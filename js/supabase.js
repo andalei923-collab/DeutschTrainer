@@ -27,8 +27,8 @@
 //    analytics   → INSERT für alle (anon)
 // ============================================================
 
-const SUPABASE_URL = 'HIER_SUPABASE_URL_EINTRAGEN';
-const SUPABASE_KEY = 'HIER_SUPABASE_ANON_KEY_EINTRAGEN';
+const SUPABASE_URL = 'https://vmdkzprtzfjcfaqkmxtu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZGt6cHJ0emZqY2ZhcWtteHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNDY3NzgsImV4cCI6MjA4NzkyMjc3OH0.ddwb-BI5FBud6AbviO6FILq-V_ocykYp76bzllx-taA';
 
 // ------------------------------------------------------------
 //  Interne Hilfsfunktionen
