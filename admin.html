@@ -1,0 +1,580 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Deutsch Trainer</title>
+  <style>
+    /* ── Reset & Design-Tokens ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-bg:      #0f0e17;
+      --c-surface: #1a1a2e;
+      --c-card:    #16213e;
+      --c-accent1: #e94560;
+      --c-accent2: #f5a623;
+      --c-accent3: #0fd4c8;
+      --c-purple:  #a855f7;
+      --c-text:    #eaeaea;
+      --c-muted:   #8892a4;
+      --top-h:     64px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--c-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 0%,   #1e0a3c 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, #0a1e3c 0%, transparent 50%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--c-text);
+      padding-top: var(--top-h);
+      padding-bottom: 2.5rem;
+    }
+
+    /* ── Top-Bar ────────────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--top-h);
+      z-index: 100;
+      background: rgba(22, 33, 62, .95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.2rem;
+      gap: .75rem;
+    }
+
+    .topbar-left { flex: 1; min-width: 0; }
+
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .topbar-sub {
+      font-size: .7rem;
+      color: var(--c-muted);
+      margin-top: .1rem;
+    }
+
+    .refresh-btn {
+      background: var(--c-purple);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 700;
+      padding: .42rem .85rem;
+      cursor: pointer;
+      transition: opacity .15s;
+      flex-shrink: 0;
+    }
+    .refresh-btn:hover    { opacity: .85; }
+    .refresh-btn:active   { transform: scale(.96); }
+    .refresh-btn:disabled { opacity: .4; cursor: default; }
+
+    .back-btn {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      color: var(--c-text);
+      font-size: .82rem;
+      font-weight: 600;
+      padding: .42rem .8rem;
+      text-decoration: none;
+      transition: background .15s;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.12); }
+
+    /* ── Haupt-Content ──────────────────────────────────────── */
+    .main {
+      max-width: 700px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.4rem 1rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── Offline-Banner ─────────────────────────────────────── */
+    .offline-banner {
+      background: rgba(233, 69, 96, .1);
+      border: 1.5px solid rgba(233, 69, 96, .4);
+      border-radius: 12px;
+      padding: .9rem 1.1rem;
+      font-size: .85rem;
+      color: #fca5a5;
+      line-height: 1.6;
+    }
+    .offline-banner strong { color: var(--c-accent1); display: block; margin-bottom: .2rem; }
+    .offline-banner code {
+      background: rgba(255,255,255,.08);
+      padding: .1em .35em;
+      border-radius: 4px;
+      font-size: .8rem;
+    }
+
+    /* ── Sektions-Überschrift ───────────────────────────────── */
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: .7rem;
+    }
+
+    /* ── Statistik-Kacheln ──────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .7rem;
+    }
+
+    @media (max-width: 380px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .stat-card {
+      background: var(--c-card);
+      border: 1.5px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      padding: 1.1rem .9rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+    }
+
+    .stat-icon  { font-size: 1.55rem; line-height: 1; }
+
+    .stat-value {
+      font-size: 2.1rem;
+      font-weight: 900;
+      line-height: 1.1;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .stat-label {
+      font-size: .7rem;
+      color: var(--c-muted);
+      font-weight: 600;
+    }
+
+    /* Ladezustand in Kacheln */
+    .ladekreis-mini {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,.12);
+      border-top-color: var(--c-accent3);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Balkendiagramm-Karte ───────────────────────────────── */
+    .chart-card {
+      background: var(--c-card);
+      border: 1.5px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      padding: 1.2rem 1.2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+    }
+
+    /* eine Balken-Zeile */
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+    }
+
+    .bar-label {
+      font-size: .78rem;
+      font-weight: 600;
+      width: 68px;
+      flex-shrink: 0;
+      text-align: right;
+      color: var(--c-text);
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 22px;
+      background: rgba(255,255,255,.05);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      width: 0%;
+      /* CSS-Transition animiert von 0 % auf den per JS gesetzten Zielwert */
+      transition: width .65s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .bar-count {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--c-muted);
+      width: 30px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Welt-Farben */
+    .bar-welt-1 { background: linear-gradient(90deg, #16a34a, #4ade80); }
+    .bar-welt-2 { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+    .bar-welt-3 { background: linear-gradient(90deg, #d97706, #fbbf24); }
+    .bar-welt-4 { background: linear-gradient(90deg, #7c3aed, #c084fc); }
+    .bar-welt-5 { background: linear-gradient(90deg, #be185d, #f472b6); }
+
+    /* Level-Farbe */
+    .bar-level  { background: linear-gradient(90deg, #0891b2, var(--c-accent3)); }
+
+    /* Kein-Daten-Hinweis */
+    .keine-daten {
+      font-size: .83rem;
+      color: var(--c-muted);
+      padding: .25rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top-Bar ──────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">⚙️ Admin-Dashboard</div>
+      <div class="topbar-sub" id="letzteAkt">Noch nicht geladen</div>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" onclick="allesDaten()">↻ Neu laden</button>
+    <a href="app.html" class="back-btn">← App</a>
+  </header>
+
+  <!-- ── Haupt-Content ─────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Hinweis wenn Supabase noch nicht konfiguriert -->
+    <div class="offline-banner" id="offlineBanner" style="display:none">
+      <strong>⚠️ Supabase nicht konfiguriert</strong>
+      Bitte <code>SUPABASE_URL</code> und <code>SUPABASE_KEY</code>
+      in <em>js/supabase.js</em> (Zeilen 28–29) eintragen.
+    </div>
+
+    <!-- Statistik-Kacheln -->
+    <section>
+      <div class="section-label">Übersicht</div>
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <span class="stat-icon">👤</span>
+          <span class="stat-value" id="statHeute">
+            <span class="ladekreis-mini"></span>
+          </span>
+          <span class="stat-label">Heute aktiv</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">📅</span>
+          <span class="stat-value" id="statWoche">
+            <span class="ladekreis-mini"></span>
+          </span>
+          <span class="stat-label">Diese Woche</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">📊</span>
+          <span class="stat-value" id="statGesamt">
+            <span class="ladekreis-mini"></span>
+          </span>
+          <span class="stat-label">Events gesamt</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Balkendiagramm: Welten -->
+    <section>
+      <div class="section-label">Beliebteste Welten</div>
+      <div class="chart-card" id="chartWelten">
+        <div class="bar-row" style="justify-content:center">
+          <span class="ladekreis-mini"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Balkendiagramm: Level-Verteilung -->
+    <section>
+      <div class="section-label">Level-Verteilung der Spieler</div>
+      <div class="chart-card" id="chartLevel">
+        <div class="bar-row" style="justify-content:center">
+          <span class="ladekreis-mini"></span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/supabase.js"></script>
+  <script>
+    // ── Header-Hilfsfunktion ──────────────────────────────────
+    // SUPABASE_URL + SUPABASE_KEY kommen global aus js/supabase.js
+
+    function adminHeaders() {
+      return {
+        'apikey':        SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+      };
+    }
+
+    // ── Prüfung ob Supabase konfiguriert ist ──────────────────
+
+    function istKonfiguriert() {
+      return (
+        SUPABASE_URL !== 'HIER_SUPABASE_URL_EINTRAGEN' &&
+        SUPABASE_KEY !== 'HIER_SUPABASE_ANON_KEY_EINTRAGEN' &&
+        SUPABASE_URL.startsWith('https://')
+      );
+    }
+
+    // ── Supabase-Abfragen ─────────────────────────────────────
+
+    /**
+     * Zählt Zeilen über einen HEAD-Request.
+     * Supabase antwortet mit Content-Range: *\/N.
+     * @param {string} tabelle
+     * @param {string} [filter] – Query-String-Teil, z. B. "xp=gte.100"
+     * @returns {Promise<number>}
+     */
+    async function tabelleZaehlen(tabelle, filter) {
+      let url = `${SUPABASE_URL}/rest/v1/${tabelle}?select=*`;
+      if (filter) url += '&' + filter;
+
+      const res = await fetch(url, {
+        method:  'HEAD',
+        headers: { ...adminHeaders(), 'Prefer': 'count=exact' },
+      });
+
+      if (!res.ok) return 0;
+      const range = res.headers.get('Content-Range'); // "*\/N"
+      return parseInt(range?.split('/')[1] ?? '0', 10);
+    }
+
+    /**
+     * Lädt bis zu 1 000 Zeilen einer Tabelle.
+     * @param {string} tabelle
+     * @param {string} select – Feldliste, z. B. "level" oder "ereignis"
+     * @returns {Promise<Array>}
+     */
+    async function tabelleLaden(tabelle, select) {
+      const url =
+        `${SUPABASE_URL}/rest/v1/${tabelle}` +
+        `?select=${encodeURIComponent(select)}&limit=1000`;
+
+      const res = await fetch(url, { headers: adminHeaders() });
+      if (!res.ok) return [];
+      return res.json();
+    }
+
+    // ── Datum-Hilfsfunktionen ─────────────────────────────────
+
+    /** Gibt einen ISO-Datum-String für "N Tage in der Vergangenheit" zurück. */
+    function datumVorTagen(tage) {
+      return new Date(Date.now() - tage * 86_400_000)
+        .toISOString()
+        .substring(0, 10) + 'T00:00:00';
+    }
+
+    // ── Statistik-Kacheln befüllen ────────────────────────────
+
+    async function statsSpeisen() {
+      const heute    = datumVorTagen(0);
+      const wocheVor = datumVorTagen(7);
+
+      const [cHeute, cWoche, cGesamt] = await Promise.all([
+        tabelleZaehlen('leaderboard', `aktualisiert_am=gte.${heute}`),
+        tabelleZaehlen('leaderboard', `aktualisiert_am=gte.${wocheVor}`),
+        tabelleZaehlen('analytics'),
+      ]);
+
+      el('statHeute').textContent  = cHeute;
+      el('statWoche').textContent  = cWoche;
+      el('statGesamt').textContent = kZahl(cGesamt);
+    }
+
+    // ── Welt-Chart ────────────────────────────────────────────
+
+    const WELT_LABELS = ['🌱 Welt 1', '📖 Welt 2', '✍️  Welt 3', '🔬 Welt 4', '🎓 Welt 5'];
+
+    async function weltChartSpeisen() {
+      // Alle Analytics-Ereignisse laden, Matching in JS
+      // (LIKE-Filter wird vermieden: % im URL braucht Sonderbehandlung)
+      const events = await tabelleLaden('analytics', 'ereignis');
+
+      const counts = [0, 0, 0, 0, 0];
+      events.forEach(e => {
+        const m = String(e.ereignis ?? '').match(/welt_([1-5])/i);
+        if (m) counts[parseInt(m[1], 10) - 1]++;
+      });
+
+      renderChart(
+        el('chartWelten'),
+        WELT_LABELS.map((label, i) => ({
+          label,
+          count:  counts[i],
+          klasse: `bar-welt-${i + 1}`,
+        }))
+      );
+    }
+
+    // ── Level-Chart ───────────────────────────────────────────
+
+    async function levelChartSpeisen() {
+      const eintraege = await tabelleLaden('leaderboard', 'level');
+
+      // Anzahl je Level zählen
+      const zaehler = {};
+      eintraege.forEach(e => {
+        const lv = Number(e.level ?? 1);
+        zaehler[lv] = (zaehler[lv] ?? 0) + 1;
+      });
+
+      // Level 1–8; nur belegte Level anzeigen
+      let daten = Array.from({ length: 8 }, (_, i) => ({
+        label:  `Lv. ${i + 1}`,
+        count:  zaehler[i + 1] ?? 0,
+        klasse: 'bar-level',
+      })).filter(d => d.count > 0);
+
+      if (daten.length === 0) {
+        daten = [{ label: 'Lv. 1', count: 0, klasse: 'bar-level' }];
+      }
+
+      renderChart(el('chartLevel'), daten);
+    }
+
+    // ── Balkendiagramm rendern ────────────────────────────────
+
+    /**
+     * @param {HTMLElement} container
+     * @param {{ label: string, count: number, klasse: string }[]} daten
+     */
+    function renderChart(container, daten) {
+      const max = Math.max(...daten.map(d => d.count), 1);
+
+      if (daten.every(d => d.count === 0)) {
+        container.innerHTML = '<div class="keine-daten">Noch keine Daten vorhanden.</div>';
+        return;
+      }
+
+      container.innerHTML = daten
+        .map(d => {
+          const prozent = Math.round((d.count / max) * 100);
+          return `
+            <div class="bar-row">
+              <span class="bar-label">${d.label}</span>
+              <div class="bar-track">
+                <div class="bar-fill ${d.klasse}" data-ziel="${prozent}"></div>
+              </div>
+              <span class="bar-count">${d.count}</span>
+            </div>`;
+        })
+        .join('');
+
+      // Balken-Animation: ein Frame nach dem Rendern auf Zielbreite setzen
+      requestAnimationFrame(() => {
+        container.querySelectorAll('.bar-fill').forEach(fill => {
+          fill.style.width = fill.dataset.ziel + '%';
+        });
+      });
+    }
+
+    // ── Hilfsfunktionen ───────────────────────────────────────
+
+    function el(id) { return document.getElementById(id); }
+
+    /** Gibt Zahlen >= 1 000 als "1.2k" aus. */
+    function kZahl(n) {
+      if (n >= 10000) return Math.round(n / 1000) + 'k';
+      if (n >= 1000)  return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+      return String(n);
+    }
+
+    function ladekreisZeigen(ids) {
+      ids.forEach(id => {
+        el(id).innerHTML = '<span class="ladekreis-mini"></span>';
+      });
+    }
+
+    function chartLadenZeigen(ids) {
+      ids.forEach(id => {
+        el(id).innerHTML =
+          '<div class="bar-row" style="justify-content:center">' +
+          '<span class="ladekreis-mini"></span></div>';
+      });
+    }
+
+    // ── Hauptfunktion ─────────────────────────────────────────
+
+    async function allesDaten() {
+      const btn = el('refreshBtn');
+      btn.disabled    = true;
+      btn.textContent = '…';
+
+      // Ladezustand einblenden
+      ladekreisZeigen(['statHeute', 'statWoche', 'statGesamt']);
+      chartLadenZeigen(['chartWelten', 'chartLevel']);
+
+      if (!istKonfiguriert()) {
+        el('offlineBanner').style.display = 'block';
+        el('statHeute').textContent  = '–';
+        el('statWoche').textContent  = '–';
+        el('statGesamt').textContent = '–';
+        el('chartWelten').innerHTML  =
+          '<div class="keine-daten">Supabase nicht konfiguriert.</div>';
+        el('chartLevel').innerHTML   =
+          '<div class="keine-daten">Supabase nicht konfiguriert.</div>';
+        el('letzteAkt').textContent  = 'Nicht verbunden';
+        btn.disabled    = false;
+        btn.textContent = '↻ Neu laden';
+        return;
+      }
+
+      el('offlineBanner').style.display = 'none';
+
+      await Promise.all([
+        statsSpeisen(),
+        weltChartSpeisen(),
+        levelChartSpeisen(),
+      ]);
+
+      const uhr = new Date().toLocaleTimeString('de-AT', {
+        hour: '2-digit', minute: '2-digit',
+      });
+      el('letzteAkt').textContent = `Aktualisiert: ${uhr} Uhr`;
+      btn.disabled    = false;
+      btn.textContent = '↻ Neu laden';
+    }
+
+    // Seite starten
+    allesDaten();
+  </script>
+
+</body>
+</html>

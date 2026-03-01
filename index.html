@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch Trainer</title>
+  <style>
+    /* ── Reset & Basis ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    :root {
+      --c-bg:       #0f0e17;
+      --c-surface:  #1a1a2e;
+      --c-card:     #16213e;
+      --c-accent1:  #e94560;
+      --c-accent2:  #f5a623;
+      --c-accent3:  #0fd4c8;
+      --c-purple:   #a855f7;
+      --c-text:     #eaeaea;
+      --c-muted:    #8892a4;
+      --radius:     16px;
+      --shadow:     0 8px 32px rgba(0,0,0,.45);
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--c-bg);
+      background-image:
+        radial-gradient(ellipse at 20% 10%, #1e0a3c 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 90%, #0a1e3c 0%, transparent 55%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--c-text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .logo {
+      font-size: clamp(2.2rem, 6vw, 3.4rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: .4rem;
+    }
+    .logo span:nth-child(1) { color: var(--c-accent2); }
+    .logo span:nth-child(2) { color: var(--c-accent1); }
+    .logo span:nth-child(3) { color: var(--c-accent3); }
+
+    .tagline {
+      color: var(--c-muted);
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    /* ── Karte ─────────────────────────────────────────────── */
+    .card {
+      background: var(--c-card);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem 1.8rem;
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* ── Abschnitt ─────────────────────────────────────────── */
+    .section-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: .75rem;
+    }
+
+    /* ── Namensfeld ────────────────────────────────────────── */
+    .name-wrap { position: relative; }
+
+    #nameInput {
+      width: 100%;
+      padding: .85rem 1.1rem;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,.1);
+      background: var(--c-surface);
+      color: var(--c-text);
+      font-size: 1.1rem;
+      font-weight: 600;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #nameInput:focus { border-color: var(--c-purple); }
+    #nameInput::placeholder { color: var(--c-muted); font-weight: 400; }
+
+    /* ── Avatar-Grid ───────────────────────────────────────── */
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .55rem;
+    }
+
+    .avatar-btn {
+      aspect-ratio: 1;
+      border: 2.5px solid transparent;
+      border-radius: 14px;
+      background: var(--c-surface);
+      font-size: 1.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, border-color .15s, background .15s;
+      position: relative;
+      user-select: none;
+    }
+    .avatar-btn:hover { transform: scale(1.12); background: #212140; }
+    .avatar-btn.selected {
+      border-color: var(--c-purple);
+      background: #2a1a50;
+      box-shadow: 0 0 0 3px rgba(168,85,247,.25);
+    }
+    .avatar-btn.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 2px;
+      right: 5px;
+      font-size: .6rem;
+      color: var(--c-purple);
+      font-weight: 700;
+    }
+
+    /* ── Sprache ───────────────────────────────────────────── */
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: .55rem;
+    }
+
+    .lang-btn {
+      padding: .7rem .5rem;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,.08);
+      background: var(--c-surface);
+      color: var(--c-text);
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      transition: border-color .15s, background .15s, transform .1s;
+    }
+    .lang-btn:hover { background: #212140; transform: translateY(-1px); }
+    .lang-btn.selected {
+      border-color: var(--c-accent3);
+      background: #0d2e2d;
+      color: var(--c-accent3);
+    }
+    .lang-flag { font-size: 1.3rem; }
+
+    /* ── Modus ─────────────────────────────────────────────── */
+    .modus-list {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .modus-btn {
+      padding: .8rem 1.1rem;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,.08);
+      background: var(--c-surface);
+      color: var(--c-text);
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      transition: border-color .15s, background .15s;
+      text-align: left;
+    }
+    .modus-btn:hover { background: #212140; }
+    .modus-btn.selected {
+      border-color: var(--c-accent2);
+      background: #2e2000;
+      color: var(--c-accent2);
+    }
+    .modus-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .modus-desc {
+      font-size: .75rem;
+      font-weight: 400;
+      color: var(--c-muted);
+      margin-top: .15rem;
+    }
+    .modus-btn.selected .modus-desc { color: #c28a30; }
+    .modus-text { display: flex; flex-direction: column; }
+
+    /* ── Start-Button ──────────────────────────────────────── */
+    #startBtn {
+      width: 100%;
+      padding: 1.05rem;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--c-accent1), var(--c-purple));
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(233,69,96,.35);
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+      position: relative;
+      overflow: hidden;
+    }
+    #startBtn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,.12));
+    }
+    #startBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(233,69,96,.45); }
+    #startBtn:active { transform: translateY(0); }
+    #startBtn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    #startBtn.inaktiv  { opacity: .45; cursor: not-allowed; transform: none; }
+
+    /* ── Fehler-Meldung ────────────────────────────────────── */
+    #errorMsg {
+      color: var(--c-accent1);
+      font-size: .85rem;
+      font-weight: 600;
+      text-align: center;
+      min-height: 1.2em;
+    }
+
+    /* ── Haupt-Layout (2 Spalten) ───────────────────────────── */
+    .haupt-layout {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1.4rem;
+      width: 100%;
+      max-width: 860px;
+    }
+    .haupt-layout .card {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ── Roadmap-Panel ──────────────────────────────────────── */
+    .roadmap-panel {
+      flex-shrink: 0;
+      width: 210px;
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      padding: 1.2rem 1rem;
+      position: sticky;
+      top: 1.5rem;
+    }
+    .roadmap-titel {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: .85rem;
+    }
+    .roadmap-liste {
+      display: flex;
+      flex-direction: column;
+      gap: .45rem;
+    }
+    .roadmap-item {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(255,255,255,.055);
+      border-radius: 8px;
+      padding: .45rem .65rem;
+    }
+    .roadmap-badge {
+      font-size: .58rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      border-radius: 99px;
+      padding: .15rem .45rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-arbeit  { background: rgba(245,166,35,.15);  color: #f5a623; }
+    .badge-geplant { background: rgba(255,255,255,.07); color: #8892a4; }
+    .roadmap-label {
+      font-size: .78rem;
+      color: #8892a4;
+      line-height: 1.3;
+    }
+
+    /* ── Responsiv ─────────────────────────────────────────── */
+    @media (max-width: 680px) {
+      .haupt-layout {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .roadmap-panel {
+        width: auto;
+        position: static;
+      }
+    }
+    @media (max-width: 380px) {
+      .avatar-grid { grid-template-columns: repeat(5, 1fr); gap: .35rem; }
+      .avatar-btn  { font-size: 1.5rem; border-radius: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">
+    <span>Deutsch</span><span>&nbsp;</span><span>Trainer</span>
+  </div>
+  <p class="tagline">Lerne spielend – Level up dein Deutsch! 🚀</p>
+
+  <div class="haupt-layout">
+
+    <!-- Linke Spalte: Formular ──────────────────────────────── -->
+    <div class="card">
+
+      <!-- ① Name ──────────────────────────────────────────────── -->
+      <div>
+        <p class="section-label">Wie heißt du?</p>
+        <div class="name-wrap">
+          <label for="nameInput" class="sr-only">Dein Name</label>
+          <input
+            id="nameInput"
+            type="text"
+            maxlength="20"
+            placeholder="Dein Name …"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
+
+      <!-- ② Avatar ────────────────────────────────────────────── -->
+      <div>
+        <p class="section-label">Wähl deinen Avatar</p>
+        <div class="avatar-grid" id="avatarGrid">
+          <!-- wird per JS befüllt -->
+        </div>
+      </div>
+
+      <!-- ③ Sprache ────────────────────────────────────────────── -->
+      <div>
+        <p class="section-label">Deine Sprache</p>
+        <div class="lang-grid" id="langGrid">
+          <!-- wird per JS befüllt -->
+        </div>
+      </div>
+
+      <!-- ④ Modus ──────────────────────────────────────────────── -->
+      <div>
+        <p class="section-label">Lernmodus</p>
+        <div class="modus-list" id="modusList">
+          <!-- wird per JS befüllt -->
+        </div>
+      </div>
+
+      <!-- Fehler -->
+      <p id="errorMsg"></p>
+
+      <!-- ⑤ Start ──────────────────────────────────────────────── -->
+      <button id="startBtn" class="inaktiv">Los geht's! 🎮</button>
+
+    </div>
+
+    <!-- Rechte Spalte: Roadmap ──────────────────────────────── -->
+    <div class="roadmap-panel">
+      <p class="roadmap-titel">🗺️ Was kommt noch?</p>
+      <div class="roadmap-liste">
+        <div class="roadmap-item">
+          <span class="roadmap-badge badge-arbeit">🚧 In Arbeit</span>
+          <span class="roadmap-label">Themen-Quiz</span>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-badge badge-arbeit">🚧 In Arbeit</span>
+          <span class="roadmap-label">Sound System</span>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-badge badge-arbeit">🚧 In Arbeit</span>
+          <span class="roadmap-label">Übersetzung</span>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-badge badge-geplant">💭 Geplant</span>
+          <span class="roadmap-label">Duell-Modus gegen Mitschüler</span>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-badge badge-geplant">💭 Geplant</span>
+          <span class="roadmap-label">Offline-Modus</span>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-badge badge-geplant">💭 Geplant</span>
+          <span class="roadmap-label">Prüfungs&shy;vorbereitung</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    // ── Daten ──────────────────────────────────────────────────
+    const AVATARE = [
+      { id: 'fuchs',     emoji: '🦊', label: 'Fuchs'    },
+      { id: 'frosch',    emoji: '🐸', label: 'Frosch'   },
+      { id: 'panda',     emoji: '🐼', label: 'Panda'    },
+      { id: 'waschbaer', emoji: '🦝', label: 'Waschbär' },
+      { id: 'wolf',      emoji: '🐺', label: 'Wolf'     },
+      { id: 'koala',     emoji: '🐨', label: 'Koala'    },
+      { id: 'hund',      emoji: '🐶', label: 'Hund'     },
+      { id: 'affe',      emoji: '🐵', label: 'Affe'     },
+      { id: 'loewe',     emoji: '🦁', label: 'Löwe'     },
+      { id: 'tiger',     emoji: '🐯', label: 'Tiger'    },
+      { id: 'baer',      emoji: '🐻', label: 'Bär'      },
+      { id: 'katze',     emoji: '🐱', label: 'Katze'    },
+      { id: 'kuh',       emoji: '🐮', label: 'Kuh'      },
+      { id: 'schlange',  emoji: '🐍', label: 'Schlange' },
+      { id: 'papagei',   emoji: '🦜', label: 'Papagei'  },
+    ];
+
+    const SPRACHEN = [
+      { id: 'de', flag: '🇩🇪', label: 'Deutsch'  },
+      { id: 'fa', flag: '🇮🇷', label: 'Persisch' },
+      { id: 'tr', flag: '🇹🇷', label: 'Türkisch' },
+      { id: 'ar', flag: '🇸🇦', label: 'Arabisch' },
+    ];
+
+    const MODI = [
+      {
+        id:    'normal',
+        icon:  '📖',
+        label: 'Normal',
+        desc:  'Aufgaben auf Deutsch – für Fortgeschrittene',
+      },
+      {
+        id:    'einfach',
+        icon:  '🟢',
+        label: 'Einfache Sprache',
+        desc:  'Kurze, klare Sätze – leichter verständlich',
+      },
+      {
+        id:    'tap',
+        icon:  '🌍',
+        label: 'Einfach + Übersetzung',
+        desc:  'Mit Übersetzung in deiner Muttersprache',
+      },
+    ];
+
+    // ── Zustand ────────────────────────────────────────────────
+    let gewaehlterAvatar  = null;
+    let gewaehlteSprache = 'de';
+    let gewaehlterModus   = 'normal';
+
+    // ── Elemente ───────────────────────────────────────────────
+    const nameInput  = document.getElementById('nameInput');
+    const errorMsg   = document.getElementById('errorMsg');
+    const startBtn   = document.getElementById('startBtn');
+
+    // ── Avatar-Grid rendern ────────────────────────────────────
+    const avatarGrid = document.getElementById('avatarGrid');
+    AVATARE.forEach(av => {
+      const btn = document.createElement('button');
+      btn.className   = 'avatar-btn';
+      btn.textContent = av.emoji;
+      btn.title       = av.label;
+      btn.dataset.id  = av.id;
+      btn.addEventListener('click', () => waehleAvatar(av.id));
+      avatarGrid.appendChild(btn);
+    });
+
+    function waehleAvatar(id) {
+      gewaehlterAvatar = id;
+      avatarGrid.querySelectorAll('.avatar-btn').forEach(b => {
+        b.classList.toggle('selected', b.dataset.id === id);
+      });
+      pruefeFormular();
+    }
+
+    // ── Sprach-Grid rendern ────────────────────────────────────
+    const langGrid = document.getElementById('langGrid');
+    SPRACHEN.forEach(sp => {
+      const btn = document.createElement('button');
+      btn.className   = 'lang-btn' + (sp.id === 'de' ? ' selected' : '');
+      btn.dataset.id  = sp.id;
+      btn.innerHTML   = `<span class="lang-flag">${sp.flag}</span>${sp.label}`;
+      btn.addEventListener('click', () => waehleSprache(sp.id));
+      langGrid.appendChild(btn);
+    });
+
+    function waehleSprache(id) {
+      gewaehlteSprache = id;
+      langGrid.querySelectorAll('.lang-btn').forEach(b => {
+        b.classList.toggle('selected', b.dataset.id === id);
+      });
+    }
+
+    // ── Modus-Liste rendern ────────────────────────────────────
+    const modusList = document.getElementById('modusList');
+    MODI.forEach(m => {
+      const btn = document.createElement('button');
+      btn.className   = 'modus-btn' + (m.id === 'normal' ? ' selected' : '');
+      btn.dataset.id  = m.id;
+      btn.innerHTML   = `
+        <span class="modus-icon">${m.icon}</span>
+        <span class="modus-text">
+          ${m.label}
+          <span class="modus-desc">${m.desc}</span>
+        </span>`;
+      btn.addEventListener('click', () => waehleModus(m.id));
+      modusList.appendChild(btn);
+    });
+
+    function waehleModus(id) {
+      gewaehlterModus = id;
+      modusList.querySelectorAll('.modus-btn').forEach(b => {
+        b.classList.toggle('selected', b.dataset.id === id);
+      });
+    }
+
+    // ── Formular-Validierung ───────────────────────────────────
+    function pruefeFormular() {
+      const nameOk   = nameInput.value.trim().length >= 2;
+      const avatarOk = gewaehlterAvatar !== null;
+      startBtn.classList.toggle('inaktiv', !(nameOk && avatarOk));
+      if (nameInput.value.trim().length === 1) {
+        errorMsg.textContent = 'Name muss mindestens 2 Zeichen haben.';
+      } else {
+        errorMsg.textContent = '';
+      }
+    }
+
+    nameInput.addEventListener('input', pruefeFormular);
+
+    // ── Vorhandene Daten laden ─────────────────────────────────
+    (function ladeGespeicherteDaten() {
+      try {
+        const spieler = spielerLaden();
+        if (spieler.name && spieler.name !== 'Spieler') {
+          nameInput.value = spieler.name;
+        }
+        if (spieler.avatar && spieler.avatar !== 'default') {
+          waehleAvatar(spieler.avatar);
+        }
+        const sprache = spracheLaden();
+        waehleSprache(sprache.sprache || 'de');
+        if (spieler.sprachModus) {
+          waehleModus(spieler.sprachModus);
+        }
+        pruefeFormular();
+      } catch (err) {
+        console.error('[index] Fehler beim Laden der gespeicherten Daten:', err);
+      }
+    })();
+
+    // ── Start ──────────────────────────────────────────────────
+    console.log('[index] Click-Handler wird registriert …');
+    startBtn.addEventListener('click', () => {
+      console.log('[index] Button geklickt');
+      const name = nameInput.value.trim();
+      if (name.length < 2) {
+        errorMsg.textContent = 'Bitte gib deinen Namen ein (mind. 2 Zeichen).';
+        nameInput.focus();
+        return;
+      }
+      if (!gewaehlterAvatar) {
+        errorMsg.textContent = 'Bitte wähle einen Avatar aus!';
+        return;
+      }
+
+      errorMsg.textContent = '';
+
+      try {
+        console.log('[index] Speichere …');
+        spielerSpeichern({
+          name,
+          avatar:      gewaehlterAvatar,
+          sprachModus: gewaehlterModus,
+        });
+        spracheSpeichern({
+          sprache: gewaehlteSprache,
+          modus:   gewaehlterModus,
+        });
+        console.log('[index] Gespeichert! Weiterleitung zu app.html …');
+      } catch (err) {
+        console.error('[index] Fehler beim Speichern:', err);
+        errorMsg.textContent = 'Fehler beim Speichern – bitte F12 → Console öffnen.';
+        return;
+      }
+
+      startBtn.textContent = '⏳ Lade …';
+      startBtn.disabled    = true;
+
+      setTimeout(() => {
+        window.location.href = 'app.html';
+      }, 300);
+    });
+  </script>
+  <span style="font-size:12px;color:#888;position:fixed;bottom:10px;right:10px;pointer-events:none;">v0.1</span>
+
+</body>
+</html>

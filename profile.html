@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch Trainer – Profil</title>
+  <link rel="stylesheet" href="css/avatar.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-bg:      #0f0e17;
+      --c-surface: #1a1a2e;
+      --c-card:    #16213e;
+      --c-accent1: #e94560;
+      --c-accent2: #f5a623;
+      --c-accent3: #0fd4c8;
+      --c-purple:  #a855f7;
+      --c-text:    #eaeaea;
+      --c-muted:   #8892a4;
+      --nav-h:     64px;
+      --top-h:     72px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--c-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 0%,   #1e0a3c 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, #0a1e3c 0%, transparent 50%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--c-text);
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--top-h);
+      padding-bottom: calc(var(--nav-h) + 1.5rem);
+    }
+
+    /* ── Top-Bar ────────────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--top-h);
+      z-index: 100;
+      background: rgba(22, 33, 62, .92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      gap: 1rem;
+    }
+
+    .topbar-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .edit-btn {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      color: var(--c-text);
+      font-size: .82rem;
+      font-weight: 600;
+      padding: .42rem .8rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .edit-btn:hover { background: rgba(255,255,255,.13); }
+
+    /* ── Haupt-Content ──────────────────────────────────────── */
+    .main {
+      flex: 1;
+      max-width: 540px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    /* ── Profil-Karte ───────────────────────────────────────── */
+    .profil-karte {
+      background: var(--c-card);
+      border: 1.5px solid rgba(255,255,255,.07);
+      border-radius: 18px;
+      padding: 1.6rem 1.2rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .9rem;
+      text-align: center;
+    }
+
+    #avatar-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 90px;
+    }
+
+    .profil-name {
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: -.01em;
+    }
+
+    .level-badge {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--c-purple);
+      background: rgba(168,85,247,.12);
+      border: 1px solid rgba(168,85,247,.28);
+      border-radius: 99px;
+      padding: .2rem .65rem;
+    }
+
+    /* ── XP-Leiste ──────────────────────────────────────────── */
+    .xp-leiste { width: 100%; }
+
+    .xp-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: .68rem;
+      color: var(--c-muted);
+      margin-bottom: .35rem;
+    }
+
+    .xp-track {
+      height: 8px;
+      background: rgba(255,255,255,.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--c-purple), var(--c-accent1));
+      border-radius: 99px;
+      transition: width .65s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── Stats-Chips ────────────────────────────────────────── */
+    .stats-zeile {
+      display: flex;
+      justify-content: center;
+      gap: .55rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .stat-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .15rem;
+      background: var(--c-surface);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px;
+      padding: .55rem .8rem;
+      min-width: 64px;
+      flex: 1;
+      max-width: 90px;
+    }
+
+    .chip-wert {
+      font-size: 1.15rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .chip-label {
+      font-size: .6rem;
+      color: var(--c-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+
+    .stat-chip.streak  { color: var(--c-accent2); }
+    .stat-chip.herzen  { color: #ff6b8a; }
+    .stat-chip.xp-ges  { color: var(--c-accent3); }
+    .stat-chip.rekord  { color: var(--c-purple); }
+
+    /* ── Abschnitt-Label ────────────────────────────────────── */
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: .75rem;
+    }
+
+    /* ── Achievements-Grid ──────────────────────────────────── */
+    .ach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: .65rem;
+    }
+
+    .ach-karte {
+      background: var(--c-card);
+      border: 1.5px solid rgba(255,255,255,.06);
+      border-radius: 14px;
+      padding: .9rem .65rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .3rem;
+      text-align: center;
+    }
+
+    .ach-karte.freigeschaltet {
+      border-color: rgba(168,85,247,.35);
+      background: rgba(168,85,247,.06);
+    }
+
+    .ach-karte.selten.freigeschaltet {
+      border-color: rgba(251,191,36,.45);
+      background: rgba(251,191,36,.05);
+    }
+
+    .ach-symbol {
+      font-size: 1.8rem;
+      line-height: 1;
+      filter: grayscale(1) opacity(.28);
+    }
+
+    .ach-karte.freigeschaltet .ach-symbol { filter: none; }
+
+    .ach-titel {
+      font-size: .75rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .ach-karte:not(.freigeschaltet) .ach-titel { color: var(--c-muted); }
+    .ach-karte.selten.freigeschaltet .ach-titel { color: #fbbf24; }
+
+    .ach-beschreibung {
+      font-size: .6rem;
+      color: var(--c-muted);
+      line-height: 1.4;
+    }
+
+    /* ── Bottom-Nav ─────────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(22, 33, 62, .96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .2rem;
+      text-decoration: none;
+      color: var(--c-muted);
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: color .15s;
+    }
+    .nav-item .nav-icon { font-size: 1.4rem; line-height: 1; }
+    .nav-item.active { color: var(--c-accent3); }
+    .nav-item:hover  { color: var(--c-text); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top-Bar ──────────────────────────────────────────── -->
+  <header class="topbar">
+    <span class="topbar-title">👤 Profil</span>
+    <a href="index.html" class="edit-btn">✏️ Ändern</a>
+  </header>
+
+  <!-- ── Haupt-Content ─────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Profil-Karte -->
+    <div class="profil-karte">
+      <div id="avatar-container"></div>
+      <div class="profil-name" id="profilName">Spieler</div>
+      <span class="level-badge" id="levelBadge">Level 1</span>
+
+      <!-- XP-Leiste -->
+      <div class="xp-leiste">
+        <div class="xp-labels">
+          <span id="xpAktuell">0 XP</span>
+          <span id="xpZiel">Ziel: 200 XP</span>
+        </div>
+        <div class="xp-track">
+          <div class="xp-fill" id="xpFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Stats-Chips -->
+      <div class="stats-zeile">
+        <div class="stat-chip streak">
+          <span class="chip-wert">🔥 <span id="streakZahl">0</span></span>
+          <span class="chip-label">Streak</span>
+        </div>
+        <div class="stat-chip herzen">
+          <span class="chip-wert">❤️ <span id="herzenZahl">5</span></span>
+          <span class="chip-label">Herzen</span>
+        </div>
+        <div class="stat-chip xp-ges">
+          <span class="chip-wert" id="xpGesamt">0</span>
+          <span class="chip-label">XP gesamt</span>
+        </div>
+        <div class="stat-chip rekord">
+          <span class="chip-wert" id="streakRekord">0</span>
+          <span class="chip-label">Beststreak</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Abzeichen -->
+    <section>
+      <div class="section-label">Abzeichen</div>
+      <div class="ach-grid" id="achGrid">
+        <!-- wird per JS befüllt -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Bottom-Nav ────────────────────────────────────────── -->
+  <nav class="bottom-nav" aria-label="Hauptnavigation">
+    <a href="app.html"         class="nav-item">
+      <span class="nav-icon">🗺️</span>Welten
+    </a>
+    <a href="profile.html"    class="nav-item active">
+      <span class="nav-icon">👤</span>Profil
+    </a>
+    <a href="leaderboard.html" class="nav-item">
+      <span class="nav-icon">🏆</span>Rangliste
+    </a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/xp.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/achievements.js"></script>
+  <script>
+    // XP-Tabelle (identisch mit xp.js)
+    const XP_TAB = [0, 200, 500, 1000, 2000, 3500, 5500, 8000];
+
+    function xpProzent(xp, level) {
+      if (typeof xpFortschrittProzent === 'function') return xpFortschrittProzent(xp, level);
+      const unter = XP_TAB[level - 1] ?? 0;
+      const ober  = XP_TAB[level]     ?? XP_TAB[XP_TAB.length - 1];
+      return Math.min(100, Math.max(0, Math.round(((xp - unter) / Math.max(1, ober - unter)) * 100)));
+    }
+
+    function naechstesXpZiel(level) {
+      return XP_TAB[Math.min(level, XP_TAB.length - 1)];
+    }
+
+    // ── Profil rendern ─────────────────────────────────────────
+    function renderProfil() {
+      const spieler = spielerLaden();
+
+      avatarAnzeigen(spieler.avatar, spieler.hat, spieler.glasses, {
+        containerId:  'avatar-container',
+        groesse:      'avatar-lg',
+        startEmotion: 'cool',
+      });
+
+      document.getElementById('profilName').textContent  = spieler.name;
+      document.getElementById('levelBadge').textContent  = `Level ${spieler.level}`;
+      document.getElementById('streakZahl').textContent  = spieler.streak;
+      document.getElementById('herzenZahl').textContent  = spieler.hearts;
+      document.getElementById('xpGesamt').textContent    = spieler.xp.toLocaleString('de');
+      document.getElementById('streakRekord').textContent = spieler.streakRecord;
+
+      const pct  = xpProzent(spieler.xp, spieler.level);
+      const ziel = naechstesXpZiel(spieler.level);
+      document.getElementById('xpFill').style.width = pct + '%';
+      document.getElementById('xpAktuell').textContent = spieler.xp + ' XP';
+      document.getElementById('xpZiel').textContent    =
+        spieler.level >= 8 ? 'Max Level! 🌟' : `Ziel: ${ziel} XP`;
+    }
+
+    // ── Achievements rendern ───────────────────────────────────
+    function renderAchievements() {
+      const grid       = document.getElementById('achGrid');
+      const vorhandene = achievementsLaden();
+
+      if (typeof ACHIEVEMENTS_LISTE === 'undefined') return;
+
+      grid.innerHTML = '';
+      ACHIEVEMENTS_LISTE.forEach(ach => {
+        const frei = vorhandene.includes(ach.id);
+        const div  = document.createElement('div');
+        div.className = 'ach-karte'
+          + (frei        ? ' freigeschaltet' : '')
+          + (ach.selten  ? ' selten'         : '');
+        div.innerHTML = `
+          <span class="ach-symbol">${ach.symbol}</span>
+          <span class="ach-titel">${ach.titel}</span>
+          <span class="ach-beschreibung">${ach.beschreibung}</span>`;
+        grid.appendChild(div);
+      });
+    }
+
+    // ── Initialisierung ────────────────────────────────────────
+    renderProfil();
+    renderAchievements();
+  </script>
+
+</body>
+</html>

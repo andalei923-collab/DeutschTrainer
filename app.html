@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch Trainer – Welten</title>
+  <style>
+    /* ── Reset & Design-Tokens ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-bg:      #0f0e17;
+      --c-surface: #1a1a2e;
+      --c-card:    #16213e;
+      --c-accent1: #e94560;
+      --c-accent2: #f5a623;
+      --c-accent3: #0fd4c8;
+      --c-purple:  #a855f7;
+      --c-text:    #eaeaea;
+      --c-muted:   #8892a4;
+      --nav-h:     64px;
+      --top-h:     72px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--c-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 0%,   #1e0a3c 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, #0a1e3c 0%, transparent 50%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--c-text);
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--top-h);
+      padding-bottom: calc(var(--nav-h) + 1rem);
+    }
+
+    /* ── Top-Bar ────────────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--top-h);
+      z-index: 100;
+      background: rgba(22, 33, 62, .92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      gap: 1rem;
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      min-width: 0;
+    }
+
+    .avatar-bubble {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--c-surface);
+      border: 2px solid var(--c-purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .player-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .player-name {
+      font-weight: 700;
+      font-size: .95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    .level-label {
+      font-size: .68rem;
+      color: var(--c-purple);
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .xp-track {
+      width: 110px;
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.1);
+      overflow: hidden;
+    }
+    .xp-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--c-purple), var(--c-accent1));
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+
+    .stats {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-shrink: 0;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      background: var(--c-surface);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 99px;
+      padding: .3rem .65rem;
+      font-size: .9rem;
+      font-weight: 700;
+    }
+    .stat-chip.hearts { color: #ff6b8a; }
+    .stat-chip.streak { color: var(--c-accent2); }
+
+    .sound-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 99px;
+      color: var(--c-muted);
+      font-size: 1.05rem;
+      padding: .28rem .55rem;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .sound-btn:hover { color: var(--c-text); border-color: rgba(255,255,255,.3); }
+
+    /* ── Haupt-Content ──────────────────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 1.5rem 1rem 0;
+      max-width: 540px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+    .xp-total {
+      font-size: .8rem;
+      color: var(--c-muted);
+    }
+    .xp-total strong { color: var(--c-accent2); }
+
+    /* ── Daily Challenge Banner ─────────────────────────────── */
+    .daily-banner {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      background: linear-gradient(135deg, #1a2a1a, #0d2e2d);
+      border: 1px solid rgba(15,212,200,.2);
+      border-radius: 14px;
+      padding: .9rem 1.1rem;
+      margin-bottom: 1.4rem;
+      cursor: pointer;
+      transition: transform .15s;
+    }
+    .daily-banner:hover { transform: translateY(-1px); }
+    .daily-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .daily-text { flex: 1; }
+    .daily-title {
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--c-accent3);
+    }
+    .daily-desc {
+      font-size: .88rem;
+      color: var(--c-muted);
+      margin-top: .15rem;
+    }
+    .daily-badge {
+      font-size: .72rem;
+      font-weight: 700;
+      background: var(--c-accent3);
+      color: #000;
+      border-radius: 99px;
+      padding: .2rem .55rem;
+      flex-shrink: 0;
+    }
+    .daily-badge.done { background: var(--c-muted); }
+
+    /* ── Welten-Liste ────────────────────────────────────────── */
+    .welten-liste {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Welt-Karte */
+    .welt-card {
+      border-radius: 18px;
+      border: 1.5px solid rgba(255,255,255,.08);
+      overflow: hidden;
+      position: relative;
+      transition: transform .15s, box-shadow .15s;
+      cursor: pointer;
+    }
+    .welt-card.locked {
+      cursor: default;
+      filter: saturate(.25);
+    }
+    .welt-card:not(.locked):hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,.5);
+    }
+
+    /* Farbiger Kopfbereich */
+    .welt-head {
+      padding: 1.1rem 1.2rem .9rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .welt-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .welt-info { flex: 1; }
+    .welt-nummer {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      opacity: .75;
+    }
+    .welt-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-top: .1rem;
+    }
+    .welt-sub {
+      font-size: .78rem;
+      opacity: .7;
+      margin-top: .15rem;
+    }
+
+    /* Sterne */
+    .welt-stars {
+      display: flex;
+      gap: .2rem;
+      flex-shrink: 0;
+    }
+    .star { font-size: 1.15rem; }
+    .star.empty { opacity: .25; }
+
+    /* Schloss-Overlay */
+    .lock-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.55);
+      border-radius: 17px;
+    }
+    .lock-icon { font-size: 2rem; opacity: .8; }
+
+    /* Fortschritts-Leiste */
+    .welt-foot {
+      background: rgba(0,0,0,.25);
+      padding: .6rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    .prog-track {
+      flex: 1;
+      height: 5px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.12);
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .6s;
+    }
+    .prog-label {
+      font-size: .72rem;
+      color: rgba(255,255,255,.55);
+      white-space: nowrap;
+    }
+    .test-badge {
+      font-size: .68rem;
+      font-weight: 700;
+      border-radius: 99px;
+      padding: .15rem .5rem;
+      white-space: nowrap;
+    }
+    .test-badge.passed {
+      background: rgba(15,212,200,.18);
+      color: var(--c-accent3);
+    }
+    .test-badge.open {
+      background: rgba(245,166,35,.15);
+      color: var(--c-accent2);
+    }
+
+    /* Welt-Farben */
+    .welt-1 .welt-head { background: linear-gradient(135deg, #1a3a1a, #0d3d2a); }
+    .welt-1 .prog-fill { background: #4ade80; }
+
+    .welt-2 .welt-head { background: linear-gradient(135deg, #0d2040, #0a2e50); }
+    .welt-2 .prog-fill { background: #38bdf8; }
+
+    .welt-3 .welt-head { background: linear-gradient(135deg, #3a1a0d, #50200a); }
+    .welt-3 .prog-fill { background: var(--c-accent2); }
+
+    .welt-4 .welt-head { background: linear-gradient(135deg, #2a0d3a, #1e0a50); }
+    .welt-4 .prog-fill { background: var(--c-purple); }
+
+    .welt-5 .welt-head { background: linear-gradient(135deg, #3a2a00, #503a00); }
+    .welt-5 .prog-fill { background: #facc15; }
+
+    /* ── Bottom-Nav ─────────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(22, 33, 62, .96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .2rem;
+      text-decoration: none;
+      color: var(--c-muted);
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: color .15s;
+    }
+    .nav-item .nav-icon { font-size: 1.4rem; line-height: 1; }
+    .nav-item.active { color: var(--c-accent3); }
+    .nav-item:hover  { color: var(--c-text); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top-Bar ──────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="player-info">
+      <div class="avatar-bubble" id="avatarBubble">🦊</div>
+      <div class="player-meta">
+        <span class="player-name" id="playerName">Spieler</span>
+        <span class="level-label" id="levelLabel">Level 1</span>
+        <div class="xp-track">
+          <div class="xp-fill" id="xpFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat-chip streak">🔥 <span id="streakCount">0</span></div>
+      <div class="stat-chip hearts">❤️ <span id="heartsCount">5</span></div>
+      <button class="sound-btn" id="soundToggleBtn" title="Sound">🔊</button>
+    </div>
+  </header>
+
+  <!-- ── Haupt-Content ─────────────────────────────────────── -->
+  <main class="main">
+
+    <div class="section-header">
+      <h1 class="section-title">Deine Welten 🗺️</h1>
+      <span class="xp-total"><strong id="xpTotal">0</strong> XP gesamt</span>
+    </div>
+
+    <!-- Daily Challenge -->
+    <div class="daily-banner" id="dailyBanner" role="button" tabindex="0">
+      <span class="daily-icon">⚡</span>
+      <div class="daily-text">
+        <div class="daily-title">Tägliche Challenge</div>
+        <div class="daily-desc" id="dailyDesc">Lade …</div>
+      </div>
+      <span class="daily-badge" id="dailyBadge">NEU</span>
+    </div>
+
+    <!-- Welten -->
+    <div class="welten-liste" id="weltenListe"></div>
+
+  </main>
+
+  <!-- ── Bottom-Nav ────────────────────────────────────────── -->
+  <nav class="bottom-nav" aria-label="Hauptnavigation">
+    <a href="app.html"         class="nav-item active">
+      <span class="nav-icon">🗺️</span>Welten
+    </a>
+    <a href="profile.html"    class="nav-item">
+      <span class="nav-icon">👤</span>Profil
+    </a>
+    <a href="leaderboard.html" class="nav-item">
+      <span class="nav-icon">🏆</span>Rangliste
+    </a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/xp.js"></script>
+  <script>
+    // ── Konstanten ────────────────────────────────────────────
+    const AVATAR_MAP = {
+      fuchs:'🦊', frosch:'🐸', panda:'🐼', waschbaer:'🦝', wolf:'🐺',
+      koala:'🐨', hund:'🐶', affe:'🐵', loewe:'🦁', tiger:'🐯',
+      baer:'🐻', katze:'🐱', kuh:'🐮', schlange:'🐍', papagei:'🦜',
+      default:'😊',
+    };
+
+    const WELTEN = [
+      { nr: 1, icon: '🌱', desc: 'Buchstaben, einfache Wörter'       },
+      { nr: 2, icon: '🌊', desc: 'Nomen, Verben, einfache Sätze'     },
+      { nr: 3, icon: '🔥', desc: 'Grammatik & Rechtschreibung'        },
+      { nr: 4, icon: '⚡', desc: 'Texte, Bedeutungen & Stil'          },
+      { nr: 5, icon: '🌟', desc: 'Fremdwörter, Synonyme, Steigerung' },
+    ];
+
+    // ── Topbar befüllen ───────────────────────────────────────
+    function renderTopbar(spieler) {
+      document.getElementById('avatarBubble').textContent =
+        AVATAR_MAP[spieler.avatar] ?? '😊';
+      document.getElementById('playerName').textContent  = spieler.name;
+      document.getElementById('levelLabel').textContent  = `Level ${spieler.level}`;
+      document.getElementById('streakCount').textContent = spieler.streak;
+      document.getElementById('heartsCount').textContent = spieler.hearts;
+      document.getElementById('xpTotal').textContent     = spieler.xp.toLocaleString('de');
+
+      const pct = (typeof xpFortschrittProzent === 'function')
+        ? xpFortschrittProzent(spieler.xp, spieler.level)
+        : 0;
+      document.getElementById('xpFill').style.width = pct + '%';
+    }
+
+    // ── Daily Challenge ───────────────────────────────────────
+    function renderDaily() {
+      const daily   = dailyChallengeLaden();
+      const heute   = new Date().toISOString().slice(0, 10);
+      const frisch  = daily.datum !== heute;
+
+      const desc    = frisch
+        ? 'Neue Aufgabe wartet auf dich!'
+        : (daily.aufgabe?.titel ?? 'Tägliche Aufgabe');
+      const erledigt = !frisch && daily.erledigt;
+
+      document.getElementById('dailyDesc').textContent  = desc;
+      const badge = document.getElementById('dailyBadge');
+      badge.textContent  = erledigt ? '✓ Erledigt' : (frisch ? 'NEU' : 'Offen');
+      badge.className    = 'daily-badge' + (erledigt ? ' done' : '');
+    }
+
+    // ── Sterne rendern ────────────────────────────────────────
+    function renderStars(stars) {
+      return [1,2,3].map(n =>
+        `<span class="star${n <= stars ? '' : ' empty'}" aria-hidden="true">⭐</span>`
+      ).join('');
+    }
+
+    // ── Fortschritts-% (Platzhalter; später aus Quiz-Daten) ───
+    function progProzent(fortschritt) {
+      if (!fortschritt.unlocked) return 0;
+      if (fortschritt.completed) return 100;
+      return fortschritt.stars > 0 ? Math.round((fortschritt.stars / 3) * 80) : 0;
+    }
+
+    // ── Welten-Liste rendern ──────────────────────────────────
+    function renderWelten(fortschritt) {
+      const liste = document.getElementById('weltenListe');
+      liste.innerHTML = '';
+
+      WELTEN.forEach((w, i) => {
+        const fs      = fortschritt[i];
+        const locked  = !fs.unlocked;
+        const pct     = progProzent(fs);
+
+        const card = document.createElement('div');
+        card.className = `welt-card welt-${w.nr}${locked ? ' locked' : ''}`;
+        card.setAttribute('role', locked ? 'img' : 'button');
+        card.setAttribute('aria-label',
+          locked ? `Welt ${w.nr} (gesperrt)` : `Welt ${w.nr} öffnen`);
+        if (!locked) {
+          card.setAttribute('tabindex', '0');
+          card.addEventListener('click', () => oeffneWelt(w.nr));
+          card.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') oeffneWelt(w.nr);
+          });
+        }
+
+        card.innerHTML = `
+          <div class="welt-head">
+            <div class="welt-icon">${w.icon}</div>
+            <div class="welt-info">
+              <div class="welt-name">🌍 Welt ${w.nr}</div>
+              <div class="welt-sub">${w.desc}</div>
+            </div>
+            <div class="welt-stars" aria-label="${fs.stars} von 3 Sternen">
+              ${renderStars(fs.stars)}
+            </div>
+            ${locked ? '<div class="lock-overlay"><span class="lock-icon">🔒</span></div>' : ''}
+          </div>
+          <div class="welt-foot">
+            <div class="prog-track">
+              <div class="prog-fill" style="width:${pct}%"></div>
+            </div>
+            <span class="prog-label">${pct}%</span>
+            <span class="test-badge ${fs.testPassed ? 'passed' : 'open'}">
+              ${fs.testPassed ? '✓ Test bestanden' : 'Stufentest'}
+            </span>
+          </div>
+        `;
+
+        liste.appendChild(card);
+      });
+    }
+
+    // ── Navigation ────────────────────────────────────────────
+    function oeffneWelt(nr) {
+      window.location.href = `quiz.html?welt=${nr}`;
+    }
+
+    document.getElementById('dailyBanner').addEventListener('click', () => {
+      window.location.href = 'quiz.html?daily=1';
+    });
+    document.getElementById('dailyBanner').addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') window.location.href = 'quiz.html?daily=1';
+    });
+
+    // ── Initialisierung ───────────────────────────────────────
+    (function init() {
+      const spieler     = spielerLaden();
+      const fortschritt = fortschrittLaden();
+
+      // Kein Profil → zurück zur Startseite
+      if (!spieler.name || spieler.name === 'Spieler') {
+        const hatName = localStorage.getItem('dt_spieler');
+        if (!hatName) {
+          window.location.href = 'index.html';
+          return;
+        }
+      }
+
+      renderTopbar(spieler);
+      renderWelten(fortschritt);
+      renderDaily();
+      soundToggleInit('soundToggleBtn');
+    })();
+  </script>
+</body>
+</html>

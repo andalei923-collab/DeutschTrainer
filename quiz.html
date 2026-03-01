@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch Trainer – Quiz</title>
+  <link rel="stylesheet" href="css/avatar.css" />
+  <link rel="stylesheet" href="css/quiz.css" />
+  <style>
+    /* ── Design-Tokens (identisch mit index/app) ────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-bg:      #0f0e17;
+      --c-surface: #1a1a2e;
+      --c-card:    #16213e;
+      --c-accent1: #e94560;
+      --c-accent2: #f5a623;
+      --c-accent3: #0fd4c8;
+      --c-purple:  #a855f7;
+      --c-text:    #eaeaea;
+      --c-muted:   #8892a4;
+      --radius:    16px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--c-bg);
+      background-image:
+        radial-gradient(ellipse at 20% 0%,  #1e0a3c 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 100%, #0a1e3c 0%, transparent 55%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--c-text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    /* ── Zurück-Link ────────────────────────────────────────── */
+    .quiz-toprow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 1.2rem;
+    }
+    .back-link {
+      color: var(--c-muted);
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      transition: color .15s;
+    }
+    .back-link:hover { color: var(--c-text); }
+    .sound-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 99px;
+      color: var(--c-muted);
+      font-size: 1.1rem;
+      padding: .25rem .6rem;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .sound-btn:hover { color: var(--c-text); border-color: rgba(255,255,255,.3); }
+
+    /* ── Thema-Badge ────────────────────────────────────────── */
+    .thema-badge {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--c-accent3);
+      background: rgba(15,212,200,.12);
+      border: 1px solid rgba(15,212,200,.25);
+      border-radius: 99px;
+      padding: .25rem .75rem;
+      margin-bottom: 1rem;
+      align-self: center;
+    }
+
+    /* ── Avatar-Bereich ─────────────────────────────────────── */
+    .avatar-bereich {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1.4rem;
+    }
+
+    #avatar-container { /* avatar.js rendert hier hinein */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 110px;
+    }
+
+    /* ── Inhaltskarte ───────────────────────────────────────── */
+    .karte {
+      background: var(--c-card);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius);
+      padding: 1.6rem 1.5rem;
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    /* ── Titel ──────────────────────────────────────────────── */
+    .theorie-titel {
+      font-size: clamp(1.3rem, 4vw, 1.7rem);
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    /* ── Erklärungstext ─────────────────────────────────────── */
+    .erklaerung {
+      font-size: .97rem;
+      line-height: 1.7;
+      color: #d0d8e8;
+    }
+
+    /* ── Tap-to-Translate: anklickbare Wörter ───────────────── */
+    span.wort {
+      cursor: pointer;
+      border-bottom: 1.5px dotted rgba(168,85,247,.55);
+      transition: color .12s, border-color .12s;
+      position: relative;
+    }
+    span.wort:hover  { color: var(--c-purple); border-color: var(--c-purple); }
+    span.wort:focus  { outline: 2px solid var(--c-purple); border-radius: 2px; }
+    span.wort.active { color: var(--c-accent3); }
+
+    /* ── Beispiel-Block ─────────────────────────────────────── */
+    .beispiel-block {
+      background: rgba(168,85,247,.08);
+      border-left: 3px solid var(--c-purple);
+      border-radius: 0 12px 12px 0;
+      padding: .9rem 1.1rem;
+    }
+    .beispiel-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--c-purple);
+      margin-bottom: .4rem;
+    }
+    .beispiel-satz {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.6;
+      color: #e8e0f8;
+    }
+    .beispiel-satz .highlight {
+      color: var(--c-accent2);
+      font-weight: 800;
+    }
+
+    /* ── Merkhilfe ──────────────────────────────────────────── */
+    .merkhilfe {
+      display: flex;
+      gap: .8rem;
+      align-items: flex-start;
+      background: rgba(245,166,35,.07);
+      border: 1px solid rgba(245,166,35,.18);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+    }
+    .merkhilfe-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1.4; }
+    .merkhilfe-text {
+      font-size: .88rem;
+      line-height: 1.6;
+      color: #ddd0b8;
+    }
+
+    /* ── Start-Button ───────────────────────────────────────── */
+    .start-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--c-purple), var(--c-accent1));
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(168,85,247,.35);
+      transition: transform .15s, box-shadow .15s;
+      margin-top: .4rem;
+    }
+    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(168,85,247,.45); }
+    .start-btn:active { transform: translateY(0); }
+    .btn-arrow { font-size: 1.2rem; }
+
+    /* ── Übersetzungs-Popup ─────────────────────────────────── */
+    #translate-popup {
+      position: fixed;
+      background: #1e1e3a;
+      border: 1px solid var(--c-purple);
+      border-radius: 10px;
+      padding: .45rem .85rem;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--c-text);
+      pointer-events: none;
+      z-index: 999;
+      white-space: nowrap;
+      box-shadow: 0 4px 18px rgba(0,0,0,.55);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .15s, transform .15s;
+    }
+    #translate-popup.sichtbar {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #translate-popup .popup-sprache {
+      font-size: .65rem;
+      color: var(--c-muted);
+      display: block;
+      margin-bottom: .1rem;
+    }
+
+    /* ── Fortschrittsleiste oben ────────────────────────────── */
+    .fortschritt-leiste {
+      width: 100%;
+      max-width: 520px;
+      height: 5px;
+      background: rgba(255,255,255,.08);
+      border-radius: 99px;
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+    }
+    .fortschritt-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--c-purple), var(--c-accent3));
+      border-radius: 99px;
+      transition: width .4s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Zurück + Sound-Toggle -->
+  <div class="quiz-toprow">
+    <a href="app.html" class="back-link" id="backLink">← Weltenübersicht</a>
+    <button class="sound-btn" id="soundToggleBtn" title="Sound">🔊</button>
+  </div>
+
+  <!-- Fortschritt -->
+  <div class="fortschritt-leiste" aria-hidden="true">
+    <div class="fortschritt-fill" id="fortschrittFill" style="width:0%"></div>
+  </div>
+
+  <!-- Thema-Badge -->
+  <div class="thema-badge" id="themaBadge">Welt 1 · 1. Klasse</div>
+
+  <!-- Avatar -->
+  <div class="avatar-bereich">
+    <div id="avatar-container"></div>
+  </div>
+
+  <!-- Inhaltskarte -->
+  <div class="karte" id="theoriKarte">
+
+    <h1 class="theorie-titel" id="theorieTitel">Lade …</h1>
+
+    <p class="erklaerung" id="erklaerungText"></p>
+
+    <div class="beispiel-block">
+      <div class="beispiel-label">Beispiel</div>
+      <div class="beispiel-satz" id="beispielSatz"></div>
+    </div>
+
+    <div class="merkhilfe">
+      <span class="merkhilfe-icon">💡</span>
+      <span class="merkhilfe-text" id="merkhilfeText"></span>
+    </div>
+
+    <button class="start-btn" id="startBtn">
+      Los geht's! <span class="btn-arrow">→</span>
+    </button>
+
+  </div>
+
+  <!-- Übersetzungs-Popup -->
+  <div id="translate-popup" role="tooltip" aria-live="polite">
+    <span class="popup-sprache" id="popupSprache"></span>
+    <span id="popupText"></span>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/xp.js"></script>
+  <script src="js/streak.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/achievements.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="data/klasse1.js"></script>
+  <script src="data/klasse2.js"></script>
+  <script src="data/klasse3.js"></script>
+  <script src="data/klasse4.js"></script>
+  <script src="data/klasse5.js"></script>
+  <script>
+    // ================================================================
+    //  Beispiel-Fragen pro Welt (Fallback bis data/klasse*.js existiert)
+    //  Zeigt alle 11 Fragetypen als Demo
+    // ================================================================
+    const BEISPIEL_FRAGEN = {
+      1: [
+        {
+          typ: 'multiple_choice',
+          frage: 'Welches Wort ist ein Nomen (Substantiv)?',
+          optionen: ['laufen', 'schön', 'der Hund', 'schnell'],
+          richtig: 2,
+          erklaerung: 'Nomen schreibt man groß und sie bezeichnen Dinge, Lebewesen oder Orte.',
+        },
+        {
+          typ: 'richtig_falsch',
+          frage: 'Stimmt diese Aussage?',
+          aussage: 'Das Wort "laufen" ist ein Nomen und wird großgeschrieben.',
+          richtig: false,
+          erklaerung: '"laufen" ist ein Verb (Tätigkeitswort) und wird kleingeschrieben.',
+        },
+        {
+          typ: 'lueckentext',
+          frage: 'Fülle die Lücke aus: Der ___ bellt laut.',
+          satz: 'Der ___ bellt laut.',
+          optionen: ['Hund', 'laufen', 'schön', 'weil'],
+          richtig: 'Hund',
+          erklaerung: '"Hund" ist ein Nomen – deshalb großgeschrieben und passt hier als Subjekt.',
+        },
+        {
+          typ: 'reihenfolge',
+          frage: 'Bring die Wörter in die richtige Satzreihenfolge:',
+          woerter: ['spielt', 'Die', 'Katze', 'draußen'],
+          richtig: ['Die', 'Katze', 'spielt', 'draußen'],
+          erklaerung: 'Im deutschen Aussagesatz steht das Verb (spielt) an zweiter Stelle.',
+        },
+        {
+          typ: 'mehrfachauswahl',
+          frage: 'Welche Wörter sind Nomen? (mehrere richtig)',
+          optionen: ['Tisch', 'rennen', 'Schule', 'blau', 'Freund'],
+          richtig: [0, 2, 4],
+          erklaerung: 'Tisch, Schule und Freund sind Nomen – erkennbar an der Großschreibung.',
+        },
+      ],
+      2: [
+        {
+          typ: 'multiple_choice',
+          frage: 'Welcher Artikel gehört zu "Sonne"?',
+          optionen: ['der', 'die', 'das', 'den'],
+          richtig: 1,
+          erklaerung: '"die Sonne" – Sonne ist weiblich (feminin).',
+        },
+        {
+          typ: 'satz_korrigieren',
+          frage: 'Finde das falsche Wort im Satz:',
+          satz: 'Das hund schläft auf dem Sofa.',
+          fehlerWort: 'hund',
+          korrektWort: 'Hund',
+          erklaerung: 'Nomen werden großgeschrieben: "der Hund", nicht "der hund".',
+        },
+        {
+          typ: 'lueckentext',
+          frage: 'Schreibe den richtigen Artikel: ___ Buch liegt auf dem Tisch.',
+          satz: '___ Buch liegt auf dem Tisch.',
+          richtig: 'Das',
+          erklaerung: '"Buch" ist sächlich (neutrum) – deshalb "das Buch".',
+        },
+        {
+          typ: 'richtig_falsch',
+          frage: 'Stimmt diese Aussage?',
+          aussage: 'Alle Nomen mit der Endung "-heit" sind weiblich (die).',
+          richtig: true,
+          erklaerung: 'Richtig! -heit, -keit, -ung sind immer feminin: die Freiheit, die Möglichkeit.',
+        },
+        {
+          typ: 'multiple_choice',
+          frage: 'Was ist der Plural von "das Kind"?',
+          optionen: ['die Kinds', 'die Kinder', 'die Kindern', 'die Kinde'],
+          richtig: 1,
+          erklaerung: 'Der Plural von "das Kind" ist "die Kinder" – unregelmäßige Pluralform.',
+        },
+      ],
+      3: [
+        {
+          typ: 'multiple_choice',
+          frage: 'Welche Frage stellt man für den Dativ?',
+          optionen: ['Wer?', 'Wen?', 'Wem?', 'Wessen?'],
+          richtig: 2,
+          erklaerung: '"Wem?" ist die Frage für den Dativ – der 3. Fall im Deutschen.',
+        },
+        {
+          typ: 'richtig_falsch',
+          frage: 'Stimmt diese Aussage?',
+          aussage: 'Im Satz "Ich helfe dem Mann" steht "dem Mann" im Akkusativ.',
+          richtig: false,
+          erklaerung: '"dem Mann" steht im Dativ (Wem helfe ich? – dem Mann).',
+        },
+        {
+          typ: 'satz_korrigieren',
+          frage: 'Finde den Fehler im Satz:',
+          satz: 'Ich gebe den Hund einen Knochen.',
+          fehlerWort: 'den',
+          korrektWort: 'dem',
+          erklaerung: '"geben" verlangt den Dativ: Ich gebe dem Hund (Wem?) einen Knochen.',
+        },
+        {
+          typ: 'mehrfachauswahl',
+          frage: 'Welche Sätze enthalten den Dativ? (mehrere richtig)',
+          optionen: [
+            'Ich sehe den Hund.',
+            'Er hilft dem Kind.',
+            'Sie dankt ihrer Mutter.',
+            'Wir kaufen ein Buch.',
+          ],
+          richtig: [1, 2],
+          erklaerung: '"helfen" und "danken" fordern den Dativ (Wem?).',
+        },
+        {
+          typ: 'lueckentext',
+          frage: 'Ergänze den richtigen Artikel: Ich schreibe ___ Lehrerin einen Brief.',
+          satz: 'Ich schreibe ___ Lehrerin einen Brief.',
+          optionen: ['die', 'der', 'den', 'das'],
+          richtig: 'der',
+          erklaerung: '"Lehrerin" ist feminin. Im Dativ: "die" → "der Lehrerin".',
+        },
+      ],
+      4: [
+        {
+          typ: 'synonym_finden',
+          frage: 'Was ist ein Synonym für "mutig"?',
+          optionen: ['ängstlich', 'tapfer', 'langsam', 'laut'],
+          richtig: 1,
+          erklaerung: '"tapfer" bedeutet dasselbe wie "mutig" – beide beschreiben Mut.',
+        },
+        {
+          typ: 'synonym_verbinden',
+          frage: 'Verbinde die Synonympaare:',
+          paare: [
+            ['schnell', 'flink'],
+            ['groß', 'riesig'],
+            ['schön', 'hübsch'],
+          ],
+          erklaerung: 'Synonyme sind Wörter mit gleicher oder sehr ähnlicher Bedeutung.',
+        },
+        {
+          typ: 'homonym_bedeutung',
+          frage: 'Was bedeutet "Bank" in diesem Satz?',
+          satz: 'Die Kinder sitzen auf der Bank im Park.',
+          optionen: [
+            'Ein Geldinstitut',
+            'Ein Sitzmöbel im Freien',
+            'Ein Regal',
+            'Eine Schulklasse',
+          ],
+          richtig: 1,
+          erklaerung: 'Homonyme sind Wörter, die gleich klingen, aber verschiedene Bedeutungen haben.',
+        },
+        {
+          typ: 'synonym_finden',
+          frage: 'Welches Wort ist ein Synonym für "beginnen"?',
+          optionen: ['aufhören', 'starten', 'schlafen', 'essen'],
+          richtig: 1,
+          erklaerung: '"starten" und "beginnen" bedeuten dasselbe: etwas in Gang setzen.',
+        },
+        {
+          typ: 'homonym_bedeutung',
+          frage: 'Was bedeutet "Schloss" in diesem Satz?',
+          satz: 'Sie steckte den Schlüssel ins Schloss.',
+          optionen: [
+            'Ein großes Gebäude',
+            'Eine Türverriegelung',
+            'Ein See',
+            'Ein Werkzeug',
+          ],
+          richtig: 1,
+          erklaerung: '"Schloss" kann ein Gebäude (Schloss Neuschwanstein) oder eine Türverriegelung sein.',
+        },
+      ],
+      5: [
+        {
+          typ: 'steigerung_bilden',
+          frage: 'Bilde den Komparativ von "schnell":',
+          wort: 'schnell',
+          form: 'komparativ',
+          richtig: 'schneller',
+          erklaerung: 'Komparativ: schnell → schneller. Regel: Grundform + -er.',
+        },
+        {
+          typ: 'steigerung_bilden',
+          frage: 'Bilde den Superlativ von "groß":',
+          wort: 'groß',
+          form: 'superlativ',
+          richtig: 'am größten',
+          erklaerung: 'Superlativ: groß → am größten. Achtung: Umlaut (o → ö)!',
+        },
+        {
+          typ: 'steigerung_ordnen',
+          frage: 'Sortiere die Steigerungsformen:',
+          woerter: ['am schnellsten', 'schneller', 'schnell'],
+          richtig: ['schnell', 'schneller', 'am schnellsten'],
+          erklaerung: 'Steigerung: Positiv → Komparativ → Superlativ.',
+        },
+        {
+          typ: 'multiple_choice',
+          frage: 'Welches Wort ist ein Fremdwort aus dem Englischen?',
+          optionen: ['Tisch', 'Computer', 'Haus', 'Baum'],
+          richtig: 1,
+          erklaerung: '"Computer" stammt aus dem Englischen (to compute = berechnen).',
+        },
+        {
+          typ: 'steigerung_ordnen',
+          frage: 'Bringe "gut" in die richtige Steigerungsreihenfolge:',
+          woerter: ['am besten', 'gut', 'besser'],
+          richtig: ['gut', 'besser', 'am besten'],
+          erklaerung: '"gut" hat eine unregelmäßige Steigerung: gut – besser – am besten.',
+        },
+      ],
+    };
+
+    // ================================================================
+    //  Beispiel-Theorieinhalt pro Welt
+    //  (wird später durch data/klasse*.js ersetzt)
+    // ================================================================
+    const THEORIE_INHALTE = {
+      1: {
+        titel:     'Groß- und Kleinschreibung',
+        erklaerung: [
+          { de: 'Im',        fa: 'در',             tr: 'Almancada',     ar: 'في' },
+          { de: 'Deutschen', fa: 'آلمانی',          tr: 'Almancada',     ar: 'اللغة الألمانية' },
+          { de: 'schreibt',  fa: 'می‌نویسند',       tr: 'yazılır',       ar: 'تُكتب' },
+          { de: 'man',       fa: 'همه',             tr: 'kişi',          ar: 'الشخص' },
+          { de: 'alle',      fa: 'همه',             tr: 'tüm',           ar: 'جميع' },
+          { de: 'Nomen',     fa: 'اسم‌ها',          tr: 'isimler',       ar: 'الأسماء' },
+          { de: 'groß.',     fa: 'با حرف بزرگ.',    tr: 'büyük harfle.', ar: 'بأحرف كبيرة.' },
+          null,
+          { de: 'Das',       fa: 'این',             tr: 'Bu',            ar: 'هذا' },
+          { de: 'gilt',      fa: 'صدق می‌کند',      tr: 'geçerlidir',    ar: 'ينطبق' },
+          { de: 'für',       fa: 'برای',            tr: 'için',          ar: 'لـ' },
+          { de: 'Menschen,', fa: 'انسان‌ها،',       tr: 'insanlar,',     ar: 'الناس،' },
+          { de: 'Tiere,',    fa: 'حیوانات،',        tr: 'hayvanlar,',    ar: 'الحيوانات،' },
+          { de: 'Dinge',     fa: 'اشیاء',           tr: 'eşyalar',       ar: 'الأشياء' },
+          { de: 'und',       fa: 'و',               tr: 've',            ar: 'و' },
+          { de: 'Orte.',     fa: 'مکان‌ها.',        tr: 'yerler.',       ar: 'الأماكن.' },
+        ],
+        beispiel: {
+          satz: 'Der <span class="highlight">Hund</span> spielt im <span class="highlight">Garten</span>.',
+          tapWoerter: [
+            { de: 'Der',    fa: '(مذکر) آن',        tr: 'Bu (eril)',  ar: 'الـ' },
+            { de: 'Hund',   fa: 'سگ',               tr: 'Köpek',     ar: 'كلب' },
+            { de: 'spielt', fa: 'بازی می‌کند',      tr: 'oynar',     ar: 'يلعب' },
+            { de: 'im',     fa: 'در',               tr: 'içinde',    ar: 'في الـ' },
+            { de: 'Garten', fa: 'باغ',              tr: 'Bahçe',     ar: 'حديقة' },
+          ],
+        },
+        merkhilfe: 'Frage: "Was ist das?" – Wenn du ein Nomen hast, schreib es groß! Verben und Adjektive schreibt man klein.',
+      },
+      2: {
+        titel:     'Artikel: der, die, das',
+        erklaerung: [
+          { de: 'Jedes',      fa: 'هر',              tr: 'Her',       ar: 'كل' },
+          { de: 'Nomen',      fa: 'اسم',             tr: 'isim',      ar: 'اسم' },
+          { de: 'hat',        fa: 'دارد',            tr: 'sahiptir',  ar: 'لديه' },
+          { de: 'einen',      fa: 'یک',              tr: 'bir',       ar: 'مقالة' },
+          { de: 'Artikel.',   fa: 'حرف تعریف.',      tr: 'makale.',   ar: 'مقالة.' },
+          null,
+          { de: 'Männliche',  fa: 'مذکر',            tr: 'Eril',      ar: 'المذكر' },
+          { de: 'Nomen',      fa: 'اسم‌ها',          tr: 'isimler',   ar: 'الأسماء' },
+          { de: 'bekommen',   fa: 'می‌گیرند',        tr: 'alır',      ar: 'تحصل على' },
+          { de: '"der",',     fa: '«der»،',          tr: '"der",',    ar: '"der"،' },
+          { de: 'weibliche',  fa: 'مؤنث',            tr: 'dişil',     ar: 'المؤنث' },
+          { de: '"die"',      fa: '«die»',           tr: '"die"',     ar: '"die"' },
+          { de: 'und',        fa: 'و',               tr: 've',        ar: 'و' },
+          { de: 'sächliche',  fa: 'خنثی',            tr: 'nötr',      ar: 'المحايد' },
+          { de: '"das".',     fa: '«das».',          tr: '"das".',    ar: '"das".' },
+        ],
+        beispiel: {
+          satz: '<span class="highlight">Der</span> Mann, <span class="highlight">die</span> Frau, <span class="highlight">das</span> Kind.',
+          tapWoerter: [
+            { de: 'Der',   fa: '(مذکر) آن',   tr: 'Eril',   ar: 'المذكر' },
+            { de: 'Mann',  fa: 'مرد',          tr: 'Adam',   ar: 'رجل' },
+            { de: 'die',   fa: '(مؤنث) آن',   tr: 'Dişil',  ar: 'المؤنث' },
+            { de: 'Frau',  fa: 'زن',           tr: 'Kadın',  ar: 'امرأة' },
+            { de: 'das',   fa: '(خنثی) آن',   tr: 'Nötr',   ar: 'المحايد' },
+            { de: 'Kind',  fa: 'کودک',         tr: 'Çocuk',  ar: 'طفل' },
+          ],
+        },
+        merkhilfe: 'Leider gibt es keine 100%-Regel. Merke: -ung, -heit, -keit → "die"; -chen, -lein → "das".',
+      },
+      3: {
+        titel:     'Was ist der Dativ?',
+        erklaerung: [
+          { de: 'Der',      fa: 'حالت',                   tr: 'Almancada',     ar: 'في' },
+          { de: 'Dativ',    fa: 'مفعول غیرمستقیم',        tr: 'yönelme hali',  ar: 'حالة المفعول غير المباشر' },
+          { de: 'zeigt,',   fa: 'نشان می‌دهد،',           tr: 'gösterir',      ar: 'يُظهر' },
+          { de: 'wem',      fa: 'به چه کسی',              tr: 'kime',          ar: 'لمن' },
+          { de: 'etwas',    fa: 'چیزی',                   tr: 'bir şey',       ar: 'شيء' },
+          { de: 'gegeben',  fa: 'داده می‌شود',            tr: 'verilir',       ar: 'يُعطى' },
+          { de: 'wird.',    fa: '.',                       tr: 'or verilir.',   ar: '.' },
+          null,
+          { de: 'Man',      fa: 'فرد',                    tr: 'Kişi',          ar: 'تسأل' },
+          { de: 'fragt',    fa: 'می‌پرسد',                tr: 'sorar',         ar: 'بسؤال' },
+          { de: 'mit',      fa: 'با',                     tr: 'ile',           ar: 'مع' },
+          { de: '"Wem?"',   fa: '«به چه کسی؟»',           tr: '"Kime?"',       ar: '"لمن؟"' },
+          { de: 'um',       fa: 'برای',                   tr: 'bulmak için',   ar: 'للعثور' },
+          { de: 'den',      fa: 'آن',                     tr: 'Dativ\'i',      ar: 'على حالة' },
+          { de: 'Dativ',    fa: 'حالت مفعولی',            tr: 'bulmak',        ar: 'المفعول غير المباشر' },
+          { de: 'zu',       fa: 'را',                     tr: 'için',          ar: '' },
+          { de: 'finden.',  fa: 'یافت.',                  tr: 'bulmak.',       ar: '.' },
+        ],
+        beispiel: {
+          satz: 'Ich gebe <span class="highlight">dem Hund</span> einen Knochen.',
+          tapWoerter: [
+            { de: 'Ich',     fa: 'من',             tr: 'Ben',       ar: 'أنا' },
+            { de: 'gebe',    fa: 'می‌دهم',          tr: 'veriyorum', ar: 'أعطي' },
+            { de: 'dem',     fa: '(مفعول) آن',     tr: 'köpeğe',    ar: 'للـ' },
+            { de: 'Hund',    fa: 'سگ',             tr: 'köpek',     ar: 'كلب' },
+            { de: 'einen',   fa: 'یک',             tr: 'bir',       ar: 'عظمة' },
+            { de: 'Knochen', fa: 'استخوان',        tr: 'kemik',     ar: 'عظمة' },
+          ],
+        },
+        merkhilfe: '"Wem?" → Dativ! Eselsbrücke: "Wem? – dem!" – bei maskulin/neutrum wird "der/das" zu "dem".',
+      },
+      4: {
+        titel:     'Synonyme – gleiche Bedeutung',
+        erklaerung: [
+          { de: 'Synonyme',          fa: 'مترادف‌ها',    tr: 'Eş anlamlılar', ar: 'المترادفات' },
+          { de: 'sind',              fa: 'هستند',         tr: 'aynı',          ar: 'هي' },
+          { de: 'Wörter',            fa: 'کلماتی',        tr: 'anlama',        ar: 'كلمات' },
+          { de: 'mit',               fa: 'با',            tr: 'sahip',         ar: 'بـ' },
+          { de: 'gleicher',          fa: 'معنای یکسان',   tr: 'kelimelerdir',  ar: 'نفس' },
+          { de: 'oder',              fa: 'یا',            tr: 'veya',          ar: 'أو' },
+          { de: 'ähnlicher',         fa: 'مشابه',         tr: 'benzer',        ar: 'مشابه' },
+          { de: 'Bedeutung.',        fa: 'هستند.',        tr: 'anlamda.',      ar: 'المعنى.' },
+          null,
+          { de: 'Sie',               fa: 'آن‌ها',         tr: 'Bu kelimeler',  ar: 'تجعل' },
+          { de: 'machen',            fa: 'می‌کنند',       tr: 'metinleri',     ar: 'النصوص' },
+          { de: 'Texte',             fa: 'متن‌ها را',     tr: 'daha',          ar: 'أكثر' },
+          { de: 'abwechslungsreicher', fa: 'متنوع‌تر',   tr: 'çeşitli kılar', ar: 'تنوعًا' },
+          { de: 'und',               fa: 'و',             tr: 've',            ar: 'و' },
+          { de: 'lebendiger.',       fa: 'پرجان‌تر.',     tr: 'canlı.',        ar: 'حيوية.' },
+        ],
+        beispiel: {
+          satz: '<span class="highlight">schnell</span> = <span class="highlight">flink</span> = <span class="highlight">rasch</span>',
+          tapWoerter: [
+            { de: 'schnell', fa: 'سریع',  tr: 'hızlı',    ar: 'سريع' },
+            { de: 'flink',   fa: 'چابک',  tr: 'çevik',    ar: 'خفيف' },
+            { de: 'rasch',   fa: 'تند',   tr: 'süratli',  ar: 'سريع جداً' },
+          ],
+        },
+        merkhilfe: 'Wenn du ein Wort schon zweimal benutzt hast, suche ein Synonym! Das macht deinen Text viel interessanter.',
+      },
+      5: {
+        titel:     'Fremdwörter im Deutschen',
+        erklaerung: [
+          { de: 'Viele',        fa: 'بسیاری از',       tr: 'Birçok',      ar: 'كثير من' },
+          { de: 'deutsche',     fa: 'کلمات آلمانی',    tr: 'Almanca',     ar: 'الكلمات' },
+          { de: 'Wörter',       fa: 'واژه‌ها',          tr: 'kelime',      ar: 'الألمانية' },
+          { de: 'kommen',       fa: 'می‌آیند',          tr: 'başka',       ar: 'تأتي' },
+          { de: 'aus',          fa: 'از',              tr: 'dillerden',   ar: 'من' },
+          { de: 'anderen',      fa: 'زبان‌های دیگر',   tr: 'geliyor.',    ar: 'لغات' },
+          { de: 'Sprachen.',    fa: '.',               tr: '',            ar: 'أخرى.' },
+          null,
+          { de: 'Besonders',    fa: 'به‌ویژه',          tr: 'Özellikle',   ar: 'بشكل خاص' },
+          { de: 'viele',        fa: 'بسیاری',          tr: 'pek çok',     ar: 'كثير من' },
+          { de: 'stammen',      fa: 'برخاسته‌اند',     tr: 'Latince,',    ar: 'تأتي من' },
+          { de: 'aus',          fa: 'از',              tr: 'Fransızca',   ar: 'اللاتينية،' },
+          { de: 'dem',          fa: 'زبان',            tr: 've',          ar: 'الفرنسية' },
+          { de: 'Englischen,',  fa: 'انگلیسی،',        tr: 'İngilizceden', ar: 'والإنجليزية.' },
+          { de: 'Lateinischen', fa: 'لاتین',           tr: 'gelmektedir.', ar: '' },
+          { de: 'oder',         fa: 'یا',              tr: '',            ar: '' },
+          { de: 'Französischen.', fa: 'فرانسوی.',      tr: '',            ar: '' },
+        ],
+        beispiel: {
+          satz: '<span class="highlight">Computer</span>, <span class="highlight">Pizza</span>, <span class="highlight">Balkon</span>',
+          tapWoerter: [
+            { de: 'Computer', fa: 'رایانه (انگلیسی)',    tr: 'Bilgisayar', ar: 'حاسوب' },
+            { de: 'Pizza',    fa: 'پیتزا (ایتالیایی)', tr: 'Pizza',      ar: 'بيتزا' },
+            { de: 'Balkon',   fa: 'بالکن (فرانسوی)',   tr: 'Balkon',     ar: 'شرفة' },
+          ],
+        },
+        merkhilfe: 'Fremdwörter erkennst du oft an untypischen Buchstabenkombinationen wie "ph", "th" oder "qu".',
+      },
+    };
+
+    // ================================================================
+    //  Sprach-Mapping für das Popup
+    // ================================================================
+    const SPRACH_LABEL = { de: 'Deutsch', fa: 'Persisch', tr: 'Türkçe', ar: 'العربية' };
+
+    // ================================================================
+    //  Fragen für eine Welt laden (echte Datendateien oder Fallback)
+    // ================================================================
+
+    function fragenFuerWelt(nr) {
+      const klassen = {
+        1: typeof KLASSE1 !== 'undefined' ? KLASSE1 : null,
+        2: typeof KLASSE2 !== 'undefined' ? KLASSE2 : null,
+        3: typeof KLASSE3 !== 'undefined' ? KLASSE3 : null,
+        4: typeof KLASSE4 !== 'undefined' ? KLASSE4 : null,
+        5: typeof KLASSE5 !== 'undefined' ? KLASSE5 : null,
+      };
+      const daten = klassen[nr];
+      if (!daten?.kategorien?.length) {
+        return BEISPIEL_FRAGEN[nr] ?? BEISPIEL_FRAGEN[1];
+      }
+      // Alle Fragen aller Kategorien sammeln
+      const alle = daten.kategorien.flatMap(k => k.fragen ?? []);
+      // Fisher-Yates mischen
+      for (let i = alle.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [alle[i], alle[j]] = [alle[j], alle[i]];
+      }
+      return alle.slice(0, 8);
+    }
+
+    // ================================================================
+    //  URL-Parameter lesen (shared für beide Phasen)
+    // ================================================================
+    const params   = new URLSearchParams(window.location.search);
+    const weltNr   = parseInt(params.get('welt') ?? '1', 10);
+    const isDaily  = params.has('daily');
+    const phase    = params.get('phase') ?? 'theorie';   // 'theorie' | 'quiz'
+
+    // ================================================================
+    //  Profil & Einstellungen laden (shared)
+    // ================================================================
+    const spieler     = spielerLaden();
+    const sprache     = spracheLaden();
+    const tapModus    = spieler.sprachModus === 'tap';
+    const zielSprache = sprache.sprache ?? 'de';
+
+    // ================================================================
+    //  Avatar rendern (shared – Emotion je nach Phase)
+    // ================================================================
+    avatarAnzeigen(spieler.avatar, spieler.hat, spieler.glasses, {
+      containerId:  'avatar-container',
+      groesse:      'avatar-lg',
+      startEmotion: phase === 'quiz' ? 'happy' : 'cool',
+    });
+
+    // ================================================================
+    //  Zurück-Link (shared)
+    // ================================================================
+    document.getElementById('backLink').textContent =
+      isDaily ? '← Zurück' : `← Welt ${weltNr}`;
+
+    // ================================================================
+    //  QUIZ-PHASE: Engine starten → Theorie-Inhalt überspringen
+    // ================================================================
+    if (phase === 'quiz') {
+      document.getElementById('themaBadge').textContent =
+        isDaily ? '⚡ Challenge · Quiz' : `Welt ${weltNr} · Quiz`;
+      document.title = `Deutsch Trainer – Quiz · Welt ${weltNr}`;
+
+      // Fragen aus echten Datendateien laden (Fallback: BEISPIEL_FRAGEN)
+      const fragen = fragenFuerWelt(weltNr);
+      quizStarten(fragen, { weltNr, containerId: 'theoriKarte' });
+
+      // Tap-to-Translate Popup im Quiz-Modus verstecken
+      const tp = document.getElementById('translate-popup');
+      if (tp) tp.style.display = 'none';
+
+    } else {
+      // ================================================================
+      //  THEORIE-PHASE: Inhalt aufbauen
+      // ================================================================
+      const inhalt = THEORIE_INHALTE[weltNr] ?? THEORIE_INHALTE[1];
+
+      document.getElementById('themaBadge').textContent =
+        isDaily ? '⚡ Tägliche Challenge' : `Welt ${weltNr} · Theorie`;
+      document.title = `Deutsch Trainer – ${inhalt.titel}`;
+
+      // ── Erklärungstext aufbauen ───────────────────────────────
+      function wortZuElement(wort) {
+        if (!tapModus) return document.createTextNode(wort.de + ' ');
+        const span = document.createElement('span');
+        span.className   = 'wort';
+        span.tabIndex    = 0;
+        span.dataset.de  = wort.de;
+        span.dataset.fa  = wort.fa;
+        span.dataset.tr  = wort.tr;
+        span.dataset.ar  = wort.ar;
+        span.textContent = wort.de + ' ';
+        return span;
+      }
+
+      function erklaerungAufbauen(container, woerter) {
+        container.innerHTML = '';
+        woerter.forEach(eintrag => {
+          if (eintrag === null) { container.appendChild(document.createElement('br')); return; }
+          container.appendChild(wortZuElement(eintrag));
+        });
+      }
+      erklaerungAufbauen(document.getElementById('erklaerungText'), inhalt.erklaerung);
+
+      // ── Beispiel-Satz aufbauen ────────────────────────────────
+      function beispielAufbauen(container, beispiel) {
+        if (!tapModus) { container.innerHTML = beispiel.satz; return; }
+        container.innerHTML = '';
+        beispiel.tapWoerter.forEach(wort => {
+          const span = document.createElement('span');
+          span.className   = 'wort';
+          span.tabIndex    = 0;
+          span.dataset.de  = wort.de;
+          span.dataset.fa  = wort.fa;
+          span.dataset.tr  = wort.tr;
+          span.dataset.ar  = wort.ar;
+          if (beispiel.satz.includes(`<span class="highlight">${wort.de}</span>`)) {
+            span.classList.add('highlight');
+          }
+          span.textContent = wort.de + ' ';
+          container.appendChild(span);
+        });
+      }
+      beispielAufbauen(document.getElementById('beispielSatz'), inhalt.beispiel);
+
+      // ── Merkhilfe & Fortschrittsleiste ───────────────────────
+      document.getElementById('merkhilfeText').textContent = inhalt.merkhilfe;
+      document.getElementById('fortschrittFill').style.width = '5%';
+
+      // ── Tap-to-Translate Popup ────────────────────────────────
+      const popup     = document.getElementById('translate-popup');
+      const popupText = document.getElementById('popupText');
+      const popupSpr  = document.getElementById('popupSprache');
+      let   popupTimer = null;
+
+      function popupZeigen(span, x, y) {
+        const anzeigeSprache = zielSprache === 'de' ? 'fa' : zielSprache;
+        popupText.textContent = span.dataset[anzeigeSprache] || span.dataset.fa || '–';
+        popupSpr.textContent  = SPRACH_LABEL[anzeigeSprache] ?? anzeigeSprache;
+        popup.style.left = Math.min(x, window.innerWidth - 160) + 'px';
+        popup.style.top  = (y - 52) + 'px';
+        popup.classList.add('sichtbar');
+        span.classList.add('active');
+        if (popupTimer) clearTimeout(popupTimer);
+        popupTimer = setTimeout(() => {
+          popup.classList.remove('sichtbar');
+          span.classList.remove('active');
+          popupTimer = null;
+        }, 2000);
+      }
+
+      if (tapModus) {
+        document.body.addEventListener('click', e => {
+          const span = e.target.closest('span.wort');
+          if (span) popupZeigen(span, e.clientX, e.clientY);
+        });
+        document.body.addEventListener('keydown', e => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          const span = e.target.closest('span.wort');
+          if (!span) return;
+          const r = span.getBoundingClientRect();
+          popupZeigen(span, r.left + r.width / 2, r.top);
+        });
+      }
+
+      // ── "Los geht's!"-Button ──────────────────────────────────
+      document.getElementById('startBtn').addEventListener('click', () => {
+        avatarEmotion('happy');
+        setTimeout(() => {
+          window.location.href = isDaily
+            ? 'quiz.html?daily=1&phase=quiz'
+            : `quiz.html?welt=${weltNr}&phase=quiz`;
+        }, 400);
+      });
+    } // end else (theorie)
+
+    // Sound-Toggle initialisieren
+    soundToggleInit('soundToggleBtn');
+  </script>
+</body>
+</html>

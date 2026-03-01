@@ -1,0 +1,169 @@
+/* ============================================================
+   avatar.css – Avatar-Anzeige & Emotions-Animationen
+   Deutsch Trainer
+   ============================================================ */
+
+/* ── Keyframes ────────────────────────────────────────────── */
+
+@keyframes av-hop {
+  0%, 100% { transform: translateY(0); }
+  40%       { transform: translateY(-18px); }
+  60%       { transform: translateY(-10px); }
+}
+
+@keyframes av-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(-10deg) translateX(-4px); }
+  40%       { transform: rotate(10deg)  translateX(4px); }
+  60%       { transform: rotate(-7deg)  translateX(-3px); }
+  80%       { transform: rotate(7deg)   translateX(3px); }
+}
+
+@keyframes av-celebrate {
+  0%   { transform: translateY(0)    rotate(0deg)   scale(1); }
+  25%  { transform: translateY(-22px) rotate(-15deg) scale(1.1); }
+  50%  { transform: translateY(0)    rotate(0deg)   scale(1); }
+  75%  { transform: translateY(-22px) rotate(15deg)  scale(1.1); }
+  100% { transform: translateY(0)    rotate(0deg)   scale(1); }
+}
+
+@keyframes av-shocked {
+  0%   { transform: scale(1); }
+  15%  { transform: scale(1.35); }
+  30%  { transform: scale(0.95); }
+  50%  { transform: scale(1.2); }
+  70%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+@keyframes av-cool {
+  0%, 100% { transform: rotate(0deg); }
+  30%       { transform: rotate(-5deg); }
+  70%       { transform: rotate(5deg); }
+}
+
+@keyframes av-sleepy {
+  0%, 100% { transform: translateY(0)  rotate(0deg); }
+  30%       { transform: translateY(6px) rotate(-3deg); }
+  70%       { transform: translateY(2px) rotate(2deg); }
+}
+
+@keyframes av-party {
+  0%   { transform: translateY(0)    rotate(0deg)    scale(1); }
+  15%  { transform: translateY(-20px) rotate(-20deg)  scale(1.15); }
+  30%  { transform: translateY(4px)  rotate(10deg)   scale(0.95); }
+  45%  { transform: translateY(-16px) rotate(20deg)   scale(1.1); }
+  60%  { transform: translateY(3px)  rotate(-12deg)  scale(0.97); }
+  75%  { transform: translateY(-14px) rotate(15deg)   scale(1.08); }
+  100% { transform: translateY(0)    rotate(0deg)    scale(1); }
+}
+
+@keyframes av-cry {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-5px); }
+  40%       { transform: translateX(5px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+
+/* ── Avatar-Wrapper ──────────────────────────────────────── */
+
+.avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Breite/Höhe wird per Inline-Stil oder Kontext gesetzt */
+  user-select: none;
+}
+
+/* ── Tier (Basis-Emoji) ──────────────────────────────────── */
+
+.avatar-tier {
+  font-size: 5rem;      /* Standard; kann per Klasse überschrieben werden */
+  line-height: 1;
+  display: block;
+  transition: font-size .2s;
+}
+
+/* Größen-Varianten */
+.avatar-wrap.avatar-sm  .avatar-tier { font-size: 2.8rem; }
+.avatar-wrap.avatar-md  .avatar-tier { font-size: 4rem;   }
+.avatar-wrap.avatar-lg  .avatar-tier { font-size: 6rem;   }
+.avatar-wrap.avatar-xl  .avatar-tier { font-size: 8rem;   }
+
+/* ── Hut (oben mittig) ───────────────────────────────────── */
+
+.avatar-hut {
+  position: absolute;
+  top: -0.55em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.6rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.avatar-wrap.avatar-sm .avatar-hut { font-size: 1rem;   top: -0.5em; }
+.avatar-wrap.avatar-md .avatar-hut { font-size: 1.3rem; top: -0.5em; }
+.avatar-wrap.avatar-lg .avatar-hut { font-size: 1.9rem; top: -0.5em; }
+.avatar-wrap.avatar-xl .avatar-hut { font-size: 2.4rem; top: -0.5em; }
+
+/* ── Brille (unten mittig über dem Tier) ─────────────────── */
+
+.avatar-brille {
+  position: absolute;
+  bottom: 0.25em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.avatar-wrap.avatar-sm .avatar-brille { font-size: .75rem; }
+.avatar-wrap.avatar-md .avatar-brille { font-size: 1rem;   }
+.avatar-wrap.avatar-lg .avatar-brille { font-size: 1.4rem; }
+.avatar-wrap.avatar-xl .avatar-brille { font-size: 1.8rem; }
+
+/* ── Emotion-Klassen ─────────────────────────────────────── */
+
+/* Animations-Timing-Defaults:
+   iteration-count infinite wo es passt, sonst 1–3× */
+
+.avatar-wrap.emotion-happy {
+  animation: av-hop .6s ease-in-out 2;
+}
+
+.avatar-wrap.emotion-sad {
+  animation: av-wobble .6s ease-in-out 3;
+}
+
+.avatar-wrap.emotion-celebrate {
+  animation: av-celebrate .55s ease-in-out 4;
+}
+
+.avatar-wrap.emotion-shocked {
+  animation: av-shocked .5s ease-out 1;
+}
+
+.avatar-wrap.emotion-cool {
+  animation: av-cool 1.8s ease-in-out infinite;
+}
+
+.avatar-wrap.emotion-sleepy {
+  animation: av-sleepy 2.4s ease-in-out infinite;
+}
+
+.avatar-wrap.emotion-party {
+  animation: av-party .45s ease-in-out 6;
+}
+
+.avatar-wrap.emotion-cry {
+  animation: av-cry .35s ease-in-out 5;
+}
+
+/* ── Hilfskasse: kein Accessor ───────────────────────────── */
+.avatar-wrap.no-animation {
+  animation: none !important;
+}

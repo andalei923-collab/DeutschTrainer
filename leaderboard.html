@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch Trainer – Rangliste</title>
+  <style>
+    /* ── Reset & Design-Tokens ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-bg:      #0f0e17;
+      --c-surface: #1a1a2e;
+      --c-card:    #16213e;
+      --c-accent1: #e94560;
+      --c-accent2: #f5a623;
+      --c-accent3: #0fd4c8;
+      --c-purple:  #a855f7;
+      --c-text:    #eaeaea;
+      --c-muted:   #8892a4;
+      --c-gold:    #fbbf24;
+      --nav-h:     64px;
+      --top-h:     72px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--c-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 0%,   #1e0a3c 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, #0a1e3c 0%, transparent 50%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--c-text);
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--top-h);
+      padding-bottom: calc(var(--nav-h) + 1rem);
+    }
+
+    /* ── Top-Bar ────────────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--top-h);
+      z-index: 100;
+      background: rgba(22, 33, 62, .92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      gap: 1rem;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      color: var(--c-text);
+      font-size: .85rem;
+      font-weight: 600;
+      padding: .45rem .85rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.12); }
+
+    .topbar-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .update-btn {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--c-accent3);
+      border: none;
+      border-radius: 10px;
+      color: #0f0e17;
+      font-size: .82rem;
+      font-weight: 700;
+      padding: .45rem .85rem;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+    .update-btn:hover   { opacity: .88; }
+    .update-btn:active  { transform: scale(.96); }
+    .update-btn:disabled {
+      opacity: .45;
+      cursor: default;
+    }
+
+    /* ── Haupt-Content ──────────────────────────────────────── */
+    .main {
+      flex: 1;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.2rem 1rem 0;
+    }
+
+    /* Podest für Top 3 */
+    .podest {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: .6rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .podest-platz {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .35rem;
+      flex: 1;
+      max-width: 110px;
+    }
+
+    .podest-platz.platz-1 { order: 2; }
+    .podest-platz.platz-2 { order: 1; }
+    .podest-platz.platz-3 { order: 3; }
+
+    .podest-medal { font-size: 2rem; line-height: 1; }
+
+    .podest-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--c-surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      border: 2px solid transparent;
+    }
+    .platz-1 .podest-avatar { border-color: #fbbf24; width: 60px; height: 60px; font-size: 1.9rem; }
+    .platz-2 .podest-avatar { border-color: #94a3b8; }
+    .platz-3 .podest-avatar { border-color: #b45309; }
+
+    .podest-name {
+      font-size: .72rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--c-text);
+      max-width: 90px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .podest-xp {
+      font-size: .68rem;
+      color: var(--c-muted);
+    }
+
+    .podest-sockel {
+      width: 100%;
+      border-radius: 10px 10px 0 0;
+      background: var(--c-card);
+      border: 1px solid rgba(255,255,255,.07);
+      border-bottom: none;
+    }
+    .platz-1 .podest-sockel { height: 52px; background: rgba(251,191,36,.12); border-color: rgba(251,191,36,.25); }
+    .platz-2 .podest-sockel { height: 38px; }
+    .platz-3 .podest-sockel { height: 28px; }
+
+    /* ── Ranglisten-Liste (Platz 4–10) ─────────────────────── */
+    .liste-titel {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: .6rem;
+    }
+
+    .rangliste {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .rang-eintrag {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      background: var(--c-card);
+      border: 1.5px solid rgba(255,255,255,.07);
+      border-radius: 14px;
+      padding: .75rem 1rem;
+      transition: border-color .15s;
+    }
+
+    /* Eigener Eintrag – goldener Rand */
+    .rang-eintrag.eigener {
+      border-color: var(--c-gold);
+      background: rgba(251,191,36,.07);
+    }
+    .rang-eintrag.eigener .rang-name::after {
+      content: ' (Du)';
+      color: var(--c-gold);
+      font-size: .7rem;
+    }
+
+    .rang-nummer {
+      font-size: .85rem;
+      font-weight: 800;
+      color: var(--c-muted);
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .rang-info { flex: 1; min-width: 0; }
+    .rang-name {
+      font-size: .95rem;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .rang-details {
+      display: flex;
+      gap: .7rem;
+      margin-top: .2rem;
+      font-size: .72rem;
+      color: var(--c-muted);
+    }
+
+    .rang-xp {
+      font-size: .92rem;
+      font-weight: 800;
+      color: var(--c-accent3);
+      flex-shrink: 0;
+    }
+
+    /* ── Lade- & Fehlerzustände ─────────────────────────────── */
+    .status-box {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--c-muted);
+    }
+    .status-box .status-icon { font-size: 3rem; margin-bottom: .75rem; }
+    .status-box h2 { font-size: 1.1rem; color: var(--c-text); margin-bottom: .5rem; }
+    .status-box p  { font-size: .88rem; line-height: 1.6; }
+
+    .ladekreis {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(255,255,255,.1);
+      border-top-color: var(--c-accent3);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 3rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Erfolgsmeldung */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + 1rem);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e3a2e;
+      border: 1px solid #4ade80;
+      color: #4ade80;
+      font-size: .85rem;
+      font-weight: 600;
+      padding: .55rem 1.2rem;
+      border-radius: 30px;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .toast.sichtbar {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Bottom-Nav ─────────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(22, 33, 62, .96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .2rem;
+      text-decoration: none;
+      color: var(--c-muted);
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: color .15s;
+    }
+    .nav-item .nav-icon { font-size: 1.4rem; line-height: 1; }
+    .nav-item.active { color: var(--c-accent3); }
+    .nav-item:hover  { color: var(--c-text); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top-Bar ──────────────────────────────────────────── -->
+  <header class="topbar">
+    <a href="app.html" class="back-btn">← Zurück</a>
+    <span class="topbar-title">🏆 Rangliste</span>
+    <button class="update-btn" id="updateBtn" onclick="scoreAktualisieren()">
+      ↑ Eintragen
+    </button>
+  </header>
+
+  <!-- ── Haupt-Content ─────────────────────────────────────── -->
+  <main class="main" id="main">
+    <div class="ladekreis" id="ladekreis"></div>
+  </main>
+
+  <!-- Toast-Benachrichtigung -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── Bottom-Nav ────────────────────────────────────────── -->
+  <nav class="bottom-nav" aria-label="Hauptnavigation">
+    <a href="app.html"         class="nav-item">
+      <span class="nav-icon">🗺️</span>Welten
+    </a>
+    <a href="profile.html"     class="nav-item">
+      <span class="nav-icon">👤</span>Profil
+    </a>
+    <a href="leaderboard.html" class="nav-item active">
+      <span class="nav-icon">🏆</span>Rangliste
+    </a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/supabase.js"></script>
+  <script>
+    // ── Hilfsfunktionen ───────────────────────────────────────
+
+    const MEDAILLEN = ['🥇', '🥈', '🥉'];
+
+    function xpFormatieren(xp) {
+      if (xp >= 1000) return (xp / 1000).toFixed(1).replace('.0', '') + 'k';
+      return String(xp);
+    }
+
+    function toastZeigen(text, dauer = 2500) {
+      const el = document.getElementById('toast');
+      el.textContent = text;
+      el.classList.add('sichtbar');
+      setTimeout(() => el.classList.remove('sichtbar'), dauer);
+    }
+
+    // ── Leaderboard rendern ───────────────────────────────────
+
+    function leaderboardRendern(eintraege) {
+      const spieler  = spielerLaden();
+      const eigenerName = spieler.name || '';
+      const main     = document.getElementById('main');
+
+      if (!eintraege || eintraege.length === 0) {
+        main.innerHTML = `
+          <div class="status-box">
+            <div class="status-icon">🏜️</div>
+            <h2>Noch keine Einträge</h2>
+            <p>Klicke auf <strong>↑ Eintragen</strong>, um als Erste(r) auf der Rangliste zu erscheinen!</p>
+          </div>`;
+        return;
+      }
+
+      const top3  = eintraege.slice(0, 3);
+      const rest  = eintraege.slice(3);
+
+      // ── Podest (Platz 1–3) ──
+      let podestHTML = '<div class="podest">';
+      const reihenfolge = [1, 0, 2]; // Platz 2 links, 1 mitte, 3 rechts
+      reihenfolge.forEach(i => {
+        if (!top3[i]) return;
+        const e     = top3[i];
+        const platz = i + 1;
+        const istEigen = e.name === eigenerName;
+        podestHTML += `
+          <div class="podest-platz platz-${platz}${istEigen ? ' eigener-podest' : ''}">
+            <div class="podest-medal">${MEDAILLEN[i]}</div>
+            <div class="podest-avatar" style="${istEigen ? 'border-color: var(--c-gold);' : ''}">🎓</div>
+            <div class="podest-name" title="${e.name}">${e.name}</div>
+            <div class="podest-xp">${xpFormatieren(e.xp)} XP</div>
+            <div class="podest-sockel"></div>
+          </div>`;
+      });
+      podestHTML += '</div>';
+
+      // ── Liste (Platz 4–10) ──
+      let listeHTML = '';
+      if (rest.length > 0) {
+        listeHTML = '<div class="liste-titel">Weitere Platzierungen</div><div class="rangliste">';
+        rest.forEach((e, idx) => {
+          const rang     = idx + 4;
+          const istEigen = e.name === eigenerName;
+          listeHTML += `
+            <div class="rang-eintrag${istEigen ? ' eigener' : ''}">
+              <span class="rang-nummer">${rang}</span>
+              <div class="rang-info">
+                <div class="rang-name">${escapeHTML(e.name)}</div>
+                <div class="rang-details">
+                  <span>Lv. ${e.level ?? 1}</span>
+                  <span>🔥 ${e.streak ?? 0}</span>
+                </div>
+              </div>
+              <span class="rang-xp">${xpFormatieren(e.xp)} XP</span>
+            </div>`;
+        });
+        listeHTML += '</div>';
+      }
+
+      main.innerHTML = podestHTML + listeHTML;
+
+      // Eigenen Podest-Eintrag ebenfalls hervorheben
+      document.querySelectorAll('.eigener-podest .podest-avatar').forEach(el => {
+        el.style.borderColor = 'var(--c-gold)';
+      });
+    }
+
+    function fehlerRendern(meldung) {
+      document.getElementById('main').innerHTML = `
+        <div class="status-box">
+          <div class="status-icon">📡</div>
+          <h2>Rangliste nicht verfügbar</h2>
+          <p>${meldung}</p>
+        </div>`;
+    }
+
+    function escapeHTML(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ── Score aktualisieren ───────────────────────────────────
+
+    async function scoreAktualisieren() {
+      const btn     = document.getElementById('updateBtn');
+      const spieler = spielerLaden();
+
+      btn.disabled    = true;
+      btn.textContent = '…';
+
+      const erfolg = await spielerEintragen(
+        spieler.name  || 'Anonym',
+        spieler.xp    || 0,
+        spieler.level || 1,
+        spieler.streak || 0
+      );
+
+      btn.disabled    = false;
+      btn.textContent = '↑ Eintragen';
+
+      if (erfolg) {
+        toastZeigen('Score eingetragen! ✅');
+        await leaderboardLaden();
+      } else {
+        toastZeigen('Fehler beim Eintragen. Bitte Verbindung prüfen.');
+      }
+    }
+
+    // ── Initialisierung ───────────────────────────────────────
+
+    async function leaderboardLaden() {
+      document.getElementById('main').innerHTML =
+        '<div class="ladekreis" id="ladekreis"></div>';
+
+      const eintraege = await top10Laden();
+
+      if (eintraege === null) {
+        fehlerRendern(
+          'Supabase ist noch nicht konfiguriert. ' +
+          'Bitte <code>SUPABASE_URL</code> und <code>SUPABASE_KEY</code> in <em>js/supabase.js</em> eintragen.'
+        );
+        return;
+      }
+
+      leaderboardRendern(eintraege);
+    }
+
+    // Seite starten
+    leaderboardLaden();
+  </script>
+
+</body>
+</html>
