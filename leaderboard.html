@@ -25,6 +25,8 @@
 
     body {
       min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
       background: var(--c-bg);
       background-image:
         radial-gradient(ellipse at 15% 0%,   #1e0a3c 0%, transparent 50%),
@@ -63,7 +65,8 @@
       color: var(--c-text);
       font-size: .85rem;
       font-weight: 600;
-      padding: .45rem .85rem;
+      padding: .55rem .9rem;
+      min-height: 44px;
       cursor: pointer;
       text-decoration: none;
       transition: background .15s;
@@ -84,9 +87,10 @@
       border: none;
       border-radius: 10px;
       color: #0f0e17;
-      font-size: .82rem;
+      font-size: .85rem;
       font-weight: 700;
-      padding: .45rem .85rem;
+      padding: .55rem .9rem;
+      min-height: 44px;
       cursor: pointer;
       transition: opacity .15s, transform .1s;
     }
@@ -143,18 +147,18 @@
     .platz-3 .podest-avatar { border-color: #b45309; }
 
     .podest-name {
-      font-size: .72rem;
+      font-size: .78rem;
       font-weight: 700;
       text-align: center;
       color: var(--c-text);
-      max-width: 90px;
+      max-width: 100px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .podest-xp {
-      font-size: .68rem;
+      font-size: .72rem;
       color: var(--c-muted);
     }
 
@@ -171,7 +175,7 @@
 
     /* ── Ranglisten-Liste (Platz 4–10) ─────────────────────── */
     .liste-titel {
-      font-size: .72rem;
+      font-size: .75rem;
       font-weight: 700;
       letter-spacing: .09em;
       text-transform: uppercase;
@@ -228,7 +232,7 @@
       display: flex;
       gap: .7rem;
       margin-top: .2rem;
-      font-size: .72rem;
+      font-size: .75rem;
       color: var(--c-muted);
     }
 
@@ -305,7 +309,7 @@
       gap: .2rem;
       text-decoration: none;
       color: var(--c-muted);
-      font-size: .68rem;
+      font-size: .7rem;
       font-weight: 600;
       letter-spacing: .04em;
       transition: color .15s;
@@ -339,6 +343,9 @@
     <a href="app.html"         class="nav-item">
       <span class="nav-icon">🗺️</span>Welten
     </a>
+    <a href="themen.html"      class="nav-item">
+      <span class="nav-icon">📚</span>Themen
+    </a>
     <a href="profile.html"     class="nav-item">
       <span class="nav-icon">👤</span>Profil
     </a>
@@ -347,8 +354,8 @@
     </a>
   </nav>
 
-  <script src="js/storage.js"></script>
-  <script src="js/supabase.js"></script>
+  <script src="js/storage.js?v=0.2"></script>
+  <script src="js/supabase.js?v=0.2"></script>
   <script>
     // ── Hilfsfunktionen ───────────────────────────────────────
 

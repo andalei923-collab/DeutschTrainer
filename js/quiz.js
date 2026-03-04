@@ -17,6 +17,8 @@ const QUIZ = {
   container:  null,
   gesperrt:   false,   // Eingabe blockiert während Feedback läuft
 
+  _richtigInFolge: 0,  // Streak-Zähler für Herz-Bonus (4 in Folge = +1 ❤️)
+
   // Typ-spezifischer Zustand – wird pro Frage neu gesetzt
   _typ: {
     gewaehlt:   [],    // reihenfolge / steigerung_ordnen / mehrfachauswahl
@@ -52,6 +54,235 @@ function _typZustandReset() {
 }
 
 // ============================================================
+//  Satz-Übersetzung (MyMemory API – kein Key nötig)
+// ============================================================
+
+/**
+ * Übersetzt einen deutschen Text via MyMemory API.
+ * @param {string} text         – Quelltext (Deutsch)
+ * @param {string} zielSprache  – ISO-Code: "fa" | "tr" | "ar"
+ * @returns {Promise<string|null>} Übersetzung oder null bei Fehler
+ */
+async function satzUebersetzen(text, zielSprache) {
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=de|${zielSprache}`;
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const daten = await res.json();
+    return daten.responseData?.translatedText ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Erstellt einen "🌍 Ganzen Satz übersetzen"-Block (Button + Ausgabe).
+ * @param {function(): string} getTextFn – liefert den zu übersetzenden Text
+ * @param {string}             zielSprache
+ * @returns {HTMLElement}
+ */
+function _uebersetzerBlock(getTextFn, zielSprache) {
+  const wrap = document.createElement('div');
+  wrap.className = 'uebers-block';
+
+  const btn = document.createElement('button');
+  btn.className   = 'uebers-btn';
+  btn.textContent = '🌍 Ganzen Satz übersetzen';
+
+  const ausgabe = document.createElement('p');
+  ausgabe.className    = 'uebers-ausgabe';
+  ausgabe.style.display = 'none';
+
+  btn.addEventListener('click', async () => {
+    btn.disabled    = true;
+    btn.textContent = '⏳ Übersetze …';
+
+    const uebersetzung = await satzUebersetzen(getTextFn(), zielSprache);
+
+    if (uebersetzung) {
+      ausgabe.textContent   = uebersetzung;
+      btn.textContent       = '🌍 Nochmal übersetzen';
+    } else {
+      ausgabe.textContent   = 'Übersetzung gerade nicht verfügbar';
+      btn.textContent       = '🌍 Ganzen Satz übersetzen';
+    }
+    ausgabe.style.display = 'block';
+    btn.disabled          = false;
+  });
+
+  wrap.appendChild(btn);
+  wrap.appendChild(ausgabe);
+  return wrap;
+}
+
+// ============================================================
+//  _streakHerzPopupZeigen – Popup + Blitz-Effekt
+// ============================================================
+
+/**
+ * Zeigt kurz ein grünes "+1 ❤️ Streak Bonus!"-Popup
+ * und einen grünen Blitz-Hintergrund an.
+ */
+function _streakHerzPopupZeigen() {
+  // Grüner Blitz-Hintergrund
+  const blitz = document.createElement('div');
+  blitz.style.cssText = [
+    'position:fixed', 'inset:0', 'z-index:490',
+    'background:rgba(74,222,128,.22)',
+    'pointer-events:none',
+    'opacity:1',
+    'transition:opacity .45s ease',
+  ].join(';');
+  document.body.appendChild(blitz);
+  setTimeout(() => { blitz.style.opacity = '0'; }, 80);
+  setTimeout(() => blitz.remove(), 560);
+
+  // Popup-Text
+  const popup = document.createElement('div');
+  popup.textContent = '+1 ❤️ Streak Bonus!';
+  popup.style.cssText = [
+    'position:fixed',
+    'top:42%', 'left:50%',
+    'transform:translate(-50%,-50%) scale(.75)',
+    'z-index:500',
+    'background:#0d2e1e',
+    'border:2px solid #4ade80',
+    'color:#4ade80',
+    'font-size:1.25rem',
+    'font-weight:800',
+    'letter-spacing:.02em',
+    'padding:.65rem 1.5rem',
+    'border-radius:14px',
+    'box-shadow:0 8px 32px rgba(74,222,128,.35)',
+    'pointer-events:none',
+    'opacity:0',
+    'transition:transform .18s ease, opacity .18s ease',
+  ].join(';');
+  document.body.appendChild(popup);
+
+  // Einblenden
+  requestAnimationFrame(() => {
+    popup.style.opacity  = '1';
+    popup.style.transform = 'translate(-50%,-50%) scale(1)';
+  });
+
+  // Ausblenden
+  setTimeout(() => {
+    popup.style.opacity   = '0';
+    popup.style.transform = 'translate(-50%,-58%) scale(.92)';
+  }, 1400);
+  setTimeout(() => popup.remove(), 1620);
+}
+
+// ============================================================
+//  herzAnzeigenAktualisieren
+// ============================================================
+
+/**
+ * Liest die aktuelle Herzanzahl und rendert ❤️-Icons
+ * in #herzenAnzeige (zwischen Avatar und Fragekarte).
+ */
+function herzAnzeigenAktualisieren() {
+  const el = document.getElementById('herzenAnzeige');
+  if (!el) return;
+  const herzen = typeof spielerLaden === 'function'
+    ? Math.max(0, spielerLaden().hearts)
+    : 0;
+  el.textContent = herzen > 0 ? '❤️'.repeat(herzen) : '💔';
+  el.setAttribute('aria-label', `${herzen} Herzen verbleibend`);
+}
+
+// ============================================================
+//  Tap-to-Translate – Quiz-Fragetext
+// ============================================================
+
+const _QUIZ_SPRACH_LABEL = { de: 'Deutsch', fa: 'Persisch', tr: 'Türkçe', ar: 'العربية' };
+let _quizTapAktiv   = false;
+let _quizPopupTimer = null;
+
+/**
+ * Wandelt einen Text in antippbare Wort-Spans um.
+ * @param {string} text
+ * @returns {DocumentFragment}
+ */
+function _quizFrageZuSpans(text) {
+  const frag = document.createDocumentFragment();
+  text.split(/(\s+)/).forEach(teil => {
+    if (/^\s+$/.test(teil)) { frag.appendChild(document.createTextNode(teil)); return; }
+    if (!teil) return;
+    const span       = document.createElement('span');
+    span.className   = 'wort';
+    span.tabIndex    = 0;
+    span.dataset.de  = teil.replace(/[.,!?;:»«()"]/g, '');
+    span.textContent = teil;
+    frag.appendChild(span);
+  });
+  return frag;
+}
+
+/**
+ * Zeigt das Übersetzungs-Popup für ein angeklicktes Quiz-Wort.
+ * Übersetzt via LibreTranslate.
+ * @param {HTMLElement} span
+ * @param {number}      x
+ * @param {number}      y
+ * @param {string}      zielSprache – 'fa' | 'tr' | 'ar'
+ */
+async function _quizPopupZeigen(span, x, y, zielSprache) {
+  const popup = document.getElementById('translate-popup');
+  const txtEl = document.getElementById('popupText');
+  const sprEl = document.getElementById('popupSprache');
+  if (!popup || !txtEl || !sprEl) return;
+
+  const wort = (span.dataset.de || span.textContent).replace(/[.,!?;:»«()"]/g, '').trim();
+  if (!wort) return;
+
+  txtEl.textContent = '…';
+  sprEl.textContent = _QUIZ_SPRACH_LABEL[zielSprache] ?? zielSprache;
+  popup.style.left  = Math.min(x, window.innerWidth - 160) + 'px';
+  popup.style.top   = (y - 52) + 'px';
+  popup.classList.add('sichtbar');
+  span.classList.add('active');
+
+  if (_quizPopupTimer) clearTimeout(_quizPopupTimer);
+
+  const uebersetzung = await satzUebersetzen(wort, zielSprache);
+  txtEl.textContent  = uebersetzung || wort;
+
+  _quizPopupTimer = setTimeout(() => {
+    popup.classList.remove('sichtbar');
+    span.classList.remove('active');
+    _quizPopupTimer = null;
+  }, 2000);
+}
+
+/**
+ * Richtet Tap-to-Translate für den Quiz-Fragetext ein (einmalig).
+ * Kein Popup wenn Zielsprache = Deutsch.
+ */
+function _quizTapToTranslateInit() {
+  const spr = typeof spracheLaden === 'function'
+    ? (spracheLaden().sprache ?? 'de') : 'de';
+  if (spr === 'de' || _quizTapAktiv) return;
+  _quizTapAktiv = true;
+
+  document.body.addEventListener('click', e => {
+    const span = e.target.closest('span.wort');
+    if (!span) return;
+    _quizPopupZeigen(span, e.clientX, e.clientY, spr);
+  });
+
+  document.body.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const span = e.target.closest('span.wort');
+    if (!span) return;
+    e.preventDefault();
+    const r = span.getBoundingClientRect();
+    _quizPopupZeigen(span, r.left + r.width / 2, r.top, spr);
+  });
+}
+
+// ============================================================
 //  quizStarten – Einstieg
 // ============================================================
 
@@ -61,21 +292,26 @@ function _typZustandReset() {
  * @param {{ weltNr?: number, containerId?: string }} opt
  */
 function quizStarten(fragen, opt = {}) {
-  const { weltNr = 1, containerId = 'theoriKarte' } = opt;
+  const { weltNr = 1, containerId = 'theoriKarte', xpProAntwort = 0 } = opt;
 
-  QUIZ.fragen    = fragen;
-  QUIZ.index     = 0;
-  QUIZ.richtig   = 0;
-  QUIZ.falsch    = 0;
-  QUIZ.xpRunde   = 0;
-  QUIZ.weltNr    = weltNr;
-  QUIZ.gesperrt  = false;
-  QUIZ.container = document.getElementById(containerId);
+  QUIZ.fragen          = fragen;
+  QUIZ.index           = 0;
+  QUIZ.richtig         = 0;
+  QUIZ.falsch          = 0;
+  QUIZ.xpRunde         = 0;
+  QUIZ.weltNr          = weltNr;
+  QUIZ.gesperrt        = false;
+  QUIZ._richtigInFolge = 0;
+  QUIZ.xpProAntwort    = xpProAntwort;  // 0 = Standard (10/15), sonst fester Wert
+  QUIZ.container       = document.getElementById(containerId);
 
   if (!QUIZ.container) {
     console.error(`[quiz] Container #${containerId} nicht gefunden.`);
     return;
   }
+
+  // Tap-to-Translate für Fragetext aktivieren
+  _quizTapToTranslateInit();
 
   // Herzen täglich zurücksetzen wenn nötig
   if (typeof herzenPruefen === 'function') herzenPruefen();
@@ -111,11 +347,18 @@ function frageAnzeigen(frage) {
   numEl.textContent = `${QUIZ.index + 1} / ${QUIZ.fragen.length}`;
   c.appendChild(numEl);
 
-  // Frage-Text
+  // Frage-Text (Wörter als antippbare Spans für Tap-to-Translate)
   const frageEl = document.createElement('p');
-  frageEl.className   = 'quiz-frage';
-  frageEl.textContent = frage.frage;
+  frageEl.className = 'quiz-frage';
+  frageEl.appendChild(_quizFrageZuSpans(frage.frage));
   c.appendChild(frageEl);
+
+  // Satz-Übersetzungs-Button (wenn Sprache ≠ Deutsch)
+  const _frageSpr = typeof spracheLaden === 'function'
+    ? (spracheLaden().sprache ?? 'de') : 'de';
+  if (_frageSpr !== 'de') {
+    c.appendChild(_uebersetzerBlock(() => frageEl.textContent, _frageSpr));
+  }
 
   // Typ-Body
   const body = document.createElement('div');
@@ -161,17 +404,34 @@ function antwortPruefen(antwort, frage) {
 
   if (istRichtig) {
     QUIZ.richtig++;
+    QUIZ._richtigInFolge++;
 
-    // XP: Streak-Bonus wenn bis hier keine Fehler
-    const xpMenge = (QUIZ.falsch === 0 && QUIZ.richtig > 1)
-      ? (typeof XP_AKTION !== 'undefined' ? XP_AKTION.RICHTIGE_ANTWORT_STREAK : 15)
-      : (typeof XP_AKTION !== 'undefined' ? XP_AKTION.RICHTIGE_ANTWORT : 10);
+    // XP: Themen-Quiz hat festen Wert, sonst Streak-Bonus
+    const xpMenge = QUIZ.xpProAntwort > 0
+      ? QUIZ.xpProAntwort
+      : (QUIZ.falsch === 0 && QUIZ.richtig > 1)
+        ? (typeof XP_AKTION !== 'undefined' ? XP_AKTION.RICHTIGE_ANTWORT_STREAK : 15)
+        : (typeof XP_AKTION !== 'undefined' ? XP_AKTION.RICHTIGE_ANTWORT : 10);
 
     let levelUp = false;
     if (typeof xpHinzufuegen === 'function') {
       levelUp = xpHinzufuegen(xpMenge).levelUp;
     }
     QUIZ.xpRunde += xpMenge;
+
+    // Herz-Bonus: jede 3. richtige Antwort in Folge → +1 ❤️ (max 10)
+    if (QUIZ._richtigInFolge === 3) {
+      QUIZ._richtigInFolge = 0;  // Zähler für nächste Serie zurücksetzen
+      if (typeof herzHinzufuegen === 'function') {
+        const herzRes = herzHinzufuegen();
+        if (herzRes.hinzugefuegt) {
+          _streakHerzPopupZeigen();
+          if (typeof avatarEmotion === 'function') avatarEmotion('celebrate');
+          if (typeof soundRichtig === 'function') soundRichtig();
+          herzAnzeigenAktualisieren();
+        }
+      }
+    }
 
     if (typeof avatarEmotion === 'function') avatarEmotion('happy');
     // Sound: Streak-Bonus oder normales Richtig (Level-Up-Sound kommt aus xp.js)
@@ -181,11 +441,13 @@ function antwortPruefen(antwort, frage) {
       if (typeof soundRichtig === 'function') soundRichtig();
     }
     feedbackZeigen(true, frage.erklaerung ?? '', xpMenge, levelUp);
+    herzAnzeigenAktualisieren();
 
   } else {
     QUIZ.falsch++;
+    QUIZ._richtigInFolge = 0;   // Streak zurücksetzen bei Fehler
 
-    let herzNachher  = 5;
+    let herzNachher  = 6;
     let rundeVerloren = false;
     if (typeof herzVerlieren === 'function') {
       const res = herzVerlieren();
@@ -201,6 +463,7 @@ function antwortPruefen(antwort, frage) {
     // Richtige Antwort aufdecken
     _richtigeAntwortMarkieren(frage);
     feedbackZeigen(false, frage.erklaerung ?? '', 0, false, herzNachher, rundeVerloren);
+    herzAnzeigenAktualisieren();
   }
 }
 
@@ -325,8 +588,8 @@ function rundeBeenden() {
   // Streak aktualisieren
   if (typeof streakAktualisieren === 'function') streakAktualisieren();
 
-  // Fortschritt speichern (Sterne + Welt-Freischaltung)
-  if (typeof fortschrittLaden === 'function') {
+  // Fortschritt speichern (Sterne + Welt-Freischaltung) – nicht im Themen-Quiz
+  if (!QUIZ.xpProAntwort && typeof fortschrittLaden === 'function') {
     const fortschritt = fortschrittLaden();
     const weltIdx     = QUIZ.weltNr - 1;
     if (weltIdx >= 0 && weltIdx < 5) {
@@ -366,13 +629,13 @@ function rundeBeenden() {
         <div class="stat-zeile stat-xp">⚡ +${QUIZ.xpRunde} XP</div>
       </div>
       <div class="ergebnis-aktionen">
-        <button class="btn-welt"    id="btnWelt">← Zur Karte</button>
+        <button class="btn-welt"    id="btnWelt">${QUIZ.xpProAntwort ? '← Zu den Themen' : '← Zur Karte'}</button>
         <button class="btn-nochmal" id="btnNochmal">Nochmal 🔄</button>
       </div>
     </div>`;
 
   document.getElementById('btnWelt').addEventListener('click',
-    () => { window.location.href = 'app.html'; });
+    () => { window.location.href = QUIZ.xpProAntwort ? 'themen.html' : 'app.html'; });
 
   document.getElementById('btnNochmal').addEventListener('click', () => {
     QUIZ.index   = 0;
@@ -779,6 +1042,7 @@ if (typeof module !== 'undefined' && module.exports) {
     antwortPruefen,
     naechsteFrage,
     rundeBeenden,
+    herzAnzeigenAktualisieren,
     TYPEN_RENDERER,
     TYPEN_PRUEFER,
   };

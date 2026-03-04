@@ -3,12 +3,15 @@
 //  Deutsch Trainer
 // ============================================================
 
+const APP_VERSION = '0.2';
+
 const KEYS = {
   SPIELER:        'dt_spieler',
   FORTSCHRITT:    'dt_fortschritt',
   ACHIEVEMENTS:   'dt_achievements',
   DAILY:          'dt_daily_challenge',
   SPRACHE:        'dt_sprache',
+  VERSION:        'dt_version',
 };
 
 // ------------------------------------------------------------
@@ -26,7 +29,7 @@ const SPIELER_DEFAULT = {
   streakRecord:   0,
   lastLogin:      null,
   heartsLastReset: null,
-  hearts:         5,
+  hearts:         6,
   sprachModus:    'normal',   // "normal" | "einfach" | "tap"
 };
 
@@ -204,12 +207,49 @@ function spracheSpeichern(data) {
 }
 
 // ============================================================
+//  Migrations-System
+// ============================================================
+
+/**
+ * Prüft die gespeicherte App-Version und führt nötige
+ * Datenmigration durch. Muss VOR spielerLaden() aufgerufen werden.
+ */
+function migrieren() {
+  try {
+    const gespeicherteVersion = localStorage.getItem(KEYS.VERSION);
+
+    // Bereits aktuell – nichts zu tun
+    if (gespeicherteVersion === APP_VERSION) return;
+
+    console.info(`[storage] Migration: ${gespeicherteVersion ?? 'keine'} → ${APP_VERSION}`);
+
+    // ── Migration → v0.2 ─────────────────────────────────────
+    // Herzen-Minimum auf 6 anheben (war früher 5 oder 3)
+    if (gespeicherteVersion === null || gespeicherteVersion === '0.1') {
+      const spieler = spielerLaden();
+      if ((spieler.hearts ?? 0) < 6) {
+        spielerSpeichern({ hearts: 6 });
+        console.info('[storage] Migration 0.2: hearts auf 6 angehoben.');
+      }
+    }
+
+    // Neue Version persistieren
+    localStorage.setItem(KEYS.VERSION, APP_VERSION);
+    console.info('[storage] Migration abgeschlossen → v' + APP_VERSION);
+
+  } catch (err) {
+    console.error('[storage] Fehler bei Migration:', err);
+  }
+}
+
+// ============================================================
 //  Exports (für Module-Umgebungen)
 //  Im Browser auch global verfügbar (window.*)
 // ============================================================
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    APP_VERSION,
     spielerLaden,
     spielerSpeichern,
     fortschrittLaden,
@@ -220,5 +260,6 @@ if (typeof module !== 'undefined' && module.exports) {
     dailyChallengeSpeichern,
     spracheLaden,
     spracheSpeichern,
+    migrieren,
   };
 }

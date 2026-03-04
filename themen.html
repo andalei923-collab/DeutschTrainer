@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch Trainer – Themen</title>
+  <style>
+    /* ── Reset & Design-Tokens ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-bg:      #0f0e17;
+      --c-surface: #1a1a2e;
+      --c-card:    #16213e;
+      --c-accent1: #e94560;
+      --c-accent2: #f5a623;
+      --c-accent3: #0fd4c8;
+      --c-purple:  #a855f7;
+      --c-text:    #eaeaea;
+      --c-muted:   #8892a4;
+      --nav-h:     64px;
+      --top-h:     72px;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      background: var(--c-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 0%,   #1e0a3c 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, #0a1e3c 0%, transparent 50%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--c-text);
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--top-h);
+      padding-bottom: calc(var(--nav-h) + 1rem);
+    }
+
+    /* ── Top-Bar ────────────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--top-h);
+      z-index: 100;
+      background: rgba(22, 33, 62, .92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      gap: 1rem;
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      min-width: 0;
+    }
+
+    .avatar-bubble {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--c-surface);
+      border: 2px solid var(--c-purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .player-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .player-name {
+      font-weight: 700;
+      font-size: .95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    .level-label {
+      font-size: .72rem;
+      color: var(--c-purple);
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .xp-track {
+      width: 110px;
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.1);
+      overflow: hidden;
+    }
+    .xp-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--c-purple), var(--c-accent1));
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+
+    .stats {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-shrink: 0;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      background: var(--c-surface);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 99px;
+      padding: .4rem .65rem;
+      font-size: .9rem;
+      font-weight: 700;
+      min-height: 36px;
+    }
+    .stat-chip.hearts { color: #ff6b8a; }
+    .stat-chip.streak { color: var(--c-accent2); }
+
+    .sound-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 99px;
+      color: var(--c-muted);
+      font-size: 1.1rem;
+      padding: .4rem .65rem;
+      min-width: 40px;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .sound-btn:hover { color: var(--c-text); border-color: rgba(255,255,255,.3); }
+
+    /* ── Haupt-Content ──────────────────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 1.5rem 1rem 0;
+      max-width: 540px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .section-header { margin-bottom: 1.2rem; }
+    .section-title  { font-size: 1.3rem; font-weight: 800; }
+    .section-sub    { font-size: .83rem; color: var(--c-muted); margin-top: .3rem; }
+
+    /* ── Akkordeon ───────────────────────────────────────────── */
+    .akkordeon-liste {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+
+    .akkordeon-bereich {
+      border-radius: 16px;
+      border: 1.5px solid rgba(255,255,255,.08);
+      overflow: hidden;
+      background: var(--c-card);
+    }
+
+    .akkordeon-kopf {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      padding: 1rem 1.1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      color: var(--c-text);
+      min-height: 56px;
+      transition: background .15s;
+    }
+    .akkordeon-kopf:hover { background: rgba(255,255,255,.04); }
+
+    .akkordeon-icon  { font-size: 1.45rem; flex-shrink: 0; line-height: 1; }
+    .akkordeon-titel { flex: 1; font-size: 1rem; font-weight: 700; }
+
+    .akkordeon-anzahl {
+      font-size: .75rem;
+      font-weight: 600;
+      border-radius: 99px;
+      padding: .22rem .6rem;
+      flex-shrink: 0;
+    }
+
+    .akkordeon-pfeil {
+      font-size: .78rem;
+      color: var(--c-muted);
+      transition: transform .3s ease;
+      flex-shrink: 0;
+    }
+    .akkordeon-bereich.offen .akkordeon-pfeil { transform: rotate(180deg); }
+
+    .akkordeon-inhalt {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .35s ease;
+    }
+    .akkordeon-bereich.offen .akkordeon-inhalt { max-height: 600px; }
+
+    .akkordeon-divider {
+      height: 1px;
+      background: rgba(255,255,255,.07);
+      margin: 0 1.1rem;
+    }
+
+    .themen-grid {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      padding: .7rem .8rem .9rem;
+    }
+
+    .thema-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: .8rem 1rem;
+      border-radius: 12px;
+      border: 1.5px solid rgba(255,255,255,.07);
+      background: rgba(255,255,255,.03);
+      color: var(--c-text);
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      min-height: 48px;
+      transition: background .15s, border-color .15s, transform .1s;
+    }
+    .thema-btn:hover  { transform: translateX(3px); }
+    .thema-btn:active { transform: translateX(1px); }
+
+    .thema-btn-pfeil {
+      margin-left: auto;
+      color: var(--c-muted);
+      font-size: .8rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Sektionsfarben ─────────────────────────────────────── */
+    .akk-gruen   .akkordeon-kopf { border-left: 4px solid #4ade80; }
+    .akk-blau    .akkordeon-kopf { border-left: 4px solid #38bdf8; }
+    .akk-orange  .akkordeon-kopf { border-left: 4px solid var(--c-accent2); }
+    .akk-rot     .akkordeon-kopf { border-left: 4px solid var(--c-accent1); }
+    .akk-lila    .akkordeon-kopf { border-left: 4px solid var(--c-purple); }
+    .akk-tuerkis .akkordeon-kopf { border-left: 4px solid var(--c-accent3); }
+
+    .akk-gruen   .akkordeon-anzahl { background: rgba(74,222,128,.15);  color: #4ade80; }
+    .akk-blau    .akkordeon-anzahl { background: rgba(56,189,248,.15);  color: #38bdf8; }
+    .akk-orange  .akkordeon-anzahl { background: rgba(245,166,35,.15);  color: var(--c-accent2); }
+    .akk-rot     .akkordeon-anzahl { background: rgba(233,69,96,.15);   color: var(--c-accent1); }
+    .akk-lila    .akkordeon-anzahl { background: rgba(168,85,247,.15);  color: var(--c-purple); }
+    .akk-tuerkis .akkordeon-anzahl { background: rgba(15,212,200,.15);  color: var(--c-accent3); }
+
+    .akk-gruen   .thema-btn:hover { border-color: rgba(74,222,128,.3);  background: rgba(74,222,128,.06); }
+    .akk-blau    .thema-btn:hover { border-color: rgba(56,189,248,.3);  background: rgba(56,189,248,.06); }
+    .akk-orange  .thema-btn:hover { border-color: rgba(245,166,35,.3);  background: rgba(245,166,35,.06); }
+    .akk-rot     .thema-btn:hover { border-color: rgba(233,69,96,.3);   background: rgba(233,69,96,.06); }
+    .akk-lila    .thema-btn:hover { border-color: rgba(168,85,247,.3);  background: rgba(168,85,247,.06); }
+    .akk-tuerkis .thema-btn:hover { border-color: rgba(15,212,200,.3);  background: rgba(15,212,200,.06); }
+
+    .akk-gruen   .thema-btn-pfeil { color: #4ade80; }
+    .akk-blau    .thema-btn-pfeil { color: #38bdf8; }
+    .akk-orange  .thema-btn-pfeil { color: var(--c-accent2); }
+    .akk-rot     .thema-btn-pfeil { color: var(--c-accent1); }
+    .akk-lila    .thema-btn-pfeil { color: var(--c-purple); }
+    .akk-tuerkis .thema-btn-pfeil { color: var(--c-accent3); }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + 1rem);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e1e3a;
+      border: 1px solid rgba(168,85,247,.4);
+      color: #c4a8ff;
+      padding: .5rem 1.2rem;
+      border-radius: 99px;
+      font-size: .88rem;
+      font-weight: 600;
+      z-index: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      animation: toast-ein .2s ease, toast-aus .2s ease 1.6s forwards;
+    }
+    @keyframes toast-ein {
+      from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    @keyframes toast-aus {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+
+    /* ── Bottom-Nav ─────────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(22, 33, 62, .96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .2rem;
+      text-decoration: none;
+      color: var(--c-muted);
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: color .15s;
+    }
+    .nav-item .nav-icon { font-size: 1.4rem; line-height: 1; }
+    .nav-item.active    { color: var(--c-accent3); }
+    .nav-item:hover     { color: var(--c-text); }
+
+    .section-sub { font-size: .85rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top-Bar ──────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="player-info">
+      <div class="avatar-bubble" id="avatarBubble">🦊</div>
+      <div class="player-meta">
+        <span class="player-name" id="playerName">Spieler</span>
+        <span class="level-label" id="levelLabel">Level 1</span>
+        <div class="xp-track">
+          <div class="xp-fill" id="xpFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat-chip streak">🔥 <span id="streakCount">0</span></div>
+      <div class="stat-chip hearts">❤️ <span id="heartsCount">5</span></div>
+      <button class="sound-btn" id="soundToggleBtn" title="Sound">🔊</button>
+    </div>
+  </header>
+
+  <!-- ── Haupt-Content ─────────────────────────────────────── -->
+  <main class="main">
+
+    <div class="section-header">
+      <h1 class="section-title">Themen üben 📚</h1>
+      <p class="section-sub">Wähle ein Thema und übe gezielt</p>
+    </div>
+
+    <div class="akkordeon-liste">
+
+      <!-- 1. Wortarten -->
+      <div class="akkordeon-bereich akk-gruen">
+        <button class="akkordeon-kopf" aria-expanded="false">
+          <span class="akkordeon-icon">📚</span>
+          <span class="akkordeon-titel">Wortarten</span>
+          <span class="akkordeon-anzahl">5 Themen</span>
+          <span class="akkordeon-pfeil">▼</span>
+        </button>
+        <div class="akkordeon-inhalt">
+          <div class="akkordeon-divider"></div>
+          <div class="themen-grid">
+            <button class="thema-btn" data-thema="nomen">Nur Nomen <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="verben">Nur Verben <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="adjektive">Nur Adjektive <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="pronomen">Nur Pronomen <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="wortarten-mix">Alle Wortarten gemischt <span class="thema-btn-pfeil">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Zeitformen -->
+      <div class="akkordeon-bereich akk-blau">
+        <button class="akkordeon-kopf" aria-expanded="false">
+          <span class="akkordeon-icon">⏰</span>
+          <span class="akkordeon-titel">Zeitformen</span>
+          <span class="akkordeon-anzahl">4 Themen</span>
+          <span class="akkordeon-pfeil">▼</span>
+        </button>
+        <div class="akkordeon-inhalt">
+          <div class="akkordeon-divider"></div>
+          <div class="themen-grid">
+            <button class="thema-btn" data-thema="praesens">Präsens <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="praeteritum">Präteritum &amp; Perfekt <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="futur">Futur <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="zeitformen-mix">Alle Zeitformen gemischt <span class="thema-btn-pfeil">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Die 4 Fälle -->
+      <div class="akkordeon-bereich akk-orange">
+        <button class="akkordeon-kopf" aria-expanded="false">
+          <span class="akkordeon-icon">📐</span>
+          <span class="akkordeon-titel">Die 4 Fälle</span>
+          <span class="akkordeon-anzahl">5 Themen</span>
+          <span class="akkordeon-pfeil">▼</span>
+        </button>
+        <div class="akkordeon-inhalt">
+          <div class="akkordeon-divider"></div>
+          <div class="themen-grid">
+            <button class="thema-btn" data-thema="nominativ">Nominativ <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="genitiv">Genitiv <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="dativ">Dativ <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="akkusativ">Akkusativ <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="faelle-mix">Alle Fälle gemischt <span class="thema-btn-pfeil">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Rechtschreibung -->
+      <div class="akkordeon-bereich akk-rot">
+        <button class="akkordeon-kopf" aria-expanded="false">
+          <span class="akkordeon-icon">✏️</span>
+          <span class="akkordeon-titel">Rechtschreibung</span>
+          <span class="akkordeon-anzahl">4 Themen</span>
+          <span class="akkordeon-pfeil">▼</span>
+        </button>
+        <div class="akkordeon-inhalt">
+          <div class="akkordeon-divider"></div>
+          <div class="themen-grid">
+            <button class="thema-btn" data-thema="gross-klein">Groß-/Kleinschreibung <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="das-dass">das/dass Regel <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="komma">Kommasetzung <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="schwierige-woerter">Schwierige Wörter <span class="thema-btn-pfeil">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Wortbedeutung -->
+      <div class="akkordeon-bereich akk-lila">
+        <button class="akkordeon-kopf" aria-expanded="false">
+          <span class="akkordeon-icon">🔤</span>
+          <span class="akkordeon-titel">Wortbedeutung</span>
+          <span class="akkordeon-anzahl">3 Themen</span>
+          <span class="akkordeon-pfeil">▼</span>
+        </button>
+        <div class="akkordeon-inhalt">
+          <div class="akkordeon-divider"></div>
+          <div class="themen-grid">
+            <button class="thema-btn" data-thema="synonyme">Synonyme <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="homonyme">Homonyme <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="steigerung">Steigerungsformen <span class="thema-btn-pfeil">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Textsorten & Stil -->
+      <div class="akkordeon-bereich akk-tuerkis">
+        <button class="akkordeon-kopf" aria-expanded="false">
+          <span class="akkordeon-icon">📝</span>
+          <span class="akkordeon-titel">Textsorten &amp; Stil</span>
+          <span class="akkordeon-anzahl">3 Themen</span>
+          <span class="akkordeon-pfeil">▼</span>
+        </button>
+        <div class="akkordeon-inhalt">
+          <div class="akkordeon-divider"></div>
+          <div class="themen-grid">
+            <button class="thema-btn" data-thema="textsorten">Textsorten erkennen <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="stilmittel">Stilmittel <span class="thema-btn-pfeil">→</span></button>
+            <button class="thema-btn" data-thema="fremdwoerter">Fremdwörter <span class="thema-btn-pfeil">→</span></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── Bottom-Nav ────────────────────────────────────────── -->
+  <nav class="bottom-nav" aria-label="Hauptnavigation">
+    <a href="app.html"         class="nav-item"><span class="nav-icon">🗺️</span>Welten</a>
+    <a href="themen.html"      class="nav-item active"><span class="nav-icon">📚</span>Themen</a>
+    <a href="profile.html"     class="nav-item"><span class="nav-icon">👤</span>Profil</a>
+    <a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span>Rangliste</a>
+  </nav>
+
+  <script src="js/storage.js?v=0.2"></script>
+  <script src="js/sound.js?v=0.2"></script>
+  <script src="js/xp.js?v=0.2"></script>
+  <script>
+    const AVATAR_MAP = {
+      fuchs:'🦊', frosch:'🐸', panda:'🐼', waschbaer:'🦝', wolf:'🐺',
+      koala:'🐨', hund:'🐶', affe:'🐵', loewe:'🦁', tiger:'🐯',
+      baer:'🐻', katze:'🐱', kuh:'🐮', schlange:'🐍', papagei:'🦜',
+      default:'😊',
+    };
+
+    // ── Topbar befüllen ───────────────────────────────────────
+    (function init() {
+      const spieler = spielerLaden();
+      document.getElementById('avatarBubble').textContent = AVATAR_MAP[spieler.avatar] ?? '😊';
+      document.getElementById('playerName').textContent   = spieler.name;
+      document.getElementById('levelLabel').textContent   = `Level ${spieler.level}`;
+      document.getElementById('streakCount').textContent  = spieler.streak;
+      document.getElementById('heartsCount').textContent  = spieler.hearts;
+      const pct = (typeof xpFortschrittProzent === 'function')
+        ? xpFortschrittProzent(spieler.xp, spieler.level) : 0;
+      document.getElementById('xpFill').style.width = pct + '%';
+      soundToggleInit('soundToggleBtn');
+    })();
+
+    // ── Akkordeon ─────────────────────────────────────────────
+    document.querySelectorAll('.akkordeon-kopf').forEach(kopf => {
+      kopf.addEventListener('click', () => {
+        const bereich  = kopf.closest('.akkordeon-bereich');
+        const istOffen = bereich.classList.contains('offen');
+        // Alle schließen
+        document.querySelectorAll('.akkordeon-bereich').forEach(b => {
+          b.classList.remove('offen');
+          b.querySelector('.akkordeon-kopf').setAttribute('aria-expanded', 'false');
+        });
+        // Diesen öffnen, wenn er vorher zu war
+        if (!istOffen) {
+          bereich.classList.add('offen');
+          kopf.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    // ── Thema-Button Klick → Quiz starten ───────────────────
+    document.querySelectorAll('.thema-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const thema = btn.dataset.thema;
+        if (thema) {
+          window.location.href = `quiz.html?modus=thema&thema=${encodeURIComponent(thema)}&phase=theorie`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

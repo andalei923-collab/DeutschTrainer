@@ -24,6 +24,8 @@
 
     body {
       min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
       background: var(--c-bg);
       background-image:
         radial-gradient(ellipse at 15% 0%,   #1e0a3c 0%, transparent 50%),
@@ -59,7 +61,7 @@
     }
 
     .topbar-sub {
-      font-size: .7rem;
+      font-size: .75rem;
       color: var(--c-muted);
       margin-top: .1rem;
     }
@@ -69,9 +71,12 @@
       border: none;
       border-radius: 10px;
       color: #fff;
-      font-size: .82rem;
+      font-size: .85rem;
       font-weight: 700;
-      padding: .42rem .85rem;
+      padding: .55rem .9rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
       cursor: pointer;
       transition: opacity .15s;
       flex-shrink: 0;
@@ -85,9 +90,12 @@
       border: 1px solid rgba(255,255,255,.1);
       border-radius: 10px;
       color: var(--c-text);
-      font-size: .82rem;
+      font-size: .85rem;
       font-weight: 600;
-      padding: .42rem .8rem;
+      padding: .55rem .9rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
       text-decoration: none;
       transition: background .15s;
       flex-shrink: 0;
@@ -125,7 +133,7 @@
 
     /* ── Sektions-Überschrift ───────────────────────────────── */
     .section-label {
-      font-size: .7rem;
+      font-size: .75rem;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
@@ -168,7 +176,7 @@
     }
 
     .stat-label {
-      font-size: .7rem;
+      font-size: .75rem;
       color: var(--c-muted);
       font-weight: 600;
     }
@@ -203,7 +211,7 @@
     }
 
     .bar-label {
-      font-size: .78rem;
+      font-size: .8rem;
       font-weight: 600;
       width: 68px;
       flex-shrink: 0;
@@ -229,7 +237,7 @@
     }
 
     .bar-count {
-      font-size: .78rem;
+      font-size: .8rem;
       font-weight: 700;
       color: var(--c-muted);
       width: 30px;
@@ -331,7 +339,7 @@
 
   </main>
 
-  <script src="js/supabase.js"></script>
+  <script src="js/supabase.js?v=0.2"></script>
   <script>
     // ── Header-Hilfsfunktion ──────────────────────────────────
     // SUPABASE_URL + SUPABASE_KEY kommen global aus js/supabase.js

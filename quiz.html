@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deutsch Trainer – Quiz</title>
-  <link rel="stylesheet" href="css/avatar.css" />
-  <link rel="stylesheet" href="css/quiz.css" />
+  <link rel="stylesheet" href="css/avatar.css?v=0.2" />
+  <link rel="stylesheet" href="css/quiz.css?v=0.2" />
   <style>
     /* ── Design-Tokens (identisch mit index/app) ────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,6 +25,8 @@
 
     body {
       min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
       background: var(--c-bg);
       background-image:
         radial-gradient(ellipse at 20% 0%,  #1e0a3c 0%, transparent 55%),
@@ -63,7 +65,12 @@
       border-radius: 99px;
       color: var(--c-muted);
       font-size: 1.1rem;
-      padding: .25rem .6rem;
+      padding: .4rem .7rem;
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       transition: color .15s, border-color .15s;
     }
@@ -89,7 +96,47 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 1.4rem;
+      margin-bottom: .6rem;
+    }
+
+    /* ── Satz-Übersetzung ───────────────────────────────────── */
+    .uebers-block {
+      margin-top: .5rem;
+      margin-bottom: .2rem;
+    }
+    .uebers-btn {
+      font-size: .72rem;
+      font-weight: 600;
+      background: rgba(15,212,200,.07);
+      border: 1px solid rgba(15,212,200,.22);
+      border-radius: 99px;
+      color: var(--c-accent3);
+      padding: .28rem .8rem;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+    }
+    .uebers-btn:hover    { background: rgba(15,212,200,.15); }
+    .uebers-btn:disabled { opacity: .5; cursor: default; }
+    .uebers-ausgabe {
+      font-size: .88rem;
+      color: var(--c-muted);
+      line-height: 1.65;
+      margin-top: .45rem;
+      padding: .5rem .75rem;
+      background: rgba(255,255,255,.04);
+      border-left: 2px solid var(--c-accent3);
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* ── Herzen-Anzeige ─────────────────────────────────────── */
+    .herzen-anzeige {
+      font-size: 1.35rem;
+      letter-spacing: .08rem;
+      margin-bottom: 1rem;
+      min-height: 1.8rem;
+      text-align: center;
+      overflow-wrap: break-word;
+      max-width: 100%;
     }
 
     #avatar-container { /* avatar.js rendert hier hinein */
@@ -180,6 +227,23 @@
       color: #ddd0b8;
     }
 
+    /* ── Wie erkennen (Themen-Theorie) ────────────────────── */
+    .wie-erkennen {
+      display: flex;
+      gap: .8rem;
+      align-items: flex-start;
+      background: rgba(15,212,200,.07);
+      border: 1px solid rgba(15,212,200,.18);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+    }
+    .wie-erkennen-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1.4; }
+    .wie-erkennen-text {
+      font-size: .88rem;
+      line-height: 1.6;
+      color: #b8ddd8;
+    }
+
     /* ── Start-Button ───────────────────────────────────────── */
     .start-btn {
       display: flex;
@@ -216,7 +280,8 @@
       color: var(--c-text);
       pointer-events: none;
       z-index: 999;
-      white-space: nowrap;
+      white-space: normal;
+      max-width: calc(100vw - 2rem);
       box-shadow: 0 4px 18px rgba(0,0,0,.55);
       opacity: 0;
       transform: translateY(4px);
@@ -232,6 +297,88 @@
       display: block;
       margin-bottom: .1rem;
     }
+
+    /* ── Quiz-Zurück-Button (sichtbar als Pill-Button) ─────── */
+    .back-link.quiz-zurueck {
+      color: var(--c-text);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 99px;
+      padding: .45rem .9rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .back-link.quiz-zurueck:hover {
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      border-color: rgba(255,255,255,.35);
+    }
+
+    /* ── Abbruch-Bestätigung Modal ──────────────────────────── */
+    #abbruch-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #abbruch-modal.sichtbar { display: flex; }
+    .abbruch-inhalt {
+      background: var(--c-card);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius);
+      padding: 1.8rem 1.5rem;
+      max-width: 340px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      text-align: center;
+    }
+    .abbruch-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+    .abbruch-sub {
+      font-size: .88rem;
+      color: var(--c-muted);
+      line-height: 1.55;
+    }
+    .abbruch-btns {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      margin-top: .5rem;
+    }
+    .abbruch-ja {
+      padding: .8rem;
+      border: none;
+      border-radius: 12px;
+      background: var(--c-accent1);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .abbruch-ja:hover { opacity: .85; }
+    .abbruch-nein {
+      padding: .8rem;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--c-text);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .abbruch-nein:hover { background: rgba(255,255,255,.06); }
 
     /* ── Fortschrittsleiste oben ────────────────────────────── */
     .fortschritt-leiste {
@@ -272,6 +419,9 @@
     <div id="avatar-container"></div>
   </div>
 
+  <!-- Herzen-Anzeige -->
+  <div class="herzen-anzeige" id="herzenAnzeige" aria-label="Herzen"></div>
+
   <!-- Inhaltskarte -->
   <div class="karte" id="theoriKarte">
 
@@ -289,10 +439,31 @@
       <span class="merkhilfe-text" id="merkhilfeText"></span>
     </div>
 
+    <div class="wie-erkennen" id="wieErkennenBlock" style="display:none">
+      <span class="wie-erkennen-icon">🔍</span>
+      <span class="wie-erkennen-text" id="wieErkennenText"></span>
+    </div>
+
     <button class="start-btn" id="startBtn">
       Los geht's! <span class="btn-arrow">→</span>
     </button>
 
+  </div>
+
+  <!-- Abbruch-Bestätigung -->
+  <div id="abbruch-modal" role="dialog" aria-modal="true" aria-labelledby="abbruchTitel">
+    <div class="abbruch-inhalt">
+      <p class="abbruch-text" id="abbruchTitel">
+        Möchtest du wirklich aufhören?
+      </p>
+      <p class="abbruch-sub">
+        Dein Fortschritt in dieser Runde geht verloren.
+      </p>
+      <div class="abbruch-btns">
+        <button class="abbruch-ja"  id="abbruchJa">Ja, aufhören</button>
+        <button class="abbruch-nein" id="abbruchNein">Weiter spielen</button>
+      </div>
+    </div>
   </div>
 
   <!-- Übersetzungs-Popup -->
@@ -301,18 +472,19 @@
     <span id="popupText"></span>
   </div>
 
-  <script src="js/storage.js"></script>
-  <script src="js/sound.js"></script>
-  <script src="js/xp.js"></script>
-  <script src="js/streak.js"></script>
-  <script src="js/avatar.js"></script>
-  <script src="js/achievements.js"></script>
-  <script src="js/quiz.js"></script>
+  <script src="js/storage.js?v=0.2"></script>
+  <script src="js/sound.js?v=0.2"></script>
+  <script src="js/xp.js?v=0.2"></script>
+  <script src="js/streak.js?v=0.2"></script>
+  <script src="js/avatar.js?v=0.2"></script>
+  <script src="js/achievements.js?v=0.2"></script>
+  <script src="js/quiz.js?v=0.2"></script>
   <script src="data/klasse1.js"></script>
   <script src="data/klasse2.js"></script>
   <script src="data/klasse3.js"></script>
   <script src="data/klasse4.js"></script>
   <script src="data/klasse5.js"></script>
+  <script src="data/themen.js"></script>
   <script>
     // ================================================================
     //  Beispiel-Fragen pro Welt (Fallback bis data/klasse*.js existiert)
@@ -729,12 +901,29 @@
     }
 
     // ================================================================
+    //  Fragen für ein Thema laden (Themen-Quiz-Modus)
+    // ================================================================
+    function fragenFuerThema(key) {
+      if (typeof THEMEN === 'undefined' || !THEMEN[key] || !THEMEN[key].fragen) return [];
+      const alle = [...THEMEN[key].fragen];
+      // Fisher-Yates mischen
+      for (let i = alle.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [alle[i], alle[j]] = [alle[j], alle[i]];
+      }
+      return alle;
+    }
+
+    // ================================================================
     //  URL-Parameter lesen (shared für beide Phasen)
     // ================================================================
     const params   = new URLSearchParams(window.location.search);
     const weltNr   = parseInt(params.get('welt') ?? '1', 10);
     const isDaily  = params.has('daily');
     const phase    = params.get('phase') ?? 'theorie';   // 'theorie' | 'quiz'
+    const modus    = params.get('modus') ?? '';           // '' | 'thema'
+    const themaKey = params.get('thema') ?? '';           // z. B. 'nomen', 'das-dass'
+    const istThemaQuiz = (modus === 'thema' && themaKey);
 
     // ================================================================
     //  Profil & Einstellungen laden (shared)
@@ -757,62 +946,134 @@
     //  Zurück-Link (shared)
     // ================================================================
     document.getElementById('backLink').textContent =
-      isDaily ? '← Zurück' : `← Welt ${weltNr}`;
+      istThemaQuiz ? '← Themen' : (isDaily ? '← Zurück' : `← Welt ${weltNr}`);
 
     // ================================================================
     //  QUIZ-PHASE: Engine starten → Theorie-Inhalt überspringen
     // ================================================================
     if (phase === 'quiz') {
+      // Themen-Quiz oder Welt-Quiz?
+      const themaLabel = themaKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       document.getElementById('themaBadge').textContent =
-        isDaily ? '⚡ Challenge · Quiz' : `Welt ${weltNr} · Quiz`;
-      document.title = `Deutsch Trainer – Quiz · Welt ${weltNr}`;
+        istThemaQuiz ? `📚 ${themaLabel}` : (isDaily ? '⚡ Challenge · Quiz' : `Welt ${weltNr} · Quiz`);
+      document.title = istThemaQuiz
+        ? `Deutsch Trainer – ${themaLabel}`
+        : `Deutsch Trainer – Quiz · Welt ${weltNr}`;
 
-      // Fragen aus echten Datendateien laden (Fallback: BEISPIEL_FRAGEN)
-      const fragen = fragenFuerWelt(weltNr);
-      quizStarten(fragen, { weltNr, containerId: 'theoriKarte' });
+      // Fragen laden: Thema-Modus oder Welt-Modus
+      const fragen = istThemaQuiz ? fragenFuerThema(themaKey) : fragenFuerWelt(weltNr);
+      const quizOptionen = { weltNr, containerId: 'theoriKarte' };
+      if (istThemaQuiz) quizOptionen.xpProAntwort = 5;
+      quizStarten(fragen, quizOptionen);
 
-      // Tap-to-Translate Popup im Quiz-Modus verstecken
-      const tp = document.getElementById('translate-popup');
-      if (tp) tp.style.display = 'none';
+      // ── Zurück-Button: Bestätigung vor Abbruch ────────────────
+      const _backLink   = document.getElementById('backLink');
+      const _modal      = document.getElementById('abbruch-modal');
+      const _btnJa      = document.getElementById('abbruchJa');
+      const _btnNein    = document.getElementById('abbruchNein');
+
+      _backLink.textContent = '← Zurück';
+      _backLink.classList.add('quiz-zurueck');
+
+      _backLink.addEventListener('click', e => {
+        e.preventDefault();
+        _modal.classList.add('sichtbar');
+        _btnJa.focus();
+      });
+
+      _btnJa.addEventListener('click', () => {
+        window.location.href = istThemaQuiz ? 'themen.html' : 'app.html';
+      });
+
+      _btnNein.addEventListener('click', () => {
+        _modal.classList.remove('sichtbar');
+        _backLink.focus();
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && _modal.classList.contains('sichtbar')) {
+          _modal.classList.remove('sichtbar');
+        }
+      });
 
     } else {
       // ================================================================
       //  THEORIE-PHASE: Inhalt aufbauen
       // ================================================================
-      const inhalt = THEORIE_INHALTE[weltNr] ?? THEORIE_INHALTE[1];
 
-      document.getElementById('themaBadge').textContent =
-        isDaily ? '⚡ Tägliche Challenge' : `Welt ${weltNr} · Theorie`;
-      document.title = `Deutsch Trainer – ${inhalt.titel}`;
+      if (istThemaQuiz) {
+        // ── Themen-Theorie ──────────────────────────────────────
+        const themaObj = (typeof THEMEN !== 'undefined' && THEMEN[themaKey]) ? THEMEN[themaKey] : null;
+        const theorie  = themaObj ? themaObj.theorie : null;
 
-      // ── Erklärungstext aufbauen ───────────────────────────────
-      function wortZuElement(wort) {
-        if (!tapModus) return document.createTextNode(wort.de + ' ');
-        const span = document.createElement('span');
-        span.className   = 'wort';
-        span.tabIndex    = 0;
-        span.dataset.de  = wort.de;
-        span.dataset.fa  = wort.fa;
-        span.dataset.tr  = wort.tr;
-        span.dataset.ar  = wort.ar;
-        span.textContent = wort.de + ' ';
-        return span;
-      }
+        if (!theorie) {
+          // Fallback: direkt zum Quiz
+          window.location.href = `quiz.html?modus=thema&thema=${encodeURIComponent(themaKey)}&phase=quiz`;
+        } else {
+          const themaLabel = themaKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          document.getElementById('themaBadge').textContent = `📚 ${themaLabel} · Theorie`;
+          document.title  = `Deutsch Trainer – ${theorie.titel}`;
+          document.getElementById('theorieTitel').textContent = theorie.titel;
 
-      function erklaerungAufbauen(container, woerter) {
-        container.innerHTML = '';
-        woerter.forEach(eintrag => {
-          if (eintrag === null) { container.appendChild(document.createElement('br')); return; }
-          container.appendChild(wortZuElement(eintrag));
-        });
-      }
-      erklaerungAufbauen(document.getElementById('erklaerungText'), inhalt.erklaerung);
+          // Erklärung (plain text)
+          document.getElementById('erklaerungText').textContent = theorie.erklaerung;
 
-      // ── Beispiel-Satz aufbauen ────────────────────────────────
-      function beispielAufbauen(container, beispiel) {
-        if (!tapModus) { container.innerHTML = beispiel.satz; return; }
-        container.innerHTML = '';
-        beispiel.tapWoerter.forEach(wort => {
+          // Beispiel (HTML mit Highlights)
+          document.getElementById('beispielSatz').innerHTML = theorie.beispiel;
+
+          // Satz-Übersetzungs-Button unter dem Beispielsatz
+          if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
+            const beispielBlock = document.querySelector('.beispiel-block');
+            if (beispielBlock) {
+              beispielBlock.appendChild(
+                _uebersetzerBlock(
+                  () => document.getElementById('beispielSatz').textContent.trim(),
+                  zielSprache
+                )
+              );
+            }
+          }
+
+          // Merkhilfe
+          document.getElementById('merkhilfeText').textContent = theorie.merkhilfe;
+
+          // Wie erkennen (nur bei Themen-Theorie)
+          const wieBlock = document.getElementById('wieErkennenBlock');
+          wieBlock.style.display = 'flex';
+          document.getElementById('wieErkennenText').textContent = theorie.wie_erkennen;
+
+          // Übersetzungs-Button für Erklärung
+          if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
+            const erklaerungEl = document.getElementById('erklaerungText');
+            erklaerungEl.parentNode.insertBefore(
+              _uebersetzerBlock(() => erklaerungEl.textContent.trim(), zielSprache),
+              erklaerungEl.nextSibling
+            );
+          }
+
+          document.getElementById('fortschrittFill').style.width = '5%';
+
+          // "Los geht's!"-Button → zum Quiz
+          document.getElementById('startBtn').addEventListener('click', () => {
+            avatarEmotion('happy');
+            setTimeout(() => {
+              window.location.href = `quiz.html?modus=thema&thema=${encodeURIComponent(themaKey)}&phase=quiz`;
+            }, 400);
+          });
+        }
+
+      } else {
+        // ── Welten-Theorie (bestehend) ────────────────────────────
+        const inhalt = THEORIE_INHALTE[weltNr] ?? THEORIE_INHALTE[1];
+
+        document.getElementById('themaBadge').textContent =
+          isDaily ? '⚡ Tägliche Challenge' : `Welt ${weltNr} · Theorie`;
+        document.title = `Deutsch Trainer – ${inhalt.titel}`;
+        document.getElementById('theorieTitel').textContent = inhalt.titel;
+
+        // ── Erklärungstext aufbauen ───────────────────────────────
+        function wortZuElement(wort) {
+          if (!tapModus) return document.createTextNode(wort.de + ' ');
           const span = document.createElement('span');
           span.className   = 'wort';
           span.tabIndex    = 0;
@@ -820,68 +1081,110 @@
           span.dataset.fa  = wort.fa;
           span.dataset.tr  = wort.tr;
           span.dataset.ar  = wort.ar;
-          if (beispiel.satz.includes(`<span class="highlight">${wort.de}</span>`)) {
-            span.classList.add('highlight');
-          }
           span.textContent = wort.de + ' ';
-          container.appendChild(span);
+          return span;
+        }
+
+        function erklaerungAufbauen(container, woerter) {
+          container.innerHTML = '';
+          woerter.forEach(eintrag => {
+            if (eintrag === null) { container.appendChild(document.createElement('br')); return; }
+            container.appendChild(wortZuElement(eintrag));
+          });
+        }
+        erklaerungAufbauen(document.getElementById('erklaerungText'), inhalt.erklaerung);
+
+        // ── Beispiel-Satz aufbauen ────────────────────────────────
+        function beispielAufbauen(container, beispiel) {
+          if (!tapModus) { container.innerHTML = beispiel.satz; return; }
+          container.innerHTML = '';
+          beispiel.tapWoerter.forEach(wort => {
+            const span = document.createElement('span');
+            span.className   = 'wort';
+            span.tabIndex    = 0;
+            span.dataset.de  = wort.de;
+            span.dataset.fa  = wort.fa;
+            span.dataset.tr  = wort.tr;
+            span.dataset.ar  = wort.ar;
+            if (beispiel.satz.includes(`<span class="highlight">${wort.de}</span>`)) {
+              span.classList.add('highlight');
+            }
+            span.textContent = wort.de + ' ';
+            container.appendChild(span);
+          });
+        }
+        beispielAufbauen(document.getElementById('beispielSatz'), inhalt.beispiel);
+
+        // ── Satz-Übersetzungs-Button unter dem Beispielsatz ──────
+        if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
+          const beispielBlock = document.querySelector('.beispiel-block');
+          if (beispielBlock) {
+            beispielBlock.appendChild(
+              _uebersetzerBlock(
+                () => document.getElementById('beispielSatz').textContent.trim(),
+                zielSprache
+              )
+            );
+          }
+        }
+
+        // ── Merkhilfe & Fortschrittsleiste ───────────────────────
+        document.getElementById('merkhilfeText').textContent = inhalt.merkhilfe;
+        document.getElementById('fortschrittFill').style.width = '5%';
+
+        // ── Tap-to-Translate Popup ────────────────────────────────
+        const popup     = document.getElementById('translate-popup');
+        const popupText = document.getElementById('popupText');
+        const popupSpr  = document.getElementById('popupSprache');
+        let   popupTimer = null;
+
+        function popupZeigen(span, x, y) {
+          const anzeigeSprache = zielSprache === 'de' ? 'fa' : zielSprache;
+          popupText.textContent = span.dataset[anzeigeSprache] || span.dataset.fa || '–';
+          popupSpr.textContent  = SPRACH_LABEL[anzeigeSprache] ?? anzeigeSprache;
+          popup.style.left = Math.min(x, window.innerWidth - 160) + 'px';
+          popup.style.top  = (y - 52) + 'px';
+          popup.classList.add('sichtbar');
+          span.classList.add('active');
+          if (popupTimer) clearTimeout(popupTimer);
+          popupTimer = setTimeout(() => {
+            popup.classList.remove('sichtbar');
+            span.classList.remove('active');
+            popupTimer = null;
+          }, 2000);
+        }
+
+        if (tapModus) {
+          document.body.addEventListener('click', e => {
+            const span = e.target.closest('span.wort');
+            if (span) popupZeigen(span, e.clientX, e.clientY);
+          });
+          document.body.addEventListener('keydown', e => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const span = e.target.closest('span.wort');
+            if (!span) return;
+            const r = span.getBoundingClientRect();
+            popupZeigen(span, r.left + r.width / 2, r.top);
+          });
+        }
+
+        // ── "Los geht's!"-Button ──────────────────────────────────
+        document.getElementById('startBtn').addEventListener('click', () => {
+          avatarEmotion('happy');
+          setTimeout(() => {
+            window.location.href = isDaily
+              ? 'quiz.html?daily=1&phase=quiz'
+              : `quiz.html?welt=${weltNr}&phase=quiz`;
+          }, 400);
         });
-      }
-      beispielAufbauen(document.getElementById('beispielSatz'), inhalt.beispiel);
-
-      // ── Merkhilfe & Fortschrittsleiste ───────────────────────
-      document.getElementById('merkhilfeText').textContent = inhalt.merkhilfe;
-      document.getElementById('fortschrittFill').style.width = '5%';
-
-      // ── Tap-to-Translate Popup ────────────────────────────────
-      const popup     = document.getElementById('translate-popup');
-      const popupText = document.getElementById('popupText');
-      const popupSpr  = document.getElementById('popupSprache');
-      let   popupTimer = null;
-
-      function popupZeigen(span, x, y) {
-        const anzeigeSprache = zielSprache === 'de' ? 'fa' : zielSprache;
-        popupText.textContent = span.dataset[anzeigeSprache] || span.dataset.fa || '–';
-        popupSpr.textContent  = SPRACH_LABEL[anzeigeSprache] ?? anzeigeSprache;
-        popup.style.left = Math.min(x, window.innerWidth - 160) + 'px';
-        popup.style.top  = (y - 52) + 'px';
-        popup.classList.add('sichtbar');
-        span.classList.add('active');
-        if (popupTimer) clearTimeout(popupTimer);
-        popupTimer = setTimeout(() => {
-          popup.classList.remove('sichtbar');
-          span.classList.remove('active');
-          popupTimer = null;
-        }, 2000);
-      }
-
-      if (tapModus) {
-        document.body.addEventListener('click', e => {
-          const span = e.target.closest('span.wort');
-          if (span) popupZeigen(span, e.clientX, e.clientY);
-        });
-        document.body.addEventListener('keydown', e => {
-          if (e.key !== 'Enter' && e.key !== ' ') return;
-          const span = e.target.closest('span.wort');
-          if (!span) return;
-          const r = span.getBoundingClientRect();
-          popupZeigen(span, r.left + r.width / 2, r.top);
-        });
-      }
-
-      // ── "Los geht's!"-Button ──────────────────────────────────
-      document.getElementById('startBtn').addEventListener('click', () => {
-        avatarEmotion('happy');
-        setTimeout(() => {
-          window.location.href = isDaily
-            ? 'quiz.html?daily=1&phase=quiz'
-            : `quiz.html?welt=${weltNr}&phase=quiz`;
-        }, 400);
-      });
+      } // end Welten-Theorie
     } // end else (theorie)
 
     // Sound-Toggle initialisieren
     soundToggleInit('soundToggleBtn');
+
+    // Herzen-Anzeige initialisieren
+    if (typeof herzAnzeigenAktualisieren === 'function') herzAnzeigenAktualisieren();
   </script>
 </body>
 </html>

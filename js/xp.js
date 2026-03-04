@@ -17,8 +17,9 @@ const XP_TABELLE = [
   8000,  // Level 8
 ];
 
-const MAX_LEVEL   = XP_TABELLE.length;   // 8
-const MAX_HERZEN  = 5;
+const MAX_LEVEL          = XP_TABELLE.length;   // 8
+const MAX_HERZEN         = 6;    // Start-Herzen pro Tag
+const MAX_HERZEN_ABSOLUT = 10;   // Maximum durch Streak-Bonus
 
 // ── XP-Konstanten pro Aktion ───────────────────────────────
 const XP_AKTION = {
@@ -187,6 +188,30 @@ function herzenResetten() {
 }
 
 /**
+ * Gibt ein Herz als Streak-Bonus dazu (max MAX_HERZEN_ABSOLUT).
+ *
+ * @returns {{
+ *   herzVorher:    number,
+ *   herzNachher:   number,
+ *   hinzugefuegt:  boolean   // false wenn bereits bei Maximum
+ * }}
+ */
+function herzHinzufuegen() {
+  const spieler   = spielerLaden();
+  const herzVorher = spieler.hearts;
+
+  if (herzVorher >= MAX_HERZEN_ABSOLUT) {
+    return { herzVorher, herzNachher: herzVorher, hinzugefuegt: false };
+  }
+
+  const herzNachher = herzVorher + 1;
+  spielerSpeichern({ hearts: herzNachher });
+  console.info(`[xp] Streak-Bonus: +1 Herz (${herzVorher} → ${herzNachher})`);
+
+  return { herzVorher, herzNachher, hinzugefuegt: true };
+}
+
+/**
  * Zieht ein Herz ab. Bei 0 Herzen: gibt { verloren: true } zurück.
  * Löst kein automatisches Reset aus – das übernimmt herzenPruefen().
  *
@@ -226,6 +251,7 @@ if (typeof module !== 'undefined' && module.exports) {
     XP_TABELLE,
     MAX_LEVEL,
     MAX_HERZEN,
+    MAX_HERZEN_ABSOLUT,
     levelBerechnen,
     xpFuerNaechstesLevel,
     xpFortschrittProzent,
@@ -234,5 +260,6 @@ if (typeof module !== 'undefined' && module.exports) {
     herzenPruefen,
     herzenResetten,
     herzVerlieren,
+    herzHinzufuegen,
   };
 }

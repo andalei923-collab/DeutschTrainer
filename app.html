@@ -24,6 +24,8 @@
 
     body {
       min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
       background: var(--c-bg);
       background-image:
         radial-gradient(ellipse at 15% 0%,   #1e0a3c 0%, transparent 50%),
@@ -86,7 +88,7 @@
     }
 
     .level-label {
-      font-size: .68rem;
+      font-size: .72rem;
       color: var(--c-purple);
       font-weight: 700;
       letter-spacing: .06em;
@@ -121,9 +123,10 @@
       background: var(--c-surface);
       border: 1px solid rgba(255,255,255,.08);
       border-radius: 99px;
-      padding: .3rem .65rem;
+      padding: .4rem .65rem;
       font-size: .9rem;
       font-weight: 700;
+      min-height: 36px;
     }
     .stat-chip.hearts { color: #ff6b8a; }
     .stat-chip.streak { color: var(--c-accent2); }
@@ -133,8 +136,13 @@
       border: 1px solid rgba(255,255,255,.12);
       border-radius: 99px;
       color: var(--c-muted);
-      font-size: 1.05rem;
-      padding: .28rem .55rem;
+      font-size: 1.1rem;
+      padding: .4rem .65rem;
+      min-width: 40px;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       transition: color .15s, border-color .15s;
     }
@@ -160,7 +168,7 @@
       font-weight: 800;
     }
     .xp-total {
-      font-size: .8rem;
+      font-size: .82rem;
       color: var(--c-muted);
     }
     .xp-total strong { color: var(--c-accent2); }
@@ -182,7 +190,7 @@
     .daily-icon { font-size: 1.8rem; flex-shrink: 0; }
     .daily-text { flex: 1; }
     .daily-title {
-      font-size: .8rem;
+      font-size: .82rem;
       font-weight: 700;
       letter-spacing: .08em;
       text-transform: uppercase;
@@ -194,7 +202,7 @@
       margin-top: .15rem;
     }
     .daily-badge {
-      font-size: .72rem;
+      font-size: .75rem;
       font-weight: 700;
       background: var(--c-accent3);
       color: #000;
@@ -249,7 +257,7 @@
 
     .welt-info { flex: 1; }
     .welt-nummer {
-      font-size: .7rem;
+      font-size: .72rem;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
@@ -261,7 +269,7 @@
       margin-top: .1rem;
     }
     .welt-sub {
-      font-size: .78rem;
+      font-size: .8rem;
       opacity: .7;
       margin-top: .15rem;
     }
@@ -308,15 +316,15 @@
       transition: width .6s;
     }
     .prog-label {
-      font-size: .72rem;
+      font-size: .75rem;
       color: rgba(255,255,255,.55);
       white-space: nowrap;
     }
     .test-badge {
-      font-size: .68rem;
+      font-size: .72rem;
       font-weight: 700;
       border-radius: 99px;
-      padding: .15rem .5rem;
+      padding: .2rem .55rem;
       white-space: nowrap;
     }
     .test-badge.passed {
@@ -344,6 +352,28 @@
     .welt-5 .welt-head { background: linear-gradient(135deg, #3a2a00, #503a00); }
     .welt-5 .prog-fill { background: #facc15; }
 
+    /* ── Zurück-Button (identisch mit Quiz) ─────────────────── */
+    .zurueck-link {
+      display: inline-flex;
+      align-items: center;
+      color: var(--c-text);
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 600;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 99px;
+      padding: .45rem .9rem;
+      min-height: 44px;
+      margin-bottom: 1rem;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .zurueck-link:hover {
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      border-color: rgba(255,255,255,.35);
+    }
+
     /* ── Bottom-Nav ─────────────────────────────────────────── */
     .bottom-nav {
       position: fixed;
@@ -366,7 +396,7 @@
       gap: .2rem;
       text-decoration: none;
       color: var(--c-muted);
-      font-size: .68rem;
+      font-size: .7rem;
       font-weight: 600;
       letter-spacing: .04em;
       transition: color .15s;
@@ -374,6 +404,66 @@
     .nav-item .nav-icon { font-size: 1.4rem; line-height: 1; }
     .nav-item.active { color: var(--c-accent3); }
     .nav-item:hover  { color: var(--c-text); }
+
+    /* ── Tooltip Tour ────────────────────────────────────────── */
+    #tour-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.62);
+      z-index: 800;
+      pointer-events: none;
+    }
+    .tour-highlight {
+      outline: 3px solid var(--c-accent3) !important;
+      outline-offset: 4px;
+    }
+    .topbar.tour-z { z-index: 803 !important; }
+
+    #tour-tip {
+      position: fixed;
+      background: #16213e;
+      border: 1.5px solid var(--c-purple);
+      border-radius: 14px;
+      padding: .9rem 1.1rem;
+      width: 248px;
+      max-width: calc(100vw - 2rem);
+      z-index: 804;
+      box-shadow: 0 8px 32px rgba(0,0,0,.55);
+    }
+    @keyframes tour-ein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    #tour-tip { animation: tour-ein .2s ease; }
+
+    .tour-tip-text {
+      font-size: .9rem; font-weight: 600;
+      color: var(--c-text); line-height: 1.5;
+      margin-bottom: .75rem;
+    }
+    .tour-tip-fuss {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .tour-zaehler { font-size: .75rem; color: var(--c-muted); }
+    .tour-weiter-btn {
+      padding: .5rem .9rem; border: none;
+      border-radius: 99px; background: var(--c-purple);
+      color: #fff; font-size: .85rem; font-weight: 700;
+      cursor: pointer; min-height: 44px;
+      display: inline-flex; align-items: center;
+      transition: opacity .15s;
+    }
+    .tour-weiter-btn:hover { opacity: .85; }
+    .tour-pfeil {
+      position: absolute;
+      width: 0; height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+    }
+    .tour-pfeil.oben {
+      top: -8px;
+      border-bottom: 8px solid var(--c-purple);
+    }
+    .tour-pfeil.unten {
+      bottom: -8px;
+      border-top: 8px solid var(--c-purple);
+    }
   </style>
 </head>
 <body>
@@ -400,6 +490,8 @@
   <!-- ── Haupt-Content ─────────────────────────────────────── -->
   <main class="main">
 
+    <a href="index.html" class="zurueck-link">← Zurück</a>
+
     <div class="section-header">
       <h1 class="section-title">Deine Welten 🗺️</h1>
       <span class="xp-total"><strong id="xpTotal">0</strong> XP gesamt</span>
@@ -425,6 +517,9 @@
     <a href="app.html"         class="nav-item active">
       <span class="nav-icon">🗺️</span>Welten
     </a>
+    <a href="themen.html"      class="nav-item">
+      <span class="nav-icon">📚</span>Themen
+    </a>
     <a href="profile.html"    class="nav-item">
       <span class="nav-icon">👤</span>Profil
     </a>
@@ -433,9 +528,9 @@
     </a>
   </nav>
 
-  <script src="js/storage.js"></script>
-  <script src="js/sound.js"></script>
-  <script src="js/xp.js"></script>
+  <script src="js/storage.js?v=0.2"></script>
+  <script src="js/sound.js?v=0.2"></script>
+  <script src="js/xp.js?v=0.2"></script>
   <script>
     // ── Konstanten ────────────────────────────────────────────
     const AVATAR_MAP = {
@@ -580,6 +675,117 @@
       renderWelten(fortschritt);
       renderDaily();
       soundToggleInit('soundToggleBtn');
+    })();
+
+    // ── Tooltip Tour ──────────────────────────────────────────
+    (function() {
+      if (localStorage.getItem('dt_tutorial') !== 'tour') return;
+
+      const SCHRITTE = [
+        { sel: '#avatarBubble',     text: 'Das bist du! Passe deinen Avatar an 🐾' },
+        { sel: '.xp-track',         text: 'Hier siehst du deine Erfahrungspunkte ⭐' },
+        { sel: '.stat-chip.hearts', text: 'Deine Herzen – pass gut auf sie auf! ❤️' },
+        { sel: '.stat-chip.streak', text: 'Spiele täglich für deinen Streak! 🔥' },
+        { sel: '.welt-card',        text: 'Hier startest du – klicke auf Welt 1! 🌍' },
+      ];
+
+      let schritt = 0;
+      let vorherigesZiel = null;
+      const topbar = document.querySelector('.topbar');
+
+      const overlay = document.createElement('div');
+      overlay.id = 'tour-overlay';
+      document.body.appendChild(overlay);
+
+      const tip = document.createElement('div');
+      tip.id = 'tour-tip';
+      document.body.appendChild(tip);
+
+      function aufraeuemen() {
+        if (vorherigesZiel) {
+          vorherigesZiel.classList.remove('tour-highlight');
+          vorherigesZiel.style.removeProperty('z-index');
+          vorherigesZiel.style.removeProperty('position');
+          vorherigesZiel = null;
+        }
+        topbar?.classList.remove('tour-z');
+      }
+
+      function beenden() {
+        localStorage.setItem('dt_tutorial', 'done');
+        aufraeuemen();
+        overlay.remove();
+        tip.remove();
+      }
+
+      function zeige(i) {
+        aufraeuemen();
+        tip.style.animation = 'none';
+
+        const s    = SCHRITTE[i];
+        const ziel = document.querySelector(s.sel);
+        if (!ziel) { beenden(); return; }
+
+        // Highlight
+        ziel.classList.add('tour-highlight');
+        vorherigesZiel = ziel;
+
+        // Z-Index: Topbar-Elemente → Topbar heben; sonst Element selbst
+        if (ziel.closest('.topbar')) {
+          topbar.classList.add('tour-z');
+        } else {
+          if (getComputedStyle(ziel).position === 'static') {
+            ziel.style.position = 'relative';
+          }
+          ziel.style.zIndex = '802';
+          ziel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        const letzt = i === SCHRITTE.length - 1;
+
+        tip.innerHTML = `
+          <div class="tour-pfeil oben" id="tourPfeil"></div>
+          <p class="tour-tip-text">${s.text}</p>
+          <div class="tour-tip-fuss">
+            <span class="tour-zaehler">${i + 1} / ${SCHRITTE.length}</span>
+            <button class="tour-weiter-btn">${letzt ? 'Tutorial beenden ✓' : 'Weiter →'}</button>
+          </div>`;
+
+        tip.querySelector('.tour-weiter-btn')
+          .addEventListener('click', () => {
+            if (letzt) beenden();
+            else        zeige(++schritt);
+          });
+
+        // Positionierung (nach kurzem Delay für scrollIntoView)
+        requestAnimationFrame(() => {
+          tip.style.animation = '';
+          const rect  = ziel.getBoundingClientRect();
+          const tipW  = 248;
+          const tipH  = tip.offsetHeight || 110;
+          const left  = Math.max(12, Math.min(rect.left, window.innerWidth - tipW - 12));
+          const pfeil = tip.querySelector('#tourPfeil');
+
+          // Pfeilo-Offset zentriert über dem Ziel-Element
+          const pfeilLinks = Math.max(12, Math.min(
+            rect.left + rect.width / 2 - left - 7, tipW - 22
+          ));
+
+          if (rect.bottom + tipH + 20 < window.innerHeight) {
+            // Tooltip unter dem Element
+            tip.style.top  = (rect.bottom + 12) + 'px';
+            if (pfeil) { pfeil.className = 'tour-pfeil oben'; pfeil.style.left = pfeilLinks + 'px'; }
+          } else {
+            // Tooltip über dem Element
+            tip.style.top  = (rect.top - tipH - 16) + 'px';
+            if (pfeil) { pfeil.className = 'tour-pfeil unten'; pfeil.style.left = pfeilLinks + 'px'; }
+          }
+          tip.style.left = left + 'px';
+        });
+      }
+
+      // Kurz warten bis renderWelten() fertig ist
+      setTimeout(() => zeige(0), 650);
     })();
   </script>
 </body>
