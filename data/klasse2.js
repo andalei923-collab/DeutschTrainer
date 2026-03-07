@@ -571,7 +571,7 @@ const KLASSE2 = {
           '  2. Schraubenmutter (Metallring zum Befestigen)\n\n' +
           '• Kiefer:\n' +
           '  1. Kieferknochen (Teil des Gesichts)\n' +
-          '  2. Koniferenbaum (der Kiefer-Baum)\n\n' +
+          '  2. Nadelbaum (die Kiefer)\n\n' +
           '• Leiter:\n' +
           '  1. Steigleiter (Gerät zum Klettern)\n' +
           '  2. Anführer/Chef (der Leiter einer Gruppe)',

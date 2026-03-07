@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deutsch Trainer – Profil</title>
-  <link rel="stylesheet" href="css/avatar.css?v=0.2" />
+  <link rel="stylesheet" href="css/avatar.css?v=0.3" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -206,6 +206,72 @@
       margin-bottom: .75rem;
     }
 
+    /* ── Accessoire-Grid ──────────────────────────────────── */
+    .acc-kategorie { margin-bottom: .5rem; }
+
+    .acc-kategorie-titel {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--c-accent3);
+      margin-bottom: .45rem;
+    }
+
+    .acc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: .5rem;
+    }
+
+    .acc-item {
+      background: var(--c-card);
+      border: 1.5px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      padding: .7rem .4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+      text-align: center;
+      cursor: default;
+      transition: border-color .15s, background .15s;
+    }
+
+    .acc-item.frei {
+      cursor: pointer;
+      border-color: rgba(168,85,247,.25);
+    }
+    .acc-item.frei:hover {
+      background: rgba(168,85,247,.08);
+    }
+
+    .acc-item.aktiv {
+      border-color: var(--c-accent3);
+      background: rgba(15,212,200,.08);
+    }
+
+    .acc-item-emoji {
+      font-size: 1.8rem;
+      line-height: 1;
+      filter: grayscale(1) opacity(.25);
+    }
+    .acc-item.frei .acc-item-emoji { filter: none; }
+
+    .acc-item-name {
+      font-size: .68rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .acc-item:not(.frei) .acc-item-name { color: var(--c-muted); }
+
+    .acc-item-hinweis {
+      font-size: .58rem;
+      color: var(--c-muted);
+      line-height: 1.3;
+    }
+    .acc-item.frei .acc-item-hinweis { display: none; }
+
     /* ── Achievements-Grid ──────────────────────────────────── */
     .ach-grid {
       display: grid;
@@ -295,7 +361,10 @@
   <!-- ── Top-Bar ──────────────────────────────────────────── -->
   <header class="topbar">
     <span class="topbar-title">👤 Profil</span>
-    <a href="index.html" class="edit-btn">✏️ Ändern</a>
+    <div style="display:flex;gap:.5rem;align-items:center">
+      <button class="hilfe-btn" title="Tutorial / Hilfe" onclick="tutorialAnzeigen()">?</button>
+      <a href="index.html" class="edit-btn">✏️ Ändern</a>
+    </div>
   </header>
 
   <!-- ── Haupt-Content ─────────────────────────────────────── -->
@@ -339,6 +408,14 @@
       </div>
     </div>
 
+    <!-- Accessoires -->
+    <section>
+      <div class="section-label">Accessoires</div>
+      <div id="accContainer">
+        <!-- wird per JS befuellt -->
+      </div>
+    </section>
+
     <!-- Abzeichen -->
     <section>
       <div class="section-label">Abzeichen</div>
@@ -365,10 +442,12 @@
     </a>
   </nav>
 
-  <script src="js/storage.js?v=0.2"></script>
-  <script src="js/xp.js?v=0.2"></script>
-  <script src="js/avatar.js?v=0.2"></script>
-  <script src="js/achievements.js?v=0.2"></script>
+  <script src="js/storage.js?v=0.3"></script>
+  <script src="js/xp.js?v=0.3"></script>
+  <script src="js/avatar.js?v=0.3"></script>
+  <script src="js/accessoires.js?v=0.3"></script>
+  <script src="js/achievements.js?v=0.3"></script>
+  <script src="js/tutorial.js?v=0.4"></script>
   <script>
     // XP-Tabelle (identisch mit xp.js)
     const XP_TAB = [0, 200, 500, 1000, 2000, 3500, 5500, 8000];
@@ -392,6 +471,7 @@
         containerId:  'avatar-container',
         groesse:      'avatar-lg',
         startEmotion: 'cool',
+        badge:        spieler.badge,
       });
 
       document.getElementById('profilName').textContent  = spieler.name;
@@ -431,9 +511,73 @@
       });
     }
 
+    // ── Accessoires rendern ────────────────────────────────────
+    function renderAccessoires() {
+      const container   = document.getElementById('accContainer');
+      const spieler     = spielerLaden();
+      const freiListe   = accessoiresFreigeschaltet();
+      const kategorien  = [
+        { typ: 'hut',    titel: 'Huete',    feld: 'hat' },
+        { typ: 'brille', titel: 'Brillen',  feld: 'glasses' },
+        { typ: 'badge',  titel: 'Badges',   feld: 'badge' },
+      ];
+
+      container.innerHTML = '';
+
+      kategorien.forEach(kat => {
+        const items = accessoireNachTyp(kat.typ);
+        if (items.length === 0) return;
+
+        const katDiv = document.createElement('div');
+        katDiv.className = 'acc-kategorie';
+        katDiv.innerHTML = `<div class="acc-kategorie-titel">${kat.titel}</div>`;
+
+        const grid = document.createElement('div');
+        grid.className = 'acc-grid';
+
+        items.forEach(acc => {
+          const istFrei = freiListe.includes(acc.id);
+          const istAktiv = spieler[kat.feld] === acc.id;
+
+          const div = document.createElement('div');
+          div.className = 'acc-item'
+            + (istFrei  ? ' frei'  : '')
+            + (istAktiv ? ' aktiv' : '');
+
+          div.innerHTML = `
+            <span class="acc-item-emoji">${acc.emoji}</span>
+            <span class="acc-item-name">${acc.name}</span>
+            <span class="acc-item-hinweis">${acc.hinweis}</span>`;
+
+          if (istFrei) {
+            div.addEventListener('click', () => {
+              // Toggle: nochmal klicken = abwaehlen
+              const neuerWert = istAktiv ? null : acc.id;
+              spielerSpeichern({ [kat.feld]: neuerWert });
+              renderProfil();
+              renderAccessoires();
+            });
+          }
+
+          grid.appendChild(div);
+        });
+
+        katDiv.appendChild(grid);
+        container.appendChild(katDiv);
+      });
+    }
+
+    // ── Freischaltungs-Check ────────────────────────────────────
+    function accessoiresFreischaltungPruefen() {
+      const neueAcc = neuFreigeschalteteAccessoires();
+      neueAcc.forEach(acc => accessoireFreischaltungAnzeigen(acc));
+    }
+
     // ── Initialisierung ────────────────────────────────────────
     renderProfil();
+    renderAccessoires();
     renderAchievements();
+    accessoiresFreischaltungPruefen();
   </script>
 
 </body>

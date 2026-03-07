@@ -3,7 +3,7 @@
 //  Deutsch Trainer
 // ============================================================
 
-const APP_VERSION = '0.2';
+const APP_VERSION = '0.3';
 
 const KEYS = {
   SPIELER:        'dt_spieler',
@@ -23,6 +23,7 @@ const SPIELER_DEFAULT = {
   avatar:         'default',
   hat:            null,
   glasses:        null,
+  badge:          null,
   xp:             0,
   level:          1,
   streak:         0,
@@ -33,12 +34,14 @@ const SPIELER_DEFAULT = {
   sprachModus:    'normal',   // "normal" | "einfach" | "tap"
 };
 
-// 5 Welten (Index 0 = Welt 1 … Index 4 = Welt 5)
+// 5 Welten mit je 5 Unterwelten + Boss
 const FORTSCHRITT_DEFAULT = Array.from({ length: 5 }, (_, i) => ({
-  unlocked:   i === 0,   // nur Welt 1 ist von Anfang an freigeschaltet
-  completed:  false,
-  testPassed: false,
-  stars:      0,         // 0 – 3
+  unlocked:     i === 0,   // nur Welt 1 ist von Anfang an freigeschaltet
+  bossDefeated: false,
+  subwelten:    Array.from({ length: 5 }, () => ({
+    completed: false,
+    stars:     0,          // 0 – 3
+  })),
 }));
 
 const ACHIEVEMENTS_DEFAULT = [];
@@ -105,21 +108,34 @@ function spielerSpeichern(data) {
 }
 
 // ============================================================
-//  Lernfortschritt (5 Welten)
+//  Lernfortschritt (5 Welten × 5 Unterwelten + Boss)
 // ============================================================
 
 /**
- * Lädt den Fortschritt aller 5 Welten.
- * @returns {Array<{unlocked, completed, testPassed, stars}>}
+ * Lädt den Fortschritt aller 5 Welten mit Unterwelten.
+ * @returns {Array<{unlocked, bossDefeated, subwelten}>}
  */
 function fortschrittLaden() {
   const gespeichert = _laden(KEYS.FORTSCHRITT, FORTSCHRITT_DEFAULT);
 
-  // Sicherstellen, dass immer genau 5 Einträge vorhanden sind
-  return FORTSCHRITT_DEFAULT.map((def, i) => ({
-    ...def,
-    ...(gespeichert[i] ?? {}),
-  }));
+  // Altes Format erkennen (hat testPassed statt subwelten)
+  if (Array.isArray(gespeichert) && gespeichert.length > 0 &&
+      gespeichert[0].testPassed !== undefined && !gespeichert[0].subwelten) {
+    return structuredClone(FORTSCHRITT_DEFAULT);
+  }
+
+  // Neue Struktur mit Subwelten sicherstellen
+  return FORTSCHRITT_DEFAULT.map((def, i) => {
+    const saved = gespeichert[i] ?? {};
+    return {
+      unlocked:     saved.unlocked ?? def.unlocked,
+      bossDefeated: saved.bossDefeated ?? def.bossDefeated,
+      subwelten:    def.subwelten.map((subDef, j) => ({
+        ...subDef,
+        ...(saved.subwelten?.[j] ?? {}),
+      })),
+    };
+  });
 }
 
 /**
@@ -230,6 +246,33 @@ function migrieren() {
       if ((spieler.hearts ?? 0) < 6) {
         spielerSpeichern({ hearts: 6 });
         console.info('[storage] Migration 0.2: hearts auf 6 angehoben.');
+      }
+    }
+
+    // ── Migration → v0.3 ─────────────────────────────────────
+    // Weltsystem-Umbau: altes Flat-Format → Subwelten-Struktur
+    if (!gespeicherteVersion || gespeicherteVersion < '0.3') {
+      const raw = localStorage.getItem(KEYS.FORTSCHRITT);
+      if (raw) {
+        try {
+          const alt = JSON.parse(raw);
+          if (Array.isArray(alt) && alt.length > 0 &&
+              alt[0].testPassed !== undefined && !alt[0].subwelten) {
+            const neu = FORTSCHRITT_DEFAULT.map((def, i) => {
+              const altW = alt[i] ?? {};
+              return {
+                unlocked:     altW.unlocked ?? def.unlocked,
+                bossDefeated: altW.testPassed ?? false,
+                subwelten:    def.subwelten.map(() => ({
+                  completed: altW.completed ?? false,
+                  stars:     altW.completed ? (altW.stars ?? 0) : 0,
+                })),
+              };
+            });
+            _speichern(KEYS.FORTSCHRITT, neu);
+            console.info('[storage] Migration 0.3: Altes Weltsystem → Subwelten');
+          }
+        } catch { /* Fehlerhafte Daten ignorieren */ }
       }
     }
 

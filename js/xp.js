@@ -179,7 +179,7 @@ function herzenPruefen() {
 }
 
 /**
- * Setzt die Herzen auf MAX_HERZEN (5) zurück und speichert das heutige Datum.
+ * Setzt die Herzen auf MAX_HERZEN (6) zurück und speichert das heutige Datum.
  */
 function herzenResetten() {
   const heute = new Date().toISOString().slice(0, 10);

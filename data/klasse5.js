@@ -397,7 +397,7 @@ const KLASSE5 = {
           '  E-Mail (Abkürzung), 8-jährig (Zahl), Deutsch-Übung\n\n' +
           'Dreifaches f:\n' +
           '  Schifffahrt (Schiff + Fahrt → 3×f)\n' +
-          '  Kaffeefilter (Kaffee + Filter → 3×f)\n' +
+          '  Sauerstoffflasche (Sauerstoff + Flasche → 3×f)\n' +
           '  Balletttänzerin (Ballett + Tänzerin → 3×t)',
         merkhilfe:
           'Komposita: Zusammenschreiben! Das letzte Wort bestimmt den Artikel.\n' +
@@ -447,16 +447,16 @@ const KLASSE5 = {
         {
           typ:       'mehrfachauswahl',
           frage:     'Welche Wörter enthalten durch Zusammensetzung drei gleiche Buchstaben? (Mehrere möglich)',
-          optionen:  ['Schifffahrt', 'Hausaufgabe', 'Kaffeefilter', 'Fußballspiel'],
+          optionen:  ['Schifffahrt', 'Hausaufgabe', 'Sauerstoffflasche', 'Fußballspiel'],
           richtig:   [0, 2],
-          erklaerung: 'Schifffahrt (ff+f) und Kaffeefilter (ee+e) entstehen aus Zusammensetzungen mit drei gleichen Buchstaben. Hausaufgabe und Fußballspiel nicht.',
+          erklaerung: 'Schifffahrt (Schiff + Fahrt → fff) und Sauerstoffflasche (Sauerstoff + Flasche → fff) haben drei gleiche Buchstaben hintereinander.',
         },
         {
           typ:       'richtig_falsch',
           frage:     'Ist die Aussage richtig oder falsch?',
           aussage:   'Das zusammengesetzte Nomen bekommt den Artikel des LETZTEN Wortes.',
           richtig:   true,
-          erklaerung: 'Richtig! Das letzte Wort bestimmt den Artikel: der Ball + das Spiel = das Ballspiel | die Haus + die Aufgabe = die Hausaufgabe.',
+          erklaerung: 'Richtig! Das letzte Wort bestimmt den Artikel: der Ball + das Spiel = das Ballspiel | das Haus + die Aufgabe = die Hausaufgabe.',
         },
       ],
     },

@@ -103,6 +103,62 @@ function soundKlick() {
   _ton(440, 0, 0.06, 0.14, 'square');
 }
 
+// Boss-Treffer – wuchtiger Schlag
+function soundBossTreffer() {
+  _ton(180, 0, 0.08, 0.32, 'sawtooth');
+  _ton(120, 0.06, 0.15, 0.28, 'square');
+  _ton(90,  0.12, 0.20, 0.20, 'sawtooth');
+}
+
+// Spieler kassiert Schaden – dumpfer Aufprall
+function soundSpielerSchaden() {
+  _ton(200, 0, 0.06, 0.25, 'sawtooth');
+  _ton(140, 0.08, 0.18, 0.22, 'square');
+}
+
+// Boss besiegt – epische Siegesfanfare
+function soundBossBesiegt() {
+  _ton(523,  0,    0.12);        // C5
+  _ton(659,  0.10, 0.12);        // E5
+  _ton(784,  0.20, 0.12);        // G5
+  _ton(1047, 0.30, 0.15);        // C6
+  _ton(1319, 0.42, 0.12);        // E6
+  _ton(1568, 0.52, 0.50, 0.22);  // G6 (lang)
+}
+
+// Boss-Niederlage – traurige Melodie
+function soundBossNiederlage() {
+  _ton(440, 0,    0.15, 0.22, 'sawtooth');  // A4
+  _ton(370, 0.15, 0.15, 0.20, 'sawtooth');  // F#4
+  _ton(330, 0.30, 0.15, 0.18, 'sawtooth');  // E4
+  _ton(262, 0.45, 0.40, 0.16, 'sawtooth');  // C4
+}
+
+// Boss-Kampf Intro – spannender Einstieg
+function soundBossIntro() {
+  _ton(165, 0,    0.12, 0.28, 'square');
+  _ton(196, 0.12, 0.12, 0.26, 'square');
+  _ton(220, 0.24, 0.12, 0.24, 'square');
+  _ton(262, 0.36, 0.22, 0.30, 'sawtooth');
+}
+
+// Epischerer Intro-Sound für den Deutsch-Drachen (Welt 5 Endkampf)
+function soundDrachenIntro() {
+  // Tiefes Grollen
+  _ton(65,  0,    0.20, 0.40, 'sawtooth');
+  _ton(73,  0.05, 0.20, 0.38, 'sawtooth');
+  // Aufsteigende Fanfare
+  _ton(131, 0.25, 0.12, 0.30, 'square');
+  _ton(165, 0.37, 0.12, 0.28, 'square');
+  _ton(196, 0.49, 0.12, 0.26, 'square');
+  _ton(220, 0.61, 0.12, 0.24, 'square');
+  _ton(262, 0.73, 0.15, 0.32, 'sawtooth');
+  // Dramatischer Schlussakkord
+  _ton(131, 0.90, 0.25, 0.35, 'sawtooth');
+  _ton(165, 0.90, 0.25, 0.30, 'square');
+  _ton(262, 0.90, 0.30, 0.35, 'sawtooth');
+}
+
 // ============================================================
 //  Sound-Toggle-Button initialisieren
 //  Sucht nach element mit id="soundToggleBtn" und setzt
@@ -135,6 +191,8 @@ if (typeof module !== 'undefined' && module.exports) {
     soundRichtig, soundFalsch, soundLevelUp,
     soundAchievement, soundStreakBonus,
     soundTestBestanden, soundKlick,
+    soundBossTreffer, soundSpielerSchaden,
+    soundBossBesiegt, soundBossNiederlage, soundBossIntro, soundDrachenIntro,
     soundToggleInit,
   };
 }

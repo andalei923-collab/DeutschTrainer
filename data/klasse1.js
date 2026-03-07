@@ -324,7 +324,7 @@ const KLASSE1 = {
           satz:      'eine Katze – viele ___',
           optionen:  ['Katzs', 'Katzen', 'Katze', 'Kätzin'],
           richtig:   'Katzen',
-          erklaerung: 'Der Plural von „Katze" lautet „Katzen" (Endung -n). Das „e" am Ende fällt weg.',
+          erklaerung: 'Der Plural von „Katze" lautet „Katzen" (Endung -n wird angehängt).',
         },
         {
           typ:       'lueckentext',
@@ -337,7 +337,7 @@ const KLASSE1 = {
         {
           typ:       'multiple_choice',
           frage:     'Was ist der Plural von „Haus"?',
-          optionen:  ['Hauser', 'Häuser', 'Hauses', 'Hauser'],
+          optionen:  ['Hauser', 'Häuser', 'Hauses', 'Häusen'],
           richtig:   1,
           erklaerung: '„Häuser" – Umlaut (a → ä) und Endung -er. Ein typisches Muster für viele Nomen auf -us und -aus.',
         },

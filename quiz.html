@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deutsch Trainer – Quiz</title>
-  <link rel="stylesheet" href="css/avatar.css?v=0.2" />
-  <link rel="stylesheet" href="css/quiz.css?v=0.2" />
+  <link rel="stylesheet" href="css/avatar.css?v=0.3" />
+  <link rel="stylesheet" href="css/quiz.css?v=0.3" />
   <style>
     /* ── Design-Tokens (identisch mit index/app) ────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -380,6 +380,221 @@
     }
     .abbruch-nein:hover { background: rgba(255,255,255,.06); }
 
+    /* ── Boss-Kampf UI ──────────────────────────────────────── */
+    .boss-modus {
+      background: var(--c-bg) !important;
+      background-image: var(--boss-bg, linear-gradient(135deg, #0d0d1a, #1a0d2e)) !important;
+    }
+
+    .boss-arena {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+      background: rgba(0,0,0,.35);
+      border: 1.5px solid rgba(233,69,96,.25);
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(233,69,96,.15);
+    }
+
+    .boss-figur {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(233,69,96,.12);
+      border: 2px solid rgba(233,69,96,.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      transition: transform .15s;
+    }
+    .boss-figur.boss-endgegner {
+      width: 96px;
+      height: 96px;
+      border-color: rgba(220,38,38,.6);
+      background: rgba(220,38,38,.15);
+      box-shadow: 0 0 24px rgba(220,38,38,.35), 0 0 48px rgba(220,38,38,.15);
+      animation: drachen-glut 2s ease-in-out infinite;
+    }
+    @keyframes drachen-glut {
+      0%, 100% { box-shadow: 0 0 24px rgba(220,38,38,.35), 0 0 48px rgba(220,38,38,.15); }
+      50% { box-shadow: 0 0 32px rgba(255,60,20,.5), 0 0 64px rgba(255,60,20,.25); }
+    }
+
+    .boss-emoji {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+    .boss-endgegner .boss-emoji {
+      font-size: 2.8rem;
+    }
+
+    .boss-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .boss-namen-zeile {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: .5rem;
+      margin-bottom: .4rem;
+    }
+
+    .boss-kampf-name {
+      font-size: .88rem;
+      font-weight: 800;
+      color: var(--c-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .boss-hp-text {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--c-accent1);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .boss-hp-leiste {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .boss-hp-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .4s ease;
+    }
+
+    /* Boss-Treffer-Animation */
+    @keyframes boss-wackeln {
+      0%, 100% { transform: translateX(0); }
+      15%  { transform: translateX(-8px) rotate(-3deg); }
+      30%  { transform: translateX(8px) rotate(3deg); }
+      45%  { transform: translateX(-6px) rotate(-2deg); }
+      60%  { transform: translateX(6px) rotate(2deg); }
+      75%  { transform: translateX(-3px); }
+      90%  { transform: translateX(3px); }
+    }
+    .boss-getroffen {
+      animation: boss-wackeln .5s ease;
+    }
+
+    /* Schadens-Popup über dem Boss */
+    .boss-schaden-popup {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: .85rem;
+      font-weight: 800;
+      color: #ef4444;
+      text-shadow: 0 2px 4px rgba(0,0,0,.5);
+      pointer-events: none;
+      animation: schaden-hoch .85s ease forwards;
+    }
+    @keyframes schaden-hoch {
+      0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+    }
+
+    /* Screen-Shake bei Spieler-Schaden */
+    @keyframes screen-shake {
+      0%, 100% { transform: translateX(0); }
+      20%  { transform: translateX(-4px); }
+      40%  { transform: translateX(4px); }
+      60%  { transform: translateX(-3px); }
+      80%  { transform: translateX(3px); }
+    }
+    .boss-shake {
+      animation: screen-shake .4s ease;
+    }
+
+    /* ── Boss Sieg-Screen ──────────────────────────────────── */
+    .boss-sieg-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: .8rem;
+      padding: .5rem 0;
+    }
+    .boss-sieg-icon {
+      font-size: 3.5rem;
+      opacity: .6;
+      filter: grayscale(.7);
+    }
+    .boss-sieg-text {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #4ade80;
+      text-shadow: 0 2px 12px rgba(74,222,128,.3);
+    }
+    .boss-sieg-sterne {
+      font-size: 1.8rem;
+      letter-spacing: 4px;
+    }
+    .boss-sieg-stats {
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+      font-size: .9rem;
+      margin: .3rem 0;
+    }
+    .boss-sieg-unlock {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--c-accent2);
+      background: rgba(245,166,35,.08);
+      border: 1px solid rgba(245,166,35,.2);
+      border-radius: 12px;
+      padding: .6rem 1.2rem;
+      margin-top: .3rem;
+    }
+
+    /* ── Boss Niederlage-Screen ────────────────────────────── */
+    .boss-niederlage-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: .8rem;
+      padding: .5rem 0;
+    }
+    .boss-niederlage-icon {
+      font-size: 3rem;
+    }
+    .boss-niederlage-text {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--c-accent1);
+    }
+    .boss-niederlage-sub {
+      font-size: .92rem;
+      color: var(--c-muted);
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+    .boss-niederlage-stats {
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+      font-size: .9rem;
+      margin: .3rem 0;
+    }
+
     /* ── Fortschrittsleiste oben ────────────────────────────── */
     .fortschritt-leiste {
       width: 100%;
@@ -472,19 +687,24 @@
     <span id="popupText"></span>
   </div>
 
-  <script src="js/storage.js?v=0.2"></script>
-  <script src="js/sound.js?v=0.2"></script>
-  <script src="js/xp.js?v=0.2"></script>
-  <script src="js/streak.js?v=0.2"></script>
-  <script src="js/avatar.js?v=0.2"></script>
-  <script src="js/achievements.js?v=0.2"></script>
-  <script src="js/quiz.js?v=0.2"></script>
+  <script src="js/storage.js?v=0.3"></script>
+  <script src="js/sound.js?v=0.3"></script>
+  <script src="js/xp.js?v=0.3"></script>
+  <script src="js/streak.js?v=0.3"></script>
+  <script src="js/avatar.js?v=0.3"></script>
+  <script src="js/achievements.js?v=0.3"></script>
+  <script src="js/accessoires.js?v=0.3"></script>
+  <script src="js/quiz.js?v=0.3"></script>
   <script src="data/klasse1.js"></script>
   <script src="data/klasse2.js"></script>
   <script src="data/klasse3.js"></script>
   <script src="data/klasse4.js"></script>
   <script src="data/klasse5.js"></script>
   <script src="data/themen.js"></script>
+  <script src="data/welt1.js"></script>
+  <script src="data/welt2.js"></script>
+  <script src="data/welt3.js"></script>
+  <script src="data/welt4.js"></script>
   <script>
     // ================================================================
     //  Beispiel-Fragen pro Welt (Fallback bis data/klasse*.js existiert)
@@ -705,168 +925,47 @@
     };
 
     // ================================================================
-    //  Beispiel-Theorieinhalt pro Welt
-    //  (wird später durch data/klasse*.js ersetzt)
+    //  Theorie-Inhalte pro Unterwelt (Platzhalter)
     // ================================================================
-    const THEORIE_INHALTE = {
-      1: {
-        titel:     'Groß- und Kleinschreibung',
-        erklaerung: [
-          { de: 'Im',        fa: 'در',             tr: 'Almancada',     ar: 'في' },
-          { de: 'Deutschen', fa: 'آلمانی',          tr: 'Almancada',     ar: 'اللغة الألمانية' },
-          { de: 'schreibt',  fa: 'می‌نویسند',       tr: 'yazılır',       ar: 'تُكتب' },
-          { de: 'man',       fa: 'همه',             tr: 'kişi',          ar: 'الشخص' },
-          { de: 'alle',      fa: 'همه',             tr: 'tüm',           ar: 'جميع' },
-          { de: 'Nomen',     fa: 'اسم‌ها',          tr: 'isimler',       ar: 'الأسماء' },
-          { de: 'groß.',     fa: 'با حرف بزرگ.',    tr: 'büyük harfle.', ar: 'بأحرف كبيرة.' },
-          null,
-          { de: 'Das',       fa: 'این',             tr: 'Bu',            ar: 'هذا' },
-          { de: 'gilt',      fa: 'صدق می‌کند',      tr: 'geçerlidir',    ar: 'ينطبق' },
-          { de: 'für',       fa: 'برای',            tr: 'için',          ar: 'لـ' },
-          { de: 'Menschen,', fa: 'انسان‌ها،',       tr: 'insanlar,',     ar: 'الناس،' },
-          { de: 'Tiere,',    fa: 'حیوانات،',        tr: 'hayvanlar,',    ar: 'الحيوانات،' },
-          { de: 'Dinge',     fa: 'اشیاء',           tr: 'eşyalar',       ar: 'الأشياء' },
-          { de: 'und',       fa: 'و',               tr: 've',            ar: 'و' },
-          { de: 'Orte.',     fa: 'مکان‌ها.',        tr: 'yerler.',       ar: 'الأماكن.' },
-        ],
-        beispiel: {
-          satz: 'Der <span class="highlight">Hund</span> spielt im <span class="highlight">Garten</span>.',
-          tapWoerter: [
-            { de: 'Der',    fa: '(مذکر) آن',        tr: 'Bu (eril)',  ar: 'الـ' },
-            { de: 'Hund',   fa: 'سگ',               tr: 'Köpek',     ar: 'كلب' },
-            { de: 'spielt', fa: 'بازی می‌کند',      tr: 'oynar',     ar: 'يلعب' },
-            { de: 'im',     fa: 'در',               tr: 'içinde',    ar: 'في الـ' },
-            { de: 'Garten', fa: 'باغ',              tr: 'Bahçe',     ar: 'حديقة' },
-          ],
-        },
-        merkhilfe: 'Frage: "Was ist das?" – Wenn du ein Nomen hast, schreib es groß! Verben und Adjektive schreibt man klein.',
-      },
-      2: {
-        titel:     'Artikel: der, die, das',
-        erklaerung: [
-          { de: 'Jedes',      fa: 'هر',              tr: 'Her',       ar: 'كل' },
-          { de: 'Nomen',      fa: 'اسم',             tr: 'isim',      ar: 'اسم' },
-          { de: 'hat',        fa: 'دارد',            tr: 'sahiptir',  ar: 'لديه' },
-          { de: 'einen',      fa: 'یک',              tr: 'bir',       ar: 'مقالة' },
-          { de: 'Artikel.',   fa: 'حرف تعریف.',      tr: 'makale.',   ar: 'مقالة.' },
-          null,
-          { de: 'Männliche',  fa: 'مذکر',            tr: 'Eril',      ar: 'المذكر' },
-          { de: 'Nomen',      fa: 'اسم‌ها',          tr: 'isimler',   ar: 'الأسماء' },
-          { de: 'bekommen',   fa: 'می‌گیرند',        tr: 'alır',      ar: 'تحصل على' },
-          { de: '"der",',     fa: '«der»،',          tr: '"der",',    ar: '"der"،' },
-          { de: 'weibliche',  fa: 'مؤنث',            tr: 'dişil',     ar: 'المؤنث' },
-          { de: '"die"',      fa: '«die»',           tr: '"die"',     ar: '"die"' },
-          { de: 'und',        fa: 'و',               tr: 've',        ar: 'و' },
-          { de: 'sächliche',  fa: 'خنثی',            tr: 'nötr',      ar: 'المحايد' },
-          { de: '"das".',     fa: '«das».',          tr: '"das".',    ar: '"das".' },
-        ],
-        beispiel: {
-          satz: '<span class="highlight">Der</span> Mann, <span class="highlight">die</span> Frau, <span class="highlight">das</span> Kind.',
-          tapWoerter: [
-            { de: 'Der',   fa: '(مذکر) آن',   tr: 'Eril',   ar: 'المذكر' },
-            { de: 'Mann',  fa: 'مرد',          tr: 'Adam',   ar: 'رجل' },
-            { de: 'die',   fa: '(مؤنث) آن',   tr: 'Dişil',  ar: 'المؤنث' },
-            { de: 'Frau',  fa: 'زن',           tr: 'Kadın',  ar: 'امرأة' },
-            { de: 'das',   fa: '(خنثی) آن',   tr: 'Nötr',   ar: 'المحايد' },
-            { de: 'Kind',  fa: 'کودک',         tr: 'Çocuk',  ar: 'طفل' },
-          ],
-        },
-        merkhilfe: 'Leider gibt es keine 100%-Regel. Merke: -ung, -heit, -keit → "die"; -chen, -lein → "das".',
-      },
-      3: {
-        titel:     'Was ist der Dativ?',
-        erklaerung: [
-          { de: 'Der',      fa: 'حالت',                   tr: 'Almancada',     ar: 'في' },
-          { de: 'Dativ',    fa: 'مفعول غیرمستقیم',        tr: 'yönelme hali',  ar: 'حالة المفعول غير المباشر' },
-          { de: 'zeigt,',   fa: 'نشان می‌دهد،',           tr: 'gösterir',      ar: 'يُظهر' },
-          { de: 'wem',      fa: 'به چه کسی',              tr: 'kime',          ar: 'لمن' },
-          { de: 'etwas',    fa: 'چیزی',                   tr: 'bir şey',       ar: 'شيء' },
-          { de: 'gegeben',  fa: 'داده می‌شود',            tr: 'verilir',       ar: 'يُعطى' },
-          { de: 'wird.',    fa: '.',                       tr: 'or verilir.',   ar: '.' },
-          null,
-          { de: 'Man',      fa: 'فرد',                    tr: 'Kişi',          ar: 'تسأل' },
-          { de: 'fragt',    fa: 'می‌پرسد',                tr: 'sorar',         ar: 'بسؤال' },
-          { de: 'mit',      fa: 'با',                     tr: 'ile',           ar: 'مع' },
-          { de: '"Wem?"',   fa: '«به چه کسی؟»',           tr: '"Kime?"',       ar: '"لمن؟"' },
-          { de: 'um',       fa: 'برای',                   tr: 'bulmak için',   ar: 'للعثور' },
-          { de: 'den',      fa: 'آن',                     tr: 'Dativ\'i',      ar: 'على حالة' },
-          { de: 'Dativ',    fa: 'حالت مفعولی',            tr: 'bulmak',        ar: 'المفعول غير المباشر' },
-          { de: 'zu',       fa: 'را',                     tr: 'için',          ar: '' },
-          { de: 'finden.',  fa: 'یافت.',                  tr: 'bulmak.',       ar: '.' },
-        ],
-        beispiel: {
-          satz: 'Ich gebe <span class="highlight">dem Hund</span> einen Knochen.',
-          tapWoerter: [
-            { de: 'Ich',     fa: 'من',             tr: 'Ben',       ar: 'أنا' },
-            { de: 'gebe',    fa: 'می‌دهم',          tr: 'veriyorum', ar: 'أعطي' },
-            { de: 'dem',     fa: '(مفعول) آن',     tr: 'köpeğe',    ar: 'للـ' },
-            { de: 'Hund',    fa: 'سگ',             tr: 'köpek',     ar: 'كلب' },
-            { de: 'einen',   fa: 'یک',             tr: 'bir',       ar: 'عظمة' },
-            { de: 'Knochen', fa: 'استخوان',        tr: 'kemik',     ar: 'عظمة' },
-          ],
-        },
-        merkhilfe: '"Wem?" → Dativ! Eselsbrücke: "Wem? – dem!" – bei maskulin/neutrum wird "der/das" zu "dem".',
-      },
-      4: {
-        titel:     'Synonyme – gleiche Bedeutung',
-        erklaerung: [
-          { de: 'Synonyme',          fa: 'مترادف‌ها',    tr: 'Eş anlamlılar', ar: 'المترادفات' },
-          { de: 'sind',              fa: 'هستند',         tr: 'aynı',          ar: 'هي' },
-          { de: 'Wörter',            fa: 'کلماتی',        tr: 'anlama',        ar: 'كلمات' },
-          { de: 'mit',               fa: 'با',            tr: 'sahip',         ar: 'بـ' },
-          { de: 'gleicher',          fa: 'معنای یکسان',   tr: 'kelimelerdir',  ar: 'نفس' },
-          { de: 'oder',              fa: 'یا',            tr: 'veya',          ar: 'أو' },
-          { de: 'ähnlicher',         fa: 'مشابه',         tr: 'benzer',        ar: 'مشابه' },
-          { de: 'Bedeutung.',        fa: 'هستند.',        tr: 'anlamda.',      ar: 'المعنى.' },
-          null,
-          { de: 'Sie',               fa: 'آن‌ها',         tr: 'Bu kelimeler',  ar: 'تجعل' },
-          { de: 'machen',            fa: 'می‌کنند',       tr: 'metinleri',     ar: 'النصوص' },
-          { de: 'Texte',             fa: 'متن‌ها را',     tr: 'daha',          ar: 'أكثر' },
-          { de: 'abwechslungsreicher', fa: 'متنوع‌تر',   tr: 'çeşitli kılar', ar: 'تنوعًا' },
-          { de: 'und',               fa: 'و',             tr: 've',            ar: 'و' },
-          { de: 'lebendiger.',       fa: 'پرجان‌تر.',     tr: 'canlı.',        ar: 'حيوية.' },
-        ],
-        beispiel: {
-          satz: '<span class="highlight">schnell</span> = <span class="highlight">flink</span> = <span class="highlight">rasch</span>',
-          tapWoerter: [
-            { de: 'schnell', fa: 'سریع',  tr: 'hızlı',    ar: 'سريع' },
-            { de: 'flink',   fa: 'چابک',  tr: 'çevik',    ar: 'خفيف' },
-            { de: 'rasch',   fa: 'تند',   tr: 'süratli',  ar: 'سريع جداً' },
-          ],
-        },
-        merkhilfe: 'Wenn du ein Wort schon zweimal benutzt hast, suche ein Synonym! Das macht deinen Text viel interessanter.',
-      },
-      5: {
-        titel:     'Fremdwörter im Deutschen',
-        erklaerung: [
-          { de: 'Viele',        fa: 'بسیاری از',       tr: 'Birçok',      ar: 'كثير من' },
-          { de: 'deutsche',     fa: 'کلمات آلمانی',    tr: 'Almanca',     ar: 'الكلمات' },
-          { de: 'Wörter',       fa: 'واژه‌ها',          tr: 'kelime',      ar: 'الألمانية' },
-          { de: 'kommen',       fa: 'می‌آیند',          tr: 'başka',       ar: 'تأتي' },
-          { de: 'aus',          fa: 'از',              tr: 'dillerden',   ar: 'من' },
-          { de: 'anderen',      fa: 'زبان‌های دیگر',   tr: 'geliyor.',    ar: 'لغات' },
-          { de: 'Sprachen.',    fa: '.',               tr: '',            ar: 'أخرى.' },
-          null,
-          { de: 'Besonders',    fa: 'به‌ویژه',          tr: 'Özellikle',   ar: 'بشكل خاص' },
-          { de: 'viele',        fa: 'بسیاری',          tr: 'pek çok',     ar: 'كثير من' },
-          { de: 'stammen',      fa: 'برخاسته‌اند',     tr: 'Latince,',    ar: 'تأتي من' },
-          { de: 'aus',          fa: 'از',              tr: 'Fransızca',   ar: 'اللاتينية،' },
-          { de: 'dem',          fa: 'زبان',            tr: 've',          ar: 'الفرنسية' },
-          { de: 'Englischen,',  fa: 'انگلیسی،',        tr: 'İngilizceden', ar: 'والإنجليزية.' },
-          { de: 'Lateinischen', fa: 'لاتین',           tr: 'gelmektedir.', ar: '' },
-          { de: 'oder',         fa: 'یا',              tr: '',            ar: '' },
-          { de: 'Französischen.', fa: 'فرانسوی.',      tr: '',            ar: '' },
-        ],
-        beispiel: {
-          satz: '<span class="highlight">Computer</span>, <span class="highlight">Pizza</span>, <span class="highlight">Balkon</span>',
-          tapWoerter: [
-            { de: 'Computer', fa: 'رایانه (انگلیسی)',    tr: 'Bilgisayar', ar: 'حاسوب' },
-            { de: 'Pizza',    fa: 'پیتزا (ایتالیایی)', tr: 'Pizza',      ar: 'بيتزا' },
-            { de: 'Balkon',   fa: 'بالکن (فرانسوی)',   tr: 'Balkon',     ar: 'شرفة' },
-          ],
-        },
-        merkhilfe: 'Fremdwörter erkennst du oft an untypischen Buchstabenkombinationen wie "ph", "th" oder "qu".',
-      },
+    const SUBWELT_THEORIE = {
+      // Welt 1 Theorie wird dynamisch aus WELT1 geladen (siehe _subweltTheorieLaden)
+      '1-1': null, '1-2': null, '1-3': null, '1-4': null, '1-5': null,
+      // Welt 2 Theorie wird dynamisch aus WELT2 geladen (siehe _subweltTheorieLaden)
+      '2-1': null, '2-2': null, '2-3': null, '2-4': null, '2-5': null,
+      // Welt 3 Theorie wird dynamisch aus WELT3 geladen (siehe _subweltTheorieLaden)
+      '3-1': null, '3-2': null, '3-3': null, '3-4': null, '3-5': null,
+      // Welt 4 Theorie wird dynamisch aus WELT4 geladen (siehe _subweltTheorieLaden)
+      '4-1': null, '4-2': null, '4-3': null, '4-4': null, '4-5': null,
+      '5-1': { titel: 'Aufwärmrunde', erklaerung: 'Die erste Stufe des Endkampfs! Hier kommen 15 gemischte Fragen aus Welt 1 (Wortarten) und Welt 2 (Grammatik). Zeige, dass du die Grundlagen beherrschst!', beispiel: 'Nomen, Verben, Adjektive, Artikel, Pronomen + Satzglieder, Fälle, Zeitformen, Satzzeichen, Nebensätze.', merkhilfe: 'Denk an die Frageproben und die Grundregeln der deutschen Grammatik!' },
+      '5-2': { titel: 'Steigerung', erklaerung: 'Stufe 2 wird härter! 15 gemischte Fragen aus Welt 3 (Rechtschreibung) und Welt 4 (Texte). Die Zeit läuft schneller als vorher!', beispiel: 'Groß-/Kleinschreibung, Getrennt-/Zusammenschreibung, Synonyme, Fremdwörter, Redewendungen + Textarten, Berichte, Briefe.', merkhilfe: 'Nutze die Proben und erinnere dich an die Merkmale jeder Textart!' },
+      '5-3': { titel: 'Alles oder Nichts', erklaerung: 'Stufe 3: 20 Fragen aus ALLEN 4 Welten – bunt gemischt! Die Zeit wird knapper. Jetzt wird es ernst!', beispiel: 'Alles von Wortarten bis Zusammenfassungen – du musst auf alles vorbereitet sein.', merkhilfe: 'Lies jede Frage genau und antworte schnell aber überlegt!' },
+      '5-4': { titel: 'Schnellfeuer', erklaerung: 'Stufe 4: Schnellfeuer! 25 Fragen aus allen Welten im Eilzugstempo. Nur wer wirklich sicher ist, übersteht diese Runde!', beispiel: 'Schnelle Antworten gefragt – jede Sekunde zählt!', merkhilfe: 'Vertrau deinem Wissen – langes Überlegen kostet wertvolle Zeit!' },
+      '5-5': { titel: 'Vor dem Drachen', erklaerung: 'Die letzte Stufe vor dem Endkampf! 20 besonders knifflige Fragen. Hier kommen bevorzugt Fragen, die du in der Vergangenheit falsch beantwortet hast. Überwinde deine Schwächen!', beispiel: 'Deine persönlichen Schwachstellen + die härtesten Fragen aus allen Welten.', merkhilfe: 'Lerne aus deinen Fehlern – dann bist du bereit für den Deutsch-Drachen!' },
+    };
+
+    // Theorie aus WELT-Daten laden (mit Fallback auf SUBWELT_THEORIE)
+    function _subweltTheorieLaden(key) {
+      const weltDaten = {
+        1: typeof WELT1 !== 'undefined' ? WELT1 : null,
+        2: typeof WELT2 !== 'undefined' ? WELT2 : null,
+        3: typeof WELT3 !== 'undefined' ? WELT3 : null,
+        4: typeof WELT4 !== 'undefined' ? WELT4 : null,
+        5: typeof WELT5 !== 'undefined' ? WELT5 : null,
+      };
+      const weltNrKey = parseInt(key.split('-')[0], 10);
+      const welt = weltDaten[weltNrKey];
+      if (welt && welt[key] && welt[key].theorie) {
+        return welt[key].theorie;
+      }
+      return SUBWELT_THEORIE[key] ?? null;
+    }
+
+    const BOSS_THEORIE = {
+      1: { titel: 'Bosskampf: Der Wort-Kobold', icon: '👺', erklaerung: 'Der Wort-Kobold hat 15 Lebenspunkte! Jede richtige Antwort ist ein Treffer. Jede falsche Antwort kostet dich ein Herz. Besiegst du ihn, wird Welt 2 freigeschaltet!', merkhilfe: 'Er stellt dir Fragen zu Nomen, Verben, Adjektiven, Artikeln und Pronomen!' },
+      2: { titel: 'Bosskampf: Der Grammatik-Troll', icon: '🧌', erklaerung: 'Der Grammatik-Troll hat 15 Lebenspunkte! Er prüft dein Wissen über Satzglieder, Fälle, Zeitformen und Nebensätze. Triff ihn mit richtigen Antworten!', merkhilfe: 'Denk an Subjekt, Prädikat, Objekt und die 4 Fälle!' },
+      3: { titel: 'Bosskampf: Die Rechtschreib-Hexe', icon: '🧙‍♀️', erklaerung: 'Die Rechtschreib-Hexe hat 15 Lebenspunkte! Sie testet Groß-/Kleinschreibung, Zusammenschreibung, Synonyme und Fremdwörter.', merkhilfe: 'Nutze die Artikel-Probe und denk an die Fremdwort-Zeichen!' },
+      4: { titel: 'Bosskampf: Der Text-Golem', icon: '🗿', erklaerung: 'Der Text-Golem hat 15 Lebenspunkte! Er prüft alles über Textarten, Berichte, Briefe und Zusammenfassungen. Besiege ihn für den Endkampf!', merkhilfe: 'Achte auf die W-Fragen und die Merkmale jeder Textart!' },
+      5: { titel: 'FINALER BOSSKAMPF: Der Deutsch-Drache', icon: '🐉', erklaerung: 'Der mächtige Deutsch-Drache hat 15 Lebenspunkte und stellt die härtesten Fragen aus ALLEN 4 vorherigen Welten! Er kennt keine Gnade. Nur wer Wortarten, Grammatik, Rechtschreibung und Texte wirklich beherrscht, kann ihn besiegen. Triff ihn mit richtigen Antworten und werde zum ultimativen Deutsch-Meister!', merkhilfe: 'Alles was du gelernt hast, kommt jetzt zusammen. Konzentrier dich, lies genau und gib alles!' },
     };
 
     // ================================================================
@@ -892,12 +991,7 @@
       }
       // Alle Fragen aller Kategorien sammeln
       const alle = daten.kategorien.flatMap(k => k.fragen ?? []);
-      // Fisher-Yates mischen
-      for (let i = alle.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [alle[i], alle[j]] = [alle[j], alle[i]];
-      }
-      return alle.slice(0, 8);
+      return _gewichteteAuswahl(alle, 8);
     }
 
     // ================================================================
@@ -905,13 +999,303 @@
     // ================================================================
     function fragenFuerThema(key) {
       if (typeof THEMEN === 'undefined' || !THEMEN[key] || !THEMEN[key].fragen) return [];
-      const alle = [...THEMEN[key].fragen];
-      // Fisher-Yates mischen
-      for (let i = alle.length - 1; i > 0; i--) {
+      return _gewichteteAuswahl(THEMEN[key].fragen, THEMEN[key].fragen.length);
+    }
+
+    // ================================================================
+    //  Fragen für eine Unterwelt laden
+    // ================================================================
+
+    // Fisher-Yates Shuffle (Hilfsfunktion)
+    function _fisherYates(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [alle[i], alle[j]] = [alle[j], alle[i]];
+        [arr[i], arr[j]] = [arr[j], arr[i]];
       }
-      return alle;
+      return arr;
+    }
+
+    // Alle Fragen einer Welt sammeln (WELT-Daten)
+    function _alleFragenAusWelt(weltNr) {
+      const weltDaten = {
+        1: typeof WELT1 !== 'undefined' ? WELT1 : null,
+        2: typeof WELT2 !== 'undefined' ? WELT2 : null,
+        3: typeof WELT3 !== 'undefined' ? WELT3 : null,
+        4: typeof WELT4 !== 'undefined' ? WELT4 : null,
+      };
+      const welt = weltDaten[weltNr];
+      if (!welt) return [];
+      const fragen = [];
+      for (let s = 1; s <= 5; s++) {
+        const sub = welt[weltNr + '-' + s];
+        if (sub?.fragen?.length) fragen.push(...sub.fragen);
+      }
+      return fragen;
+    }
+
+    // Falsch beantwortete Fragen laden (für Stufe 5.5)
+    function _falscheFragenLaden() {
+      try {
+        const raw = localStorage.getItem('dt_falsche_fragen');
+        return raw ? JSON.parse(raw) : [];
+      } catch { return []; }
+    }
+
+    // Falsch beantwortete Frage speichern
+    function _falscheFrageSpeichern(frage) {
+      try {
+        const liste = _falscheFragenLaden();
+        // Duplikat-Check per Frage-Text
+        if (!liste.some(f => f.frage === frage.frage)) {
+          liste.push(frage);
+          // Max 200 speichern (älteste entfernen)
+          if (liste.length > 200) liste.splice(0, liste.length - 200);
+          localStorage.setItem('dt_falsche_fragen', JSON.stringify(liste));
+        }
+      } catch { /* localStorage voll – ignorieren */ }
+    }
+
+    // Richtig beantwortete Frage aus Fehler-Liste entfernen
+    function _falscheFrageEntfernen(frage) {
+      try {
+        const liste = _falscheFragenLaden();
+        const neu = liste.filter(f => f.frage !== frage.frage);
+        if (neu.length !== liste.length) {
+          localStorage.setItem('dt_falsche_fragen', JSON.stringify(neu));
+        }
+      } catch { /* ignorieren */ }
+    }
+
+    // ================================================================
+    //  Wiederholungslogik – Per-Frage-Statistik & gewichtete Auswahl
+    // ================================================================
+
+    const _STATS_KEY = 'dt_fragen_stats';
+    const _cooldownListe = [];  // Letzte 5 gestellte Fragen (Frage-Text)
+
+    // Einfacher String-Hash für Frage-Schlüssel
+    function _frageHash(frage) {
+      const s = frage.frage || '';
+      let h = 0;
+      for (let i = 0; i < s.length; i++) {
+        h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+      }
+      return 'q' + (h >>> 0).toString(36);
+    }
+
+    // Alle Stats laden
+    function _statsLaden() {
+      try {
+        const raw = localStorage.getItem(_STATS_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch { return {}; }
+    }
+
+    // Stats speichern
+    function _statsSpeichern(stats) {
+      try { localStorage.setItem(_STATS_KEY, JSON.stringify(stats)); } catch {}
+    }
+
+    // Einzelne Frage-Stat aktualisieren (aufgerufen aus quiz.js)
+    function _frageStatAktualisieren(frage, richtig) {
+      const stats = _statsLaden();
+      const key = _frageHash(frage);
+      if (!stats[key]) stats[key] = { r: 0, f: 0 };
+      if (richtig) stats[key].r++;
+      else stats[key].f++;
+      _statsSpeichern(stats);
+    }
+
+    // Cooldown aktualisieren (aufgerufen aus quiz.js bei jeder gezeigten Frage)
+    function _cooldownAktualisieren(frage) {
+      const text = frage.frage || '';
+      _cooldownListe.push(text);
+      if (_cooldownListe.length > 5) _cooldownListe.shift();
+    }
+
+    // Gewichtete Auswahl aus einem Fragenpool
+    function _gewichteteAuswahl(pool, anzahl) {
+      if (!pool.length) return [];
+      if (pool.length <= anzahl) return _fisherYates([...pool]);
+
+      const stats = _statsLaden();
+
+      // Cooldown-Fragen herausfiltern
+      const cooldownSet = new Set(_cooldownListe);
+      let verfuegbar = pool.filter(f => !cooldownSet.has(f.frage || ''));
+
+      // Falls nach Cooldown zu wenige übrig: alle nehmen
+      if (verfuegbar.length < anzahl) verfuegbar = [...pool];
+
+      // Gewichte berechnen
+      const gewichtet = verfuegbar.map(f => {
+        const key = _frageHash(f);
+        const s = stats[key];
+        let gewicht;
+        if (!s) {
+          // Noch nie beantwortet → leicht erhöht (Coverage sicherstellen)
+          gewicht = 1.5;
+        } else {
+          // Mehr Fehler = höheres Gewicht, mehr Richtig = niedrigeres
+          gewicht = Math.max(0.2, 1 + (s.f * 2) - (s.r * 0.5));
+        }
+        return { frage: f, gewicht };
+      });
+
+      // Gewichtete Zufallsauswahl (ohne Zurücklegen)
+      const ausgewaehlt = [];
+      while (ausgewaehlt.length < anzahl && gewichtet.length > 0) {
+        const gesamtGewicht = gewichtet.reduce((sum, g) => sum + g.gewicht, 0);
+        let zufall = Math.random() * gesamtGewicht;
+        for (let i = 0; i < gewichtet.length; i++) {
+          zufall -= gewichtet[i].gewicht;
+          if (zufall <= 0) {
+            ausgewaehlt.push(gewichtet[i].frage);
+            gewichtet.splice(i, 1);
+            break;
+          }
+        }
+      }
+
+      return _fisherYates(ausgewaehlt);
+    }
+
+    // Welt 5 Stufen-Konfiguration: { quellen: [Welt-Nummern], anzahl: Fragenanzahl }
+    const WELT5_STUFEN = {
+      1: { quellen: [1, 2],       anzahl: 15 },  // Aufwärmrunde
+      2: { quellen: [3, 4],       anzahl: 15 },  // Steigerung
+      3: { quellen: [1, 2, 3, 4], anzahl: 20 },  // Alles oder Nichts
+      4: { quellen: [1, 2, 3, 4], anzahl: 25 },  // Schnellfeuer
+      5: { quellen: [1, 2, 3, 4], anzahl: 20 },  // Vor dem Drachen (bevorzugt Fehler)
+    };
+
+    function fragenFuerSubwelt(weltNr, subNr) {
+      // ── Welt 5: Fragen aus anderen Welten ziehen ──
+      if (weltNr === 5) {
+        const stufe = WELT5_STUFEN[subNr];
+        if (!stufe) return [];
+
+        // Stufe 5.5: Bevorzugt falsche Fragen
+        if (subNr === 5) {
+          const falsche = _falscheFragenLaden();
+          let pool = [];
+
+          if (falsche.length >= 10) {
+            // Genug Fehler-Fragen: bevorzugt daraus nehmen
+            pool = _fisherYates([...falsche]);
+            // Rest mit zufälligen Fragen auffüllen
+            const rest = [];
+            for (const w of stufe.quellen) rest.push(..._alleFragenAusWelt(w));
+            _fisherYates(rest);
+            // Fehler-Fragen zuerst, dann auffüllen (ohne Duplikate)
+            const frageTexte = new Set(pool.map(f => f.frage));
+            for (const f of rest) {
+              if (!frageTexte.has(f.frage)) {
+                pool.push(f);
+                frageTexte.add(f.frage);
+              }
+              if (pool.length >= stufe.anzahl) break;
+            }
+          } else {
+            // Wenige Fehler: normal mischen, Fehler-Fragen an den Anfang
+            for (const w of stufe.quellen) pool.push(..._alleFragenAusWelt(w));
+            _fisherYates(pool);
+          }
+          return pool.slice(0, stufe.anzahl);
+        }
+
+        // Stufe 5.1–5.4: Fragen aus den angegebenen Quellwelten
+        let pool = [];
+        for (const w of stufe.quellen) pool.push(..._alleFragenAusWelt(w));
+        return _gewichteteAuswahl(pool, stufe.anzahl);
+      }
+
+      // ── Welt 1–4: Normal aus WELT-Daten laden ──
+      const weltDaten = {
+        1: typeof WELT1 !== 'undefined' ? WELT1 : null,
+        2: typeof WELT2 !== 'undefined' ? WELT2 : null,
+        3: typeof WELT3 !== 'undefined' ? WELT3 : null,
+        4: typeof WELT4 !== 'undefined' ? WELT4 : null,
+      };
+
+      const welt = weltDaten[weltNr];
+      const key  = weltNr + '-' + subNr;
+
+      if (welt && welt[key] && welt[key].fragen && welt[key].fragen.length > 0) {
+        return _gewichteteAuswahl(welt[key].fragen, 10);
+      }
+
+      // Fallback: Platzhalter-Fragen
+      return [
+        { typ: 'multiple_choice', frage: 'Platzhalter-Frage 1 (Welt ' + weltNr + '.' + subNr + ')', optionen: ['Richtige Antwort', 'Falsch B', 'Falsch C', 'Falsch D'], richtig: 0, erklaerung: 'Platzhalter.' },
+        { typ: 'richtig_falsch', frage: 'Platzhalter-Aussage (Welt ' + weltNr + '.' + subNr + ')', richtig: true, erklaerung: 'Platzhalter.' },
+      ];
+    }
+
+    // ================================================================
+    //  Fragen für einen Bosskampf laden
+    //  Welt 1-4: Fragen aus der eigenen Welt (Klassendaten)
+    //  Welt 5: Fragen aus ALLEN vorherigen Welten gemischt
+    // ================================================================
+    function fragenFuerBoss(weltNr) {
+      const weltDaten = {
+        1: typeof WELT1 !== 'undefined' ? WELT1 : null,
+        2: typeof WELT2 !== 'undefined' ? WELT2 : null,
+        3: typeof WELT3 !== 'undefined' ? WELT3 : null,
+        4: typeof WELT4 !== 'undefined' ? WELT4 : null,
+        5: typeof WELT5 !== 'undefined' ? WELT5 : null,
+      };
+      const klassen = {
+        1: typeof KLASSE1 !== 'undefined' ? KLASSE1 : null,
+        2: typeof KLASSE2 !== 'undefined' ? KLASSE2 : null,
+        3: typeof KLASSE3 !== 'undefined' ? KLASSE3 : null,
+        4: typeof KLASSE4 !== 'undefined' ? KLASSE4 : null,
+        5: typeof KLASSE5 !== 'undefined' ? KLASSE5 : null,
+      };
+
+      // Fragen aus einer Welt sammeln (WELT-Daten + KLASSE-Daten)
+      function _fragenAusWelt(w) {
+        const fragen = [];
+        // Aus WELT-Daten (Subwelten)
+        const welt = weltDaten[w];
+        if (welt) {
+          for (let s = 1; s <= 5; s++) {
+            const sub = welt[w + '-' + s];
+            if (sub?.fragen?.length) fragen.push(...sub.fragen);
+          }
+        }
+        // Aus KLASSE-Daten (Kategorien)
+        const klasse = klassen[w];
+        if (klasse?.kategorien?.length) {
+          fragen.push(...klasse.kategorien.flatMap(k => k.fragen ?? []));
+        }
+        return fragen;
+      }
+
+      let alle = [];
+
+      if (weltNr === 5) {
+        // Endkampf: Fragen aus ALLEN 4 vorherigen Welten
+        for (let w = 1; w <= 4; w++) {
+          alle.push(..._fragenAusWelt(w));
+        }
+      } else {
+        alle = _fragenAusWelt(weltNr);
+      }
+
+      // Falls keine echten Daten: Fallback auf Beispielfragen
+      if (alle.length === 0) {
+        if (weltNr === 5) {
+          for (let w = 1; w <= 4; w++) {
+            alle.push(...(BEISPIEL_FRAGEN[w] ?? []));
+          }
+        } else {
+          alle = [...(BEISPIEL_FRAGEN[weltNr] ?? BEISPIEL_FRAGEN[1])];
+        }
+      }
+
+      // Boss bekommt 15 gewichtete Fragen (werden zyklisch wiederholt)
+      return _gewichteteAuswahl(alle, 15);
     }
 
     // ================================================================
@@ -919,6 +1303,8 @@
     // ================================================================
     const params   = new URLSearchParams(window.location.search);
     const weltNr   = parseInt(params.get('welt') ?? '1', 10);
+    const subNr    = parseInt(params.get('sub') ?? '0', 10);
+    const isBoss   = params.has('boss');
     const isDaily  = params.has('daily');
     const phase    = params.get('phase') ?? 'theorie';   // 'theorie' | 'quiz'
     const modus    = params.get('modus') ?? '';           // '' | 'thema'
@@ -940,30 +1326,50 @@
       containerId:  'avatar-container',
       groesse:      'avatar-lg',
       startEmotion: phase === 'quiz' ? 'happy' : 'cool',
+      badge:        spieler.badge,
     });
 
     // ================================================================
     //  Zurück-Link (shared)
     // ================================================================
     document.getElementById('backLink').textContent =
-      istThemaQuiz ? '← Themen' : (isDaily ? '← Zurück' : `← Welt ${weltNr}`);
+      istThemaQuiz ? '← Themen' : '← Welten';
 
     // ================================================================
     //  QUIZ-PHASE: Engine starten → Theorie-Inhalt überspringen
     // ================================================================
     if (phase === 'quiz') {
-      // Themen-Quiz oder Welt-Quiz?
+      // Badge + Titel bestimmen
       const themaLabel = themaKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      document.getElementById('themaBadge').textContent =
-        istThemaQuiz ? `📚 ${themaLabel}` : (isDaily ? '⚡ Challenge · Quiz' : `Welt ${weltNr} · Quiz`);
-      document.title = istThemaQuiz
-        ? `Deutsch Trainer – ${themaLabel}`
-        : `Deutsch Trainer – Quiz · Welt ${weltNr}`;
+      if (istThemaQuiz) {
+        document.getElementById('themaBadge').textContent = `📚 ${themaLabel}`;
+        document.title = `Deutsch Trainer – ${themaLabel}`;
+      } else if (isBoss) {
+        document.getElementById('themaBadge').textContent = `⚔️ Bosskampf · Welt ${weltNr}`;
+        document.title = `Deutsch Trainer – Bosskampf Welt ${weltNr}`;
+      } else if (subNr > 0) {
+        document.getElementById('themaBadge').textContent = `🌍 Welt ${weltNr}.${subNr}`;
+        document.title = `Deutsch Trainer – Welt ${weltNr}.${subNr}`;
+      } else {
+        document.getElementById('themaBadge').textContent = isDaily ? '⚡ Challenge' : `Welt ${weltNr}`;
+        document.title = `Deutsch Trainer – Quiz`;
+      }
 
-      // Fragen laden: Thema-Modus oder Welt-Modus
-      const fragen = istThemaQuiz ? fragenFuerThema(themaKey) : fragenFuerWelt(weltNr);
+      // Fragen laden
+      let fragen;
       const quizOptionen = { weltNr, containerId: 'theoriKarte' };
-      if (istThemaQuiz) quizOptionen.xpProAntwort = 5;
+      if (istThemaQuiz) {
+        fragen = fragenFuerThema(themaKey);
+        quizOptionen.xpProAntwort = 5;
+      } else if (isBoss) {
+        fragen = fragenFuerBoss(weltNr);
+        quizOptionen.isBoss = true;
+      } else if (subNr > 0) {
+        fragen = fragenFuerSubwelt(weltNr, subNr);
+        quizOptionen.subNr = subNr;
+      } else {
+        fragen = fragenFuerWelt(weltNr);
+      }
       quizStarten(fragen, quizOptionen);
 
       // ── Zurück-Button: Bestätigung vor Abbruch ────────────────
@@ -1015,11 +1421,24 @@
           document.title  = `Deutsch Trainer – ${theorie.titel}`;
           document.getElementById('theorieTitel').textContent = theorie.titel;
 
-          // Erklärung (plain text)
-          document.getElementById('erklaerungText').textContent = theorie.erklaerung;
+          // Erklärung – Wort-für-Wort antippbar wenn Übersetzungsmodus aktiv
+          const erklaerungEl = document.getElementById('erklaerungText');
+          if (tapModus && zielSprache !== 'de') {
+            erklaerungEl.innerHTML = '';
+            erklaerungEl.appendChild(_quizFrageZuSpans(theorie.erklaerung));
+          } else {
+            erklaerungEl.textContent = theorie.erklaerung;
+          }
 
-          // Beispiel (HTML mit Highlights)
-          document.getElementById('beispielSatz').innerHTML = theorie.beispiel;
+          // Beispiel – Wort-für-Wort antippbar wenn Übersetzungsmodus aktiv
+          const beispielEl = document.getElementById('beispielSatz');
+          if (tapModus && zielSprache !== 'de') {
+            const plainText = theorie.beispiel.replace(/<[^>]*>/g, '');
+            beispielEl.innerHTML = '';
+            beispielEl.appendChild(_quizFrageZuSpans(plainText));
+          } else {
+            beispielEl.innerHTML = theorie.beispiel;
+          }
 
           // Satz-Übersetzungs-Button unter dem Beispielsatz
           if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
@@ -1034,21 +1453,53 @@
             }
           }
 
-          // Merkhilfe
-          document.getElementById('merkhilfeText').textContent = theorie.merkhilfe;
+          // Merkhilfe – Wort-für-Wort antippbar wenn Übersetzungsmodus aktiv
+          const merkhilfeEl = document.getElementById('merkhilfeText');
+          if (tapModus && zielSprache !== 'de') {
+            merkhilfeEl.innerHTML = '';
+            merkhilfeEl.appendChild(_quizFrageZuSpans(theorie.merkhilfe));
+          } else {
+            merkhilfeEl.textContent = theorie.merkhilfe;
+          }
 
-          // Wie erkennen (nur bei Themen-Theorie)
+          // Wie erkennen (nur bei Themen-Theorie) – Wort-für-Wort antippbar
           const wieBlock = document.getElementById('wieErkennenBlock');
           wieBlock.style.display = 'flex';
-          document.getElementById('wieErkennenText').textContent = theorie.wie_erkennen;
+          const wieErkennenEl = document.getElementById('wieErkennenText');
+          if (tapModus && zielSprache !== 'de') {
+            wieErkennenEl.innerHTML = '';
+            wieErkennenEl.appendChild(_quizFrageZuSpans(theorie.wie_erkennen));
+          } else {
+            wieErkennenEl.textContent = theorie.wie_erkennen;
+          }
 
-          // Übersetzungs-Button für Erklärung
+          // Übersetzungs-Buttons für alle Textblöcke
           if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
-            const erklaerungEl = document.getElementById('erklaerungText');
             erklaerungEl.parentNode.insertBefore(
-              _uebersetzerBlock(() => erklaerungEl.textContent.trim(), zielSprache),
+              _uebersetzerBlock(() => theorie.erklaerung, zielSprache),
               erklaerungEl.nextSibling
             );
+
+            const merkhilfeWrap = merkhilfeEl.closest('.merkhilfe');
+            if (merkhilfeWrap) {
+              merkhilfeWrap.parentNode.insertBefore(
+                _uebersetzerBlock(() => theorie.merkhilfe, zielSprache),
+                merkhilfeWrap.nextSibling
+              );
+            }
+
+            const wieErkennenWrap = wieErkennenEl.closest('.wie-erkennen');
+            if (wieErkennenWrap) {
+              wieErkennenWrap.parentNode.insertBefore(
+                _uebersetzerBlock(() => theorie.wie_erkennen, zielSprache),
+                wieErkennenWrap.nextSibling
+              );
+            }
+          }
+
+          // Tap-to-Translate initialisieren (API-basiert)
+          if (tapModus && zielSprache !== 'de') {
+            _quizTapToTranslateInit();
           }
 
           document.getElementById('fortschrittFill').style.width = '5%';
@@ -1062,122 +1513,140 @@
           });
         }
 
-      } else {
-        // ── Welten-Theorie (bestehend) ────────────────────────────
-        const inhalt = THEORIE_INHALTE[weltNr] ?? THEORIE_INHALTE[1];
+      } else if (subNr > 0) {
+        // ── Unterwelt-Theorie ────────────────────────────────────
+        const subKey  = weltNr + '-' + subNr;
+        const theorie = _subweltTheorieLaden(subKey);
 
-        document.getElementById('themaBadge').textContent =
-          isDaily ? '⚡ Tägliche Challenge' : `Welt ${weltNr} · Theorie`;
-        document.title = `Deutsch Trainer – ${inhalt.titel}`;
-        document.getElementById('theorieTitel').textContent = inhalt.titel;
+        if (!theorie) {
+          window.location.href = `quiz.html?welt=${weltNr}&sub=${subNr}&phase=quiz`;
+        } else {
+          document.getElementById('themaBadge').textContent = `🌍 Welt ${weltNr}.${subNr} · Theorie`;
+          document.title  = `Deutsch Trainer – ${theorie.titel}`;
+          document.getElementById('theorieTitel').textContent = theorie.titel;
 
-        // ── Erklärungstext aufbauen ───────────────────────────────
-        function wortZuElement(wort) {
-          if (!tapModus) return document.createTextNode(wort.de + ' ');
-          const span = document.createElement('span');
-          span.className   = 'wort';
-          span.tabIndex    = 0;
-          span.dataset.de  = wort.de;
-          span.dataset.fa  = wort.fa;
-          span.dataset.tr  = wort.tr;
-          span.dataset.ar  = wort.ar;
-          span.textContent = wort.de + ' ';
-          return span;
-        }
-
-        function erklaerungAufbauen(container, woerter) {
-          container.innerHTML = '';
-          woerter.forEach(eintrag => {
-            if (eintrag === null) { container.appendChild(document.createElement('br')); return; }
-            container.appendChild(wortZuElement(eintrag));
-          });
-        }
-        erklaerungAufbauen(document.getElementById('erklaerungText'), inhalt.erklaerung);
-
-        // ── Beispiel-Satz aufbauen ────────────────────────────────
-        function beispielAufbauen(container, beispiel) {
-          if (!tapModus) { container.innerHTML = beispiel.satz; return; }
-          container.innerHTML = '';
-          beispiel.tapWoerter.forEach(wort => {
-            const span = document.createElement('span');
-            span.className   = 'wort';
-            span.tabIndex    = 0;
-            span.dataset.de  = wort.de;
-            span.dataset.fa  = wort.fa;
-            span.dataset.tr  = wort.tr;
-            span.dataset.ar  = wort.ar;
-            if (beispiel.satz.includes(`<span class="highlight">${wort.de}</span>`)) {
-              span.classList.add('highlight');
-            }
-            span.textContent = wort.de + ' ';
-            container.appendChild(span);
-          });
-        }
-        beispielAufbauen(document.getElementById('beispielSatz'), inhalt.beispiel);
-
-        // ── Satz-Übersetzungs-Button unter dem Beispielsatz ──────
-        if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
-          const beispielBlock = document.querySelector('.beispiel-block');
-          if (beispielBlock) {
-            beispielBlock.appendChild(
-              _uebersetzerBlock(
-                () => document.getElementById('beispielSatz').textContent.trim(),
-                zielSprache
-              )
-            );
+          // Erklärung – Wort-für-Wort antippbar im Übersetzungsmodus
+          const erklaerungEl = document.getElementById('erklaerungText');
+          if (tapModus && zielSprache !== 'de') {
+            erklaerungEl.innerHTML = '';
+            erklaerungEl.appendChild(_quizFrageZuSpans(theorie.erklaerung));
+          } else {
+            erklaerungEl.textContent = theorie.erklaerung;
           }
+
+          // Beispiel
+          const beispielEl = document.getElementById('beispielSatz');
+          if (tapModus && zielSprache !== 'de') {
+            const plainText = theorie.beispiel.replace(/<[^>]*>/g, '');
+            beispielEl.innerHTML = '';
+            beispielEl.appendChild(_quizFrageZuSpans(plainText));
+          } else {
+            beispielEl.innerHTML = theorie.beispiel;
+          }
+
+          // Satz-Übersetzungs-Button unter Beispielsatz
+          if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
+            const beispielBlock = document.querySelector('.beispiel-block');
+            if (beispielBlock) {
+              beispielBlock.appendChild(
+                _uebersetzerBlock(() => document.getElementById('beispielSatz').textContent.trim(), zielSprache)
+              );
+            }
+          }
+
+          // Merkhilfe
+          const merkhilfeEl = document.getElementById('merkhilfeText');
+          if (tapModus && zielSprache !== 'de') {
+            merkhilfeEl.innerHTML = '';
+            merkhilfeEl.appendChild(_quizFrageZuSpans(theorie.merkhilfe));
+          } else {
+            merkhilfeEl.textContent = theorie.merkhilfe;
+          }
+
+          // Übersetzungs-Buttons für Erklärung und Merkhilfe
+          if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
+            erklaerungEl.parentNode.insertBefore(
+              _uebersetzerBlock(() => theorie.erklaerung, zielSprache),
+              erklaerungEl.nextSibling
+            );
+            const merkhilfeWrap = merkhilfeEl.closest('.merkhilfe');
+            if (merkhilfeWrap) {
+              merkhilfeWrap.parentNode.insertBefore(
+                _uebersetzerBlock(() => theorie.merkhilfe, zielSprache),
+                merkhilfeWrap.nextSibling
+              );
+            }
+          }
+
+          // Tap-to-Translate initialisieren
+          if (tapModus && zielSprache !== 'de') _quizTapToTranslateInit();
+
+          document.getElementById('fortschrittFill').style.width = '5%';
+
+          document.getElementById('startBtn').addEventListener('click', () => {
+            avatarEmotion('happy');
+            setTimeout(() => {
+              window.location.href = `quiz.html?welt=${weltNr}&sub=${subNr}&phase=quiz`;
+            }, 400);
+          });
         }
 
-        // ── Merkhilfe & Fortschrittsleiste ───────────────────────
-        document.getElementById('merkhilfeText').textContent = inhalt.merkhilfe;
+      } else if (isBoss) {
+        // ── Boss-Intro ──────────────────────────────────────────
+        const boss = BOSS_THEORIE[weltNr] ?? BOSS_THEORIE[1];
+
+        document.getElementById('themaBadge').textContent = `⚔️ Bosskampf · Welt ${weltNr}`;
+        document.title  = `Deutsch Trainer – ${boss.titel}`;
+        document.getElementById('theorieTitel').textContent = `${boss.icon} ${boss.titel}`;
+
+        // Erklärung
+        const erklaerungEl = document.getElementById('erklaerungText');
+        if (tapModus && zielSprache !== 'de') {
+          erklaerungEl.innerHTML = '';
+          erklaerungEl.appendChild(_quizFrageZuSpans(boss.erklaerung));
+        } else {
+          erklaerungEl.textContent = boss.erklaerung;
+        }
+
+        // Beispiel-Block ausblenden
+        document.querySelector('.beispiel-block').style.display = 'none';
+
+        // Merkhilfe
+        const merkhilfeEl = document.getElementById('merkhilfeText');
+        if (tapModus && zielSprache !== 'de') {
+          merkhilfeEl.innerHTML = '';
+          merkhilfeEl.appendChild(_quizFrageZuSpans(boss.merkhilfe));
+        } else {
+          merkhilfeEl.textContent = boss.merkhilfe;
+        }
+
+        // Übersetzungs-Buttons
+        if (zielSprache !== 'de' && typeof _uebersetzerBlock === 'function') {
+          erklaerungEl.parentNode.insertBefore(
+            _uebersetzerBlock(() => boss.erklaerung, zielSprache),
+            erklaerungEl.nextSibling
+          );
+        }
+
+        if (tapModus && zielSprache !== 'de') _quizTapToTranslateInit();
+
         document.getElementById('fortschrittFill').style.width = '5%';
 
-        // ── Tap-to-Translate Popup ────────────────────────────────
-        const popup     = document.getElementById('translate-popup');
-        const popupText = document.getElementById('popupText');
-        const popupSpr  = document.getElementById('popupSprache');
-        let   popupTimer = null;
-
-        function popupZeigen(span, x, y) {
-          const anzeigeSprache = zielSprache === 'de' ? 'fa' : zielSprache;
-          popupText.textContent = span.dataset[anzeigeSprache] || span.dataset.fa || '–';
-          popupSpr.textContent  = SPRACH_LABEL[anzeigeSprache] ?? anzeigeSprache;
-          popup.style.left = Math.min(x, window.innerWidth - 160) + 'px';
-          popup.style.top  = (y - 52) + 'px';
-          popup.classList.add('sichtbar');
-          span.classList.add('active');
-          if (popupTimer) clearTimeout(popupTimer);
-          popupTimer = setTimeout(() => {
-            popup.classList.remove('sichtbar');
-            span.classList.remove('active');
-            popupTimer = null;
-          }, 2000);
-        }
-
-        if (tapModus) {
-          document.body.addEventListener('click', e => {
-            const span = e.target.closest('span.wort');
-            if (span) popupZeigen(span, e.clientX, e.clientY);
-          });
-          document.body.addEventListener('keydown', e => {
-            if (e.key !== 'Enter' && e.key !== ' ') return;
-            const span = e.target.closest('span.wort');
-            if (!span) return;
-            const r = span.getBoundingClientRect();
-            popupZeigen(span, r.left + r.width / 2, r.top);
-          });
-        }
-
-        // ── "Los geht's!"-Button ──────────────────────────────────
-        document.getElementById('startBtn').addEventListener('click', () => {
+        const startBtnEl = document.getElementById('startBtn');
+        startBtnEl.innerHTML = 'Kampf starten! ⚔️';
+        startBtnEl.addEventListener('click', () => {
           avatarEmotion('happy');
           setTimeout(() => {
-            window.location.href = isDaily
-              ? 'quiz.html?daily=1&phase=quiz'
-              : `quiz.html?welt=${weltNr}&phase=quiz`;
+            window.location.href = `quiz.html?welt=${weltNr}&boss=1&phase=quiz`;
           }, 400);
         });
-      } // end Welten-Theorie
+
+      } else {
+        // ── Fallback (Daily / Legacy): direkt zum Quiz ──────────
+        window.location.href = isDaily
+          ? 'quiz.html?daily=1&phase=quiz'
+          : 'app.html';
+      } // end theory branches
     } // end else (theorie)
 
     // Sound-Toggle initialisieren

@@ -148,11 +148,11 @@ function achievementsPruefen(extras = {}) {
     xp_100:          () => spieler.xp >= 100,
     xp_500:          () => spieler.xp >= 500,
     xp_2000:         () => spieler.xp >= 2000,
-    welt1_bestanden: () => !!(fortschritt[0]?.testPassed),
-    welt2_bestanden: () => !!(fortschritt[1]?.testPassed),
-    welt3_bestanden: () => !!(fortschritt[2]?.testPassed),
-    welt4_bestanden: () => !!(fortschritt[3]?.testPassed),
-    welt5_bestanden: () => !!(fortschritt[4]?.testPassed),
+    welt1_bestanden: () => !!(fortschritt[0]?.bossDefeated),
+    welt2_bestanden: () => !!(fortschritt[1]?.bossDefeated),
+    welt3_bestanden: () => !!(fortschritt[2]?.bossDefeated),
+    welt4_bestanden: () => !!(fortschritt[3]?.bossDefeated),
+    welt5_bestanden: () => !!(fortschritt[4]?.bossDefeated),
     perfekt_quiz:    () => extras.pct === 100,
   };
 

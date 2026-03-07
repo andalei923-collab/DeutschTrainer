@@ -212,147 +212,7 @@
     }
     .daily-badge.done { background: var(--c-muted); }
 
-    /* ── Welten-Liste ────────────────────────────────────────── */
-    .welten-liste {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    /* Welt-Karte */
-    .welt-card {
-      border-radius: 18px;
-      border: 1.5px solid rgba(255,255,255,.08);
-      overflow: hidden;
-      position: relative;
-      transition: transform .15s, box-shadow .15s;
-      cursor: pointer;
-    }
-    .welt-card.locked {
-      cursor: default;
-      filter: saturate(.25);
-    }
-    .welt-card:not(.locked):hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 36px rgba(0,0,0,.5);
-    }
-
-    /* Farbiger Kopfbereich */
-    .welt-head {
-      padding: 1.1rem 1.2rem .9rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      position: relative;
-    }
-
-    .welt-icon {
-      width: 52px; height: 52px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.25);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.8rem;
-      flex-shrink: 0;
-    }
-
-    .welt-info { flex: 1; }
-    .welt-nummer {
-      font-size: .72rem;
-      font-weight: 700;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      opacity: .75;
-    }
-    .welt-name {
-      font-size: 1.05rem;
-      font-weight: 800;
-      margin-top: .1rem;
-    }
-    .welt-sub {
-      font-size: .8rem;
-      opacity: .7;
-      margin-top: .15rem;
-    }
-
-    /* Sterne */
-    .welt-stars {
-      display: flex;
-      gap: .2rem;
-      flex-shrink: 0;
-    }
-    .star { font-size: 1.15rem; }
-    .star.empty { opacity: .25; }
-
-    /* Schloss-Overlay */
-    .lock-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,.55);
-      border-radius: 17px;
-    }
-    .lock-icon { font-size: 2rem; opacity: .8; }
-
-    /* Fortschritts-Leiste */
-    .welt-foot {
-      background: rgba(0,0,0,.25);
-      padding: .6rem 1.2rem;
-      display: flex;
-      align-items: center;
-      gap: .8rem;
-    }
-    .prog-track {
-      flex: 1;
-      height: 5px;
-      border-radius: 99px;
-      background: rgba(255,255,255,.12);
-      overflow: hidden;
-    }
-    .prog-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width .6s;
-    }
-    .prog-label {
-      font-size: .75rem;
-      color: rgba(255,255,255,.55);
-      white-space: nowrap;
-    }
-    .test-badge {
-      font-size: .72rem;
-      font-weight: 700;
-      border-radius: 99px;
-      padding: .2rem .55rem;
-      white-space: nowrap;
-    }
-    .test-badge.passed {
-      background: rgba(15,212,200,.18);
-      color: var(--c-accent3);
-    }
-    .test-badge.open {
-      background: rgba(245,166,35,.15);
-      color: var(--c-accent2);
-    }
-
-    /* Welt-Farben */
-    .welt-1 .welt-head { background: linear-gradient(135deg, #1a3a1a, #0d3d2a); }
-    .welt-1 .prog-fill { background: #4ade80; }
-
-    .welt-2 .welt-head { background: linear-gradient(135deg, #0d2040, #0a2e50); }
-    .welt-2 .prog-fill { background: #38bdf8; }
-
-    .welt-3 .welt-head { background: linear-gradient(135deg, #3a1a0d, #50200a); }
-    .welt-3 .prog-fill { background: var(--c-accent2); }
-
-    .welt-4 .welt-head { background: linear-gradient(135deg, #2a0d3a, #1e0a50); }
-    .welt-4 .prog-fill { background: var(--c-purple); }
-
-    .welt-5 .welt-head { background: linear-gradient(135deg, #3a2a00, #503a00); }
-    .welt-5 .prog-fill { background: #facc15; }
-
-    /* ── Zurück-Button (identisch mit Quiz) ─────────────────── */
+    /* ── Zurück-Button ─────────────────────────────────────── */
     .zurueck-link {
       display: inline-flex;
       align-items: center;
@@ -373,6 +233,158 @@
       color: #fff;
       border-color: rgba(255,255,255,.35);
     }
+
+    /* ── Welten-Akkordeon ──────────────────────────────────── */
+    .welten-liste {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+
+    .welt-akkordeon {
+      border-radius: 18px;
+      border: 1.5px solid rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+    .welt-akkordeon.locked { opacity: .5; }
+
+    .welt-kopf {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      padding: 1rem 1.2rem;
+      border: none;
+      color: var(--c-text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .15s;
+      text-align: left;
+    }
+    .welt-kopf:hover:not(.disabled) { filter: brightness(1.1); }
+    .welt-kopf.disabled { cursor: default; }
+
+    .welt-kopf-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .welt-kopf-info { flex: 1; min-width: 0; }
+    .welt-kopf-name {
+      font-size: 1rem;
+      font-weight: 800;
+    }
+    .welt-kopf-fortschritt {
+      font-size: .78rem;
+      color: rgba(255,255,255,.6);
+      margin-top: .15rem;
+    }
+
+    .welt-kopf-chevron {
+      font-size: .9rem;
+      color: rgba(255,255,255,.5);
+      transition: transform .25s ease;
+      flex-shrink: 0;
+    }
+    .welt-akkordeon.offen .welt-kopf-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Welt-Farben */
+    .welt-1 .welt-kopf { background: linear-gradient(135deg, #1a3a1a, #0d3d2a); }
+    .welt-2 .welt-kopf { background: linear-gradient(135deg, #0d2040, #0a2e50); }
+    .welt-3 .welt-kopf { background: linear-gradient(135deg, #3a1a0d, #50200a); }
+    .welt-4 .welt-kopf { background: linear-gradient(135deg, #2a0d3a, #1e0a50); }
+    .welt-5 .welt-kopf { background: linear-gradient(135deg, #3a2a00, #503a00); }
+
+    /* ── Aufklappbarer Inhalt ──────────────────────────────── */
+    .welt-inhalt {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .35s ease;
+      background: rgba(0,0,0,.15);
+    }
+
+    .sub-liste {
+      padding: .4rem .7rem .7rem;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+    }
+
+    /* ── Unterwelt-Item ────────────────────────────────────── */
+    .sub-item {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .65rem .85rem;
+      border-radius: 12px;
+      border: 1.5px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.025);
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      font-family: inherit;
+      color: var(--c-text);
+      text-align: left;
+      width: 100%;
+    }
+    .sub-item:hover:not(.sub-locked) {
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.14);
+    }
+    .sub-item.sub-locked {
+      opacity: .35;
+      cursor: default;
+    }
+    .sub-item.sub-done {
+      border-color: rgba(74,222,128,.2);
+    }
+
+    .sub-status { font-size: 1rem; flex-shrink: 0; width: 1.3rem; text-align: center; }
+    .sub-nr     { font-size: .72rem; font-weight: 700; color: var(--c-muted); flex-shrink: 0; width: 1.6rem; }
+    .sub-icon   { font-size: 1.05rem; flex-shrink: 0; }
+    .sub-name   { flex: 1; font-size: .88rem; font-weight: 600; }
+    .sub-stars  { font-size: .8rem; flex-shrink: 0; letter-spacing: 1px; }
+
+    /* ── Boss-Item ─────────────────────────────────────────── */
+    .boss-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .75rem .85rem;
+      border-radius: 12px;
+      border: 1.5px solid rgba(233,69,96,.2);
+      background: rgba(233,69,96,.06);
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      margin-top: .25rem;
+      font-family: inherit;
+      color: var(--c-text);
+      text-align: left;
+      width: 100%;
+    }
+    .boss-item:hover:not(.boss-locked) {
+      background: rgba(233,69,96,.12);
+      border-color: rgba(233,69,96,.35);
+    }
+    .boss-item.boss-locked {
+      opacity: .35;
+      cursor: default;
+    }
+    .boss-item.boss-defeated {
+      border-color: rgba(74,222,128,.25);
+      background: rgba(74,222,128,.06);
+    }
+
+    .boss-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .boss-name { flex: 1; font-size: .88rem; font-weight: 700; }
+    .boss-hp   { font-size: .72rem; font-weight: 700; color: var(--c-accent1); white-space: nowrap; }
+    .boss-defeated .boss-hp { color: var(--c-accent3); }
+    .boss-lock { font-size: .85rem; flex-shrink: 0; }
 
     /* ── Bottom-Nav ─────────────────────────────────────────── */
     .bottom-nav {
@@ -405,65 +417,6 @@
     .nav-item.active { color: var(--c-accent3); }
     .nav-item:hover  { color: var(--c-text); }
 
-    /* ── Tooltip Tour ────────────────────────────────────────── */
-    #tour-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.62);
-      z-index: 800;
-      pointer-events: none;
-    }
-    .tour-highlight {
-      outline: 3px solid var(--c-accent3) !important;
-      outline-offset: 4px;
-    }
-    .topbar.tour-z { z-index: 803 !important; }
-
-    #tour-tip {
-      position: fixed;
-      background: #16213e;
-      border: 1.5px solid var(--c-purple);
-      border-radius: 14px;
-      padding: .9rem 1.1rem;
-      width: 248px;
-      max-width: calc(100vw - 2rem);
-      z-index: 804;
-      box-shadow: 0 8px 32px rgba(0,0,0,.55);
-    }
-    @keyframes tour-ein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    #tour-tip { animation: tour-ein .2s ease; }
-
-    .tour-tip-text {
-      font-size: .9rem; font-weight: 600;
-      color: var(--c-text); line-height: 1.5;
-      margin-bottom: .75rem;
-    }
-    .tour-tip-fuss {
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .tour-zaehler { font-size: .75rem; color: var(--c-muted); }
-    .tour-weiter-btn {
-      padding: .5rem .9rem; border: none;
-      border-radius: 99px; background: var(--c-purple);
-      color: #fff; font-size: .85rem; font-weight: 700;
-      cursor: pointer; min-height: 44px;
-      display: inline-flex; align-items: center;
-      transition: opacity .15s;
-    }
-    .tour-weiter-btn:hover { opacity: .85; }
-    .tour-pfeil {
-      position: absolute;
-      width: 0; height: 0;
-      border-left: 7px solid transparent;
-      border-right: 7px solid transparent;
-    }
-    .tour-pfeil.oben {
-      top: -8px;
-      border-bottom: 8px solid var(--c-purple);
-    }
-    .tour-pfeil.unten {
-      bottom: -8px;
-      border-top: 8px solid var(--c-purple);
-    }
   </style>
 </head>
 <body>
@@ -484,6 +437,7 @@
       <div class="stat-chip streak">🔥 <span id="streakCount">0</span></div>
       <div class="stat-chip hearts">❤️ <span id="heartsCount">5</span></div>
       <button class="sound-btn" id="soundToggleBtn" title="Sound">🔊</button>
+      <button class="hilfe-btn" id="hilfeBtn" title="Tutorial / Hilfe" onclick="tutorialAnzeigen()">?</button>
     </div>
   </header>
 
@@ -528,9 +482,10 @@
     </a>
   </nav>
 
-  <script src="js/storage.js?v=0.2"></script>
-  <script src="js/sound.js?v=0.2"></script>
-  <script src="js/xp.js?v=0.2"></script>
+  <script src="js/storage.js?v=0.3"></script>
+  <script src="js/sound.js?v=0.3"></script>
+  <script src="js/xp.js?v=0.3"></script>
+  <script src="js/tutorial.js?v=1.0"></script>
   <script>
     // ── Konstanten ────────────────────────────────────────────
     const AVATAR_MAP = {
@@ -541,11 +496,61 @@
     };
 
     const WELTEN = [
-      { nr: 1, icon: '🌱', desc: 'Buchstaben, einfache Wörter'       },
-      { nr: 2, icon: '🌊', desc: 'Nomen, Verben, einfache Sätze'     },
-      { nr: 3, icon: '🔥', desc: 'Grammatik & Rechtschreibung'        },
-      { nr: 4, icon: '⚡', desc: 'Texte, Bedeutungen & Stil'          },
-      { nr: 5, icon: '🌟', desc: 'Fremdwörter, Synonyme, Steigerung' },
+      {
+        nr: 1, icon: '🌱', name: 'Wortarten & Grundlagen',
+        boss: { name: 'Der Wort-Kobold', hp: 15, icon: '👺' },
+        subs: [
+          { name: 'Nomen', icon: '📝' },
+          { name: 'Verben', icon: '🏃' },
+          { name: 'Adjektive', icon: '🎨' },
+          { name: 'Artikel (der/die/das)', icon: '📌' },
+          { name: 'Pronomen', icon: '👆' },
+        ],
+      },
+      {
+        nr: 2, icon: '🏗️', name: 'Satzbau & Grammatik',
+        boss: { name: 'Der Grammatik-Troll', hp: 15, icon: '🧌' },
+        subs: [
+          { name: 'Satzglieder', icon: '🧩' },
+          { name: 'Die 4 Fälle', icon: '📦' },
+          { name: 'Zeitformen', icon: '⏳' },
+          { name: 'Satzzeichen', icon: '✏️' },
+          { name: 'Nebensätze', icon: '🔗' },
+        ],
+      },
+      {
+        nr: 3, icon: '🔥', name: 'Rechtschreibung & Ausdruck',
+        boss: { name: 'Die Rechtschreib-Hexe', hp: 15, icon: '🧙‍♀️' },
+        subs: [
+          { name: 'Groß-/Kleinschreibung', icon: '🔠' },
+          { name: 'Getrennt-/Zusammenschreibung', icon: '🔀' },
+          { name: 'Synonyme & Antonyme', icon: '🔄' },
+          { name: 'Fremdwörter', icon: '🌍' },
+          { name: 'Redewendungen', icon: '💬' },
+        ],
+      },
+      {
+        nr: 4, icon: '⚡', name: 'Texte & Kommunikation',
+        boss: { name: 'Der Text-Golem', hp: 15, icon: '🗿' },
+        subs: [
+          { name: 'Textarten erkennen', icon: '📄' },
+          { name: 'Berichte schreiben', icon: '📰' },
+          { name: 'Briefe & E-Mails', icon: '📧' },
+          { name: 'Bewerbung', icon: '💼' },
+          { name: 'Zusammenfassungen', icon: '📋' },
+        ],
+      },
+      {
+        nr: 5, icon: '🌟', name: 'Der Endkampf',
+        boss: { name: 'Der Deutsch-Drache', hp: 15, icon: '🐉' },
+        subs: [
+          { name: 'Wortarten-Wiederholung', icon: '🌱' },
+          { name: 'Grammatik-Wiederholung', icon: '🏗️' },
+          { name: 'Rechtschreibung-Wiederholung', icon: '🔥' },
+          { name: 'Text-Wiederholung', icon: '⚡' },
+          { name: 'Generalprobe', icon: '🎯' },
+        ],
+      },
     ];
 
     // ── Topbar befüllen ───────────────────────────────────────
@@ -581,84 +586,158 @@
       badge.className    = 'daily-badge' + (erledigt ? ' done' : '');
     }
 
-    // ── Sterne rendern ────────────────────────────────────────
+    // ── Sterne-Anzeige ──────────────────────────────────────
     function renderStars(stars) {
-      return [1,2,3].map(n =>
-        `<span class="star${n <= stars ? '' : ' empty'}" aria-hidden="true">⭐</span>`
-      ).join('');
+      return '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
     }
 
-    // ── Fortschritts-% (Platzhalter; später aus Quiz-Daten) ───
-    function progProzent(fortschritt) {
-      if (!fortschritt.unlocked) return 0;
-      if (fortschritt.completed) return 100;
-      return fortschritt.stars > 0 ? Math.round((fortschritt.stars / 3) * 80) : 0;
-    }
-
-    // ── Welten-Liste rendern ──────────────────────────────────
+    // ── Welten-Liste rendern (Akkordeon) ─────────────────────
     function renderWelten(fortschritt) {
       const liste = document.getElementById('weltenListe');
       liste.innerHTML = '';
 
-      WELTEN.forEach((w, i) => {
-        const fs      = fortschritt[i];
-        const locked  = !fs.unlocked;
-        const pct     = progProzent(fs);
+      // Bestimme welche Welt auto-geöffnet wird (letzte freigeschaltete)
+      let autoOpenNr = 0;
+      for (let i = fortschritt.length - 1; i >= 0; i--) {
+        if (fortschritt[i].unlocked) { autoOpenNr = i; break; }
+      }
 
-        const card = document.createElement('div');
-        card.className = `welt-card welt-${w.nr}${locked ? ' locked' : ''}`;
-        card.setAttribute('role', locked ? 'img' : 'button');
-        card.setAttribute('aria-label',
-          locked ? `Welt ${w.nr} (gesperrt)` : `Welt ${w.nr} öffnen`);
+      WELTEN.forEach((w, i) => {
+        const fs     = fortschritt[i];
+        const locked = !fs.unlocked;
+        const completedSubs = fs.subwelten.filter(s => s.completed).length;
+        const allSubsDone   = completedSubs === 5;
+
+        const akkordeon = document.createElement('div');
+        akkordeon.className = `welt-akkordeon welt-${w.nr}${locked ? ' locked' : ''}`;
+
+        // ── Kopfzeile ──
+        const kopf = document.createElement('button');
+        kopf.className = `welt-kopf${locked ? ' disabled' : ''}`;
+        kopf.setAttribute('aria-expanded', 'false');
+
+        let fortschrittText = 'Gesperrt';
         if (!locked) {
-          card.setAttribute('tabindex', '0');
-          card.addEventListener('click', () => oeffneWelt(w.nr));
-          card.addEventListener('keydown', e => {
-            if (e.key === 'Enter' || e.key === ' ') oeffneWelt(w.nr);
+          fortschrittText = fs.bossDefeated
+            ? '✅ Abgeschlossen'
+            : `${completedSubs}/5 Unterwelten`;
+        }
+
+        kopf.innerHTML = `
+          <div class="welt-kopf-icon">${locked ? '🔒' : w.icon}</div>
+          <div class="welt-kopf-info">
+            <div class="welt-kopf-name">Welt ${w.nr}: ${w.name}</div>
+            <div class="welt-kopf-fortschritt">${fortschrittText}</div>
+          </div>
+          ${locked ? '' : '<span class="welt-kopf-chevron">▼</span>'}
+        `;
+
+        if (!locked) {
+          kopf.addEventListener('click', () => {
+            const offen = akkordeon.classList.toggle('offen');
+            kopf.setAttribute('aria-expanded', offen);
+            const inhalt = akkordeon.querySelector('.welt-inhalt');
+            if (offen) {
+              inhalt.style.maxHeight = inhalt.scrollHeight + 'px';
+              // Andere Akkordeons schließen
+              document.querySelectorAll('.welt-akkordeon.offen').forEach(other => {
+                if (other !== akkordeon) {
+                  other.classList.remove('offen');
+                  other.querySelector('.welt-kopf').setAttribute('aria-expanded', 'false');
+                  other.querySelector('.welt-inhalt').style.maxHeight = '0';
+                }
+              });
+            } else {
+              inhalt.style.maxHeight = '0';
+            }
           });
         }
 
-        card.innerHTML = `
-          <div class="welt-head">
-            <div class="welt-icon">${w.icon}</div>
-            <div class="welt-info">
-              <div class="welt-name">🌍 Welt ${w.nr}</div>
-              <div class="welt-sub">${w.desc}</div>
-            </div>
-            <div class="welt-stars" aria-label="${fs.stars} von 3 Sternen">
-              ${renderStars(fs.stars)}
-            </div>
-            ${locked ? '<div class="lock-overlay"><span class="lock-icon">🔒</span></div>' : ''}
-          </div>
-          <div class="welt-foot">
-            <div class="prog-track">
-              <div class="prog-fill" style="width:${pct}%"></div>
-            </div>
-            <span class="prog-label">${pct}%</span>
-            <span class="test-badge ${fs.testPassed ? 'passed' : 'open'}">
-              ${fs.testPassed ? '✓ Test bestanden' : 'Stufentest'}
-            </span>
-          </div>
-        `;
+        akkordeon.appendChild(kopf);
 
-        liste.appendChild(card);
+        // ── Inhalt (nur für freigeschaltete Welten) ──
+        if (!locked) {
+          const inhalt = document.createElement('div');
+          inhalt.className = 'welt-inhalt';
+
+          const subListe = document.createElement('div');
+          subListe.className = 'sub-liste';
+
+          w.subs.forEach((sub, j) => {
+            const subFs      = fs.subwelten[j];
+            const subUnlocked = j === 0 || fs.subwelten[j - 1].completed;
+            const subDone    = subFs.completed;
+
+            const item = document.createElement('button');
+            item.className = `sub-item${!subUnlocked ? ' sub-locked' : ''}${subDone ? ' sub-done' : ''}`;
+            item.innerHTML = `
+              <span class="sub-status">${subDone ? '✅' : subUnlocked ? '▶️' : '🔒'}</span>
+              <span class="sub-nr">${w.nr}.${j + 1}</span>
+              <span class="sub-icon">${sub.icon}</span>
+              <span class="sub-name">${sub.name}</span>
+              ${subDone ? '<span class="sub-stars">' + renderStars(subFs.stars) + '</span>' : ''}
+            `;
+
+            if (subUnlocked) {
+              item.addEventListener('click', () => oeffneSub(w.nr, j + 1));
+            }
+
+            subListe.appendChild(item);
+          });
+
+          // ── Boss ──
+          const bossUnlocked = allSubsDone;
+          const bossItem = document.createElement('button');
+          bossItem.className = `boss-item${!bossUnlocked ? ' boss-locked' : ''}${fs.bossDefeated ? ' boss-defeated' : ''}`;
+          bossItem.innerHTML = `
+            <span class="boss-icon">${w.boss.icon}</span>
+            <span class="boss-name">BOSS: ${w.boss.name}</span>
+            <span class="boss-hp">${fs.bossDefeated ? '✅ Besiegt' : w.boss.hp + ' HP'}</span>
+            ${!bossUnlocked && !fs.bossDefeated ? '<span class="boss-lock">🔒</span>' : ''}
+          `;
+
+          if (bossUnlocked && !fs.bossDefeated) {
+            bossItem.addEventListener('click', () => oeffneBoss(w.nr));
+          }
+
+          subListe.appendChild(bossItem);
+          inhalt.appendChild(subListe);
+          akkordeon.appendChild(inhalt);
+
+          // Auto-öffnen
+          if (i === autoOpenNr) {
+            akkordeon.classList.add('offen');
+            kopf.setAttribute('aria-expanded', 'true');
+            requestAnimationFrame(() => {
+              inhalt.style.maxHeight = inhalt.scrollHeight + 'px';
+            });
+          }
+        }
+
+        liste.appendChild(akkordeon);
       });
     }
 
     // ── Navigation ────────────────────────────────────────────
-    function oeffneWelt(nr) {
-      window.location.href = `quiz.html?welt=${nr}`;
+    function oeffneSub(weltNr, subNr) {
+      window.location.href = `quiz.html?welt=${weltNr}&sub=${subNr}`;
+    }
+
+    function oeffneBoss(weltNr) {
+      window.location.href = `quiz.html?welt=${weltNr}&boss=1`;
     }
 
     document.getElementById('dailyBanner').addEventListener('click', () => {
-      window.location.href = 'quiz.html?daily=1';
+      window.location.href = 'quiz.html?daily=1&phase=quiz';
     });
     document.getElementById('dailyBanner').addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') window.location.href = 'quiz.html?daily=1';
+      if (e.key === 'Enter' || e.key === ' ') window.location.href = 'quiz.html?daily=1&phase=quiz';
     });
 
     // ── Initialisierung ───────────────────────────────────────
     (function init() {
+      if (typeof migrieren === 'function') migrieren();
+
       const spieler     = spielerLaden();
       const fortschritt = fortschrittLaden();
 
@@ -675,117 +754,73 @@
       renderWelten(fortschritt);
       renderDaily();
       soundToggleInit('soundToggleBtn');
+
+      // Tutorial beim ersten Besuch anzeigen
+      if (typeof tutorialInit === 'function') tutorialInit();
     })();
 
-    // ── Tooltip Tour ──────────────────────────────────────────
+    // ── Cheat-Code: "testmodus" tippen → alle Welten freischalten ──
     (function() {
-      if (localStorage.getItem('dt_tutorial') !== 'tour') return;
+      const CODE = 'testmodus';
+      let buf = '';
+      let aktiv = false;
 
-      const SCHRITTE = [
-        { sel: '#avatarBubble',     text: 'Das bist du! Passe deinen Avatar an 🐾' },
-        { sel: '.xp-track',         text: 'Hier siehst du deine Erfahrungspunkte ⭐' },
-        { sel: '.stat-chip.hearts', text: 'Deine Herzen – pass gut auf sie auf! ❤️' },
-        { sel: '.stat-chip.streak', text: 'Spiele täglich für deinen Streak! 🔥' },
-        { sel: '.welt-card',        text: 'Hier startest du – klicke auf Welt 1! 🌍' },
-      ];
+      document.addEventListener('keydown', e => {
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        if (e.key.length !== 1) return;
+        buf += e.key.toLowerCase();
+        if (buf.length > CODE.length) buf = buf.slice(-CODE.length);
+        if (buf !== CODE) return;
+        buf = '';
 
-      let schritt = 0;
-      let vorherigesZiel = null;
-      const topbar = document.querySelector('.topbar');
+        const fortschritt = fortschrittLaden();
 
-      const overlay = document.createElement('div');
-      overlay.id = 'tour-overlay';
-      document.body.appendChild(overlay);
-
-      const tip = document.createElement('div');
-      tip.id = 'tour-tip';
-      document.body.appendChild(tip);
-
-      function aufraeuemen() {
-        if (vorherigesZiel) {
-          vorherigesZiel.classList.remove('tour-highlight');
-          vorherigesZiel.style.removeProperty('z-index');
-          vorherigesZiel.style.removeProperty('position');
-          vorherigesZiel = null;
-        }
-        topbar?.classList.remove('tour-z');
-      }
-
-      function beenden() {
-        localStorage.setItem('dt_tutorial', 'done');
-        aufraeuemen();
-        overlay.remove();
-        tip.remove();
-      }
-
-      function zeige(i) {
-        aufraeuemen();
-        tip.style.animation = 'none';
-
-        const s    = SCHRITTE[i];
-        const ziel = document.querySelector(s.sel);
-        if (!ziel) { beenden(); return; }
-
-        // Highlight
-        ziel.classList.add('tour-highlight');
-        vorherigesZiel = ziel;
-
-        // Z-Index: Topbar-Elemente → Topbar heben; sonst Element selbst
-        if (ziel.closest('.topbar')) {
-          topbar.classList.add('tour-z');
+        if (!aktiv) {
+          // Alles spielbar machen (aber nichts als besiegt/erledigt markieren)
+          for (let i = 0; i < fortschritt.length; i++) {
+            fortschritt[i].unlocked = true;
+            fortschritt[i].bossDefeated = false;
+            for (let s = 0; s < fortschritt[i].subwelten.length; s++) {
+              fortschritt[i].subwelten[s].completed = true;
+              fortschritt[i].subwelten[s].sterne = 0;
+            }
+          }
+          fortschrittSpeichern(fortschritt);
+          aktiv = true;
+          _cheatToast('\uD83D\uDD13 Testmodus aktiviert \u2014 alle Welten freigeschaltet!');
         } else {
-          if (getComputedStyle(ziel).position === 'static') {
-            ziel.style.position = 'relative';
+          // Zurücksetzen auf Anfang (nur Welt 1 offen)
+          for (let i = 0; i < fortschritt.length; i++) {
+            fortschritt[i].unlocked = i === 0;
+            fortschritt[i].bossDefeated = false;
+            for (let s = 0; s < fortschritt[i].subwelten.length; s++) {
+              fortschritt[i].subwelten[s].completed = false;
+              fortschritt[i].subwelten[s].sterne = 0;
+            }
           }
-          ziel.style.zIndex = '802';
-          ziel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          fortschrittSpeichern(fortschritt);
+          aktiv = false;
+          _cheatToast('\uD83D\uDD12 Testmodus deaktiviert');
         }
 
-        const letzt = i === SCHRITTE.length - 1;
+        // Welten-Karte neu rendern
+        const liste = document.querySelector('.welten-liste');
+        if (liste) { liste.innerHTML = ''; renderWelten(fortschrittLaden()); }
+      });
 
-        tip.innerHTML = `
-          <div class="tour-pfeil oben" id="tourPfeil"></div>
-          <p class="tour-tip-text">${s.text}</p>
-          <div class="tour-tip-fuss">
-            <span class="tour-zaehler">${i + 1} / ${SCHRITTE.length}</span>
-            <button class="tour-weiter-btn">${letzt ? 'Tutorial beenden ✓' : 'Weiter →'}</button>
-          </div>`;
-
-        tip.querySelector('.tour-weiter-btn')
-          .addEventListener('click', () => {
-            if (letzt) beenden();
-            else        zeige(++schritt);
-          });
-
-        // Positionierung (nach kurzem Delay für scrollIntoView)
-        requestAnimationFrame(() => {
-          tip.style.animation = '';
-          const rect  = ziel.getBoundingClientRect();
-          const tipW  = 248;
-          const tipH  = tip.offsetHeight || 110;
-          const left  = Math.max(12, Math.min(rect.left, window.innerWidth - tipW - 12));
-          const pfeil = tip.querySelector('#tourPfeil');
-
-          // Pfeilo-Offset zentriert über dem Ziel-Element
-          const pfeilLinks = Math.max(12, Math.min(
-            rect.left + rect.width / 2 - left - 7, tipW - 22
-          ));
-
-          if (rect.bottom + tipH + 20 < window.innerHeight) {
-            // Tooltip unter dem Element
-            tip.style.top  = (rect.bottom + 12) + 'px';
-            if (pfeil) { pfeil.className = 'tour-pfeil oben'; pfeil.style.left = pfeilLinks + 'px'; }
-          } else {
-            // Tooltip über dem Element
-            tip.style.top  = (rect.top - tipH - 16) + 'px';
-            if (pfeil) { pfeil.className = 'tour-pfeil unten'; pfeil.style.left = pfeilLinks + 'px'; }
-          }
-          tip.style.left = left + 'px';
+      function _cheatToast(text) {
+        const el = document.createElement('div');
+        el.textContent = text;
+        Object.assign(el.style, {
+          position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
+          background: '#1a1a2e', color: '#fff', padding: '.6rem 1.2rem',
+          borderRadius: '8px', fontSize: '.9rem', fontWeight: '600',
+          zIndex: '9999', boxShadow: '0 4px 16px rgba(0,0,0,.3)',
+          transition: 'opacity .4s', opacity: '1',
         });
+        document.body.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, 2500);
       }
-
-      // Kurz warten bis renderWelten() fertig ist
-      setTimeout(() => zeige(0), 650);
     })();
   </script>
 </body>

@@ -339,7 +339,7 @@
 
   </main>
 
-  <script src="js/supabase.js?v=0.2"></script>
+  <script src="js/supabase.js?v=0.3"></script>
   <script>
     // ── Header-Hilfsfunktion ──────────────────────────────────
     // SUPABASE_URL + SUPABASE_KEY kommen global aus js/supabase.js
@@ -566,16 +566,21 @@
 
       el('offlineBanner').style.display = 'none';
 
-      await Promise.all([
-        statsSpeisen(),
-        weltChartSpeisen(),
-        levelChartSpeisen(),
-      ]);
+      try {
+        await Promise.all([
+          statsSpeisen(),
+          weltChartSpeisen(),
+          levelChartSpeisen(),
+        ]);
 
-      const uhr = new Date().toLocaleTimeString('de-AT', {
-        hour: '2-digit', minute: '2-digit',
-      });
-      el('letzteAkt').textContent = `Aktualisiert: ${uhr} Uhr`;
+        const uhr = new Date().toLocaleTimeString('de-AT', {
+          hour: '2-digit', minute: '2-digit',
+        });
+        el('letzteAkt').textContent = `Aktualisiert: ${uhr} Uhr`;
+      } catch (err) {
+        console.error('[admin] Fehler beim Laden:', err);
+        el('letzteAkt').textContent = 'Fehler beim Laden';
+      }
       btn.disabled    = false;
       btn.textContent = '↻ Neu laden';
     }

@@ -14,10 +14,21 @@ const QUIZ = {
   falsch:     0,
   xpRunde:    0,
   weltNr:     1,
+  subNr:      0,       // Unterwelt-Nummer (1-5, 0 = keine)
+  isBoss:     false,   // Boss-Kampf?
   container:  null,
   gesperrt:   false,   // Eingabe blockiert während Feedback läuft
 
   _richtigInFolge: 0,  // Streak-Zähler für Herz-Bonus (4 in Folge = +1 ❤️)
+
+  // Boss-Kampf Zustand
+  boss: {
+    hp:        15,
+    maxHp:     15,
+    name:      '',
+    icon:      '',
+    aktiv:     false,   // true wenn Boss-Kampf-UI gerendert wird
+  },
 
   // Typ-spezifischer Zustand – wird pro Frage neu gesetzt
   _typ: {
@@ -175,6 +186,271 @@ function _streakHerzPopupZeigen() {
 }
 
 // ============================================================
+//  Boss-Kampf System
+// ============================================================
+
+/** Boss-Daten pro Welt */
+const BOSS_DATEN = {
+  1: { name: 'Der Wort-Kobold',      icon: '👺', hp: 15, farbe: '#9333ea', bg: 'linear-gradient(135deg, #12082a 0%, #0a1a12 50%, #1a0d2e 100%)' },
+  2: { name: 'Der Grammatik-Troll',   icon: '🧌', hp: 15, farbe: '#6b7280', bg: 'linear-gradient(135deg, #0d0d18 0%, #141a2e 50%, #0d1525 100%)' },
+  3: { name: 'Die Rechtschreib-Hexe', icon: '🧙‍♀️', hp: 15, farbe: '#a855f7', bg: 'linear-gradient(135deg, #1e0a30 0%, #2a0d3a 50%, #150820 100%)' },
+  4: { name: 'Der Text-Golem',       icon: '🗿', hp: 15, farbe: '#78716c', bg: 'linear-gradient(135deg, #1a1508 0%, #201a10 50%, #15120a 100%)' },
+  5: { name: 'Der Deutsch-Drache',    icon: '🐉', hp: 15, farbe: '#dc2626', bg: 'linear-gradient(135deg, #250000 0%, #2e0a00 40%, #1a0500 70%, #180800 100%)' },
+};
+
+/**
+ * Initialisiert den Boss-Kampf-Modus.
+ * Wird nach quizStarten() aufgerufen wenn isBoss = true.
+ */
+function bossKampfStarten(weltNr) {
+  const daten = BOSS_DATEN[weltNr] ?? BOSS_DATEN[1];
+  QUIZ.boss.hp     = daten.hp;
+  QUIZ.boss.maxHp  = daten.hp;
+  QUIZ.boss.name   = daten.name;
+  QUIZ.boss.icon   = daten.icon;
+  QUIZ.boss.aktiv  = true;
+
+  // Boss-Intro-Sound (Welt 5 bekommt den epischeren Drachen-Sound)
+  if (weltNr === 5 && typeof soundDrachenIntro === 'function') {
+    soundDrachenIntro();
+  } else if (typeof soundBossIntro === 'function') {
+    soundBossIntro();
+  }
+
+  // Body-Klasse für dunklen Hintergrund
+  document.body.classList.add('boss-modus');
+  document.body.style.setProperty('--boss-bg', daten.bg);
+
+  // Boss-Arena rendern (über der Karte)
+  _bossArenaRendern();
+}
+
+/**
+ * Rendert die Boss-Arena (HP-Balken, Boss-Figur) oben auf der Seite.
+ */
+function _bossArenaRendern() {
+  // Bestehende Arena entfernen falls vorhanden
+  const alt = document.getElementById('bossArena');
+  if (alt) alt.remove();
+
+  const daten = BOSS_DATEN[QUIZ.weltNr] ?? BOSS_DATEN[1];
+  const arena = document.createElement('div');
+  arena.id = 'bossArena';
+  arena.className = 'boss-arena';
+
+  const pct = Math.max(0, (QUIZ.boss.hp / QUIZ.boss.maxHp) * 100);
+  const istWelt5 = QUIZ.weltNr === 5;
+
+  arena.innerHTML = `
+    <div class="boss-figur${istWelt5 ? ' boss-endgegner' : ''}" id="bossFigur">
+      <span class="boss-emoji">${QUIZ.boss.icon}</span>
+    </div>
+    <div class="boss-info">
+      <div class="boss-namen-zeile">
+        <span class="boss-kampf-name">${esc(QUIZ.boss.name)}</span>
+        <span class="boss-hp-text" id="bossHpText">${QUIZ.boss.hp} / ${QUIZ.boss.maxHp} HP</span>
+      </div>
+      <div class="boss-hp-leiste">
+        <div class="boss-hp-fill" id="bossHpFill" style="width:${pct}%;background:${daten.farbe}"></div>
+      </div>
+    </div>
+  `;
+
+  // Einfügen vor der Karte
+  const karte = document.getElementById('theoriKarte');
+  if (karte) {
+    karte.parentNode.insertBefore(arena, karte);
+  }
+}
+
+/**
+ * Aktualisiert den Boss-HP-Balken mit Animation.
+ */
+function _bossHpAktualisieren() {
+  const fill = document.getElementById('bossHpFill');
+  const text = document.getElementById('bossHpText');
+  if (!fill || !text) return;
+
+  const pct = Math.max(0, (QUIZ.boss.hp / QUIZ.boss.maxHp) * 100);
+  fill.style.width = pct + '%';
+  text.textContent = `${Math.max(0, QUIZ.boss.hp)} / ${QUIZ.boss.maxHp} HP`;
+
+  // Farbe wechseln bei niedrigem HP
+  if (pct <= 20) {
+    fill.style.background = '#ef4444';
+  } else if (pct <= 50) {
+    fill.style.background = '#f59e0b';
+  }
+}
+
+/**
+ * Boss-Treffer-Animation (Boss wackelt + Schadens-Popup).
+ */
+function _bossTrefferAnimation() {
+  const figur = document.getElementById('bossFigur');
+  if (!figur) return;
+
+  figur.classList.add('boss-getroffen');
+  setTimeout(() => figur.classList.remove('boss-getroffen'), 500);
+
+  // Schadens-Popup über dem Boss
+  const popup = document.createElement('div');
+  popup.className = 'boss-schaden-popup';
+  popup.textContent = '-1 HP';
+  figur.appendChild(popup);
+  setTimeout(() => popup.remove(), 900);
+
+  // Treffer-Blitz
+  const blitz = document.createElement('div');
+  blitz.style.cssText = [
+    'position:fixed', 'inset:0', 'z-index:490',
+    'background:rgba(233,69,96,.18)',
+    'pointer-events:none', 'opacity:1',
+    'transition:opacity .3s ease',
+  ].join(';');
+  document.body.appendChild(blitz);
+  setTimeout(() => { blitz.style.opacity = '0'; }, 60);
+  setTimeout(() => blitz.remove(), 380);
+}
+
+/**
+ * Spieler-Schadens-Animation (Bildschirm bebt + roter Blitz).
+ */
+function _spielerSchadenAnimation() {
+  // Roter Blitz
+  const blitz = document.createElement('div');
+  blitz.style.cssText = [
+    'position:fixed', 'inset:0', 'z-index:490',
+    'background:rgba(220,38,38,.25)',
+    'pointer-events:none', 'opacity:1',
+    'transition:opacity .4s ease',
+  ].join(';');
+  document.body.appendChild(blitz);
+  setTimeout(() => { blitz.style.opacity = '0'; }, 80);
+  setTimeout(() => blitz.remove(), 500);
+
+  // Screen-Shake
+  document.body.classList.add('boss-shake');
+  setTimeout(() => document.body.classList.remove('boss-shake'), 400);
+}
+
+/**
+ * Boss besiegt – Sieg-Screen anzeigen.
+ */
+function _bossSiegScreen() {
+  const gesamt = QUIZ.fragen.length;
+  const pct    = gesamt > 0 ? Math.round((QUIZ.richtig / gesamt) * 100) : 0;
+  const sterne = pct >= 90 ? 3 : pct >= 60 ? 2 : pct >= 30 ? 1 : 0;
+
+  // XP Bonus für Boss-Sieg (Welt 5 Drache gibt doppelten Bonus)
+  const bossXp = QUIZ.weltNr === 5 ? 100 : 50;
+  if (typeof xpHinzufuegen === 'function') xpHinzufuegen(bossXp);
+  QUIZ.xpRunde += bossXp;
+
+  // Fortschritt speichern
+  if (typeof fortschrittLaden === 'function') {
+    const fortschritt = fortschrittLaden();
+    const weltIdx     = QUIZ.weltNr - 1;
+    if (weltIdx >= 0 && weltIdx < 5) {
+      fortschritt[weltIdx].bossDefeated = true;
+      if (weltIdx + 1 < 5) fortschritt[weltIdx + 1].unlocked = true;
+      fortschrittSpeichern(fortschritt);
+    }
+  }
+
+  // Streak aktualisieren
+  if (typeof streakAktualisieren === 'function') streakAktualisieren();
+
+  // Achievements prüfen
+  if (typeof achievementsPruefen === 'function') {
+    achievementsPruefen({ quizAbgeschlossen: true, pct, bossBesiegt: true });
+  }
+
+  // Accessoire-Freischaltungen prüfen
+  if (typeof neuFreigeschalteteAccessoires === 'function') {
+    const neueAcc = neuFreigeschalteteAccessoires();
+    if (typeof accessoireFreischaltungAnzeigen === 'function') {
+      neueAcc.forEach(a => setTimeout(() => accessoireFreischaltungAnzeigen(a), 800));
+    }
+  }
+
+  if (typeof soundBossBesiegt === 'function') soundBossBesiegt();
+  if (typeof avatarEmotion === 'function') avatarEmotion('party');
+
+  // Boss-Modus aufräumen
+  document.body.classList.remove('boss-modus');
+  QUIZ.boss.aktiv = false;
+  const arena = document.getElementById('bossArena');
+  if (arena) arena.remove();
+
+  const fill = document.getElementById('fortschrittFill');
+  if (fill) fill.style.width = '100%';
+
+  const c = QUIZ.container;
+  const sternStr = '\u2B50'.repeat(sterne) + '\u2606'.repeat(3 - sterne);
+  c.innerHTML = `
+    <div class="boss-sieg-screen">
+      <div class="boss-sieg-icon">${QUIZ.boss.icon}</div>
+      <div class="boss-sieg-text">${esc(QUIZ.boss.name)} besiegt!</div>
+      <div class="boss-sieg-sterne">${sternStr}</div>
+      <div class="boss-sieg-stats">
+        <div class="stat-zeile stat-ok">\u2705 ${QUIZ.richtig} richtig</div>
+        <div class="stat-zeile stat-fail">\u274C ${QUIZ.falsch} falsch</div>
+        <div class="stat-zeile stat-xp">\u26A1 +${QUIZ.xpRunde} XP</div>
+      </div>
+      ${QUIZ.weltNr < 5
+        ? '<p class="boss-sieg-unlock">\uD83D\uDD13 Welt ' + (QUIZ.weltNr + 1) + ' freigeschaltet!</p>'
+        : '<p class="boss-sieg-unlock">\uD83C\uDFC6 Du bist Deutsch-Meister!</p>'}
+      <div class="ergebnis-aktionen">
+        <button class="btn-welt" id="btnWelt">\u2190 Zur Karte</button>
+      </div>
+    </div>`;
+
+  document.getElementById('btnWelt').addEventListener('click',
+    () => { window.location.href = 'app.html'; });
+}
+
+/**
+ * Boss-Niederlage – Game Over Screen.
+ */
+function _bossNiederlageScreen() {
+  if (typeof soundBossNiederlage === 'function') soundBossNiederlage();
+  if (typeof avatarEmotion === 'function') avatarEmotion('cry');
+
+  // Boss-Modus aufräumen
+  document.body.classList.remove('boss-modus');
+  QUIZ.boss.aktiv = false;
+  const arena = document.getElementById('bossArena');
+  if (arena) arena.remove();
+
+  const c = QUIZ.container;
+  c.innerHTML = `
+    <div class="boss-niederlage-screen">
+      <div class="boss-niederlage-icon">\uD83D\uDC94</div>
+      <div class="boss-niederlage-text">Niederlage!</div>
+      <p class="boss-niederlage-sub">${esc(QUIZ.boss.name)} hat gewonnen.\nAber du kannst es nochmal versuchen!</p>
+      <div class="boss-niederlage-stats">
+        <div class="stat-zeile">Boss HP: ${QUIZ.boss.hp} / ${QUIZ.boss.maxHp} verbleibend</div>
+        <div class="stat-zeile stat-ok">\u2705 ${QUIZ.richtig} richtig</div>
+        <div class="stat-zeile stat-fail">\u274C ${QUIZ.falsch} falsch</div>
+      </div>
+      <div class="ergebnis-aktionen">
+        <button class="btn-nochmal" id="btnNochmal">Nochmal versuchen \uD83D\uDD04</button>
+        <button class="btn-welt" id="btnWelt">\u2190 Zur Karte</button>
+      </div>
+    </div>`;
+
+  document.getElementById('btnWelt').addEventListener('click',
+    () => { window.location.href = 'app.html'; });
+
+  document.getElementById('btnNochmal').addEventListener('click', () => {
+    // Boss-Kampf zurücksetzen
+    document.body.classList.remove('boss-modus');
+    window.location.reload();
+  });
+}
+
+// ============================================================
 //  herzAnzeigenAktualisieren
 // ============================================================
 
@@ -292,7 +568,7 @@ function _quizTapToTranslateInit() {
  * @param {{ weltNr?: number, containerId?: string }} opt
  */
 function quizStarten(fragen, opt = {}) {
-  const { weltNr = 1, containerId = 'theoriKarte', xpProAntwort = 0 } = opt;
+  const { weltNr = 1, subNr = 0, isBoss = false, containerId = 'theoriKarte', xpProAntwort = 0 } = opt;
 
   QUIZ.fragen          = fragen;
   QUIZ.index           = 0;
@@ -300,6 +576,8 @@ function quizStarten(fragen, opt = {}) {
   QUIZ.falsch          = 0;
   QUIZ.xpRunde         = 0;
   QUIZ.weltNr          = weltNr;
+  QUIZ.subNr           = subNr;
+  QUIZ.isBoss          = isBoss;
   QUIZ.gesperrt        = false;
   QUIZ._richtigInFolge = 0;
   QUIZ.xpProAntwort    = xpProAntwort;  // 0 = Standard (10/15), sonst fester Wert
@@ -310,11 +588,19 @@ function quizStarten(fragen, opt = {}) {
     return;
   }
 
+  // Boss-Zustand zurücksetzen
+  QUIZ.boss.aktiv = false;
+
   // Tap-to-Translate für Fragetext aktivieren
   _quizTapToTranslateInit();
 
   // Herzen täglich zurücksetzen wenn nötig
   if (typeof herzenPruefen === 'function') herzenPruefen();
+
+  // Boss-Kampf initialisieren
+  if (QUIZ.isBoss) {
+    bossKampfStarten(weltNr);
+  }
 
   frageAnzeigen(QUIZ.fragen[0]);
 }
@@ -330,13 +616,23 @@ function quizStarten(fragen, opt = {}) {
 function frageAnzeigen(frage) {
   if (!frage) { rundeBeenden(); return; }
 
+  // Cooldown-Liste aktualisieren
+  if (typeof _cooldownAktualisieren === 'function') _cooldownAktualisieren(frage);
+
   _typZustandReset();
   QUIZ.gesperrt = false;
 
-  // Fortschrittsbalken
-  const pct  = Math.round((QUIZ.index / QUIZ.fragen.length) * 100);
+  // Fortschrittsbalken (im Boss-Modus: Boss-HP-basiert)
   const fill = document.getElementById('fortschrittFill');
-  if (fill) fill.style.width = pct + '%';
+  if (fill) {
+    if (QUIZ.boss.aktiv) {
+      const bossPct = Math.max(0, 100 - ((QUIZ.boss.hp / QUIZ.boss.maxHp) * 100));
+      fill.style.width = bossPct + '%';
+    } else {
+      const pct = Math.round((QUIZ.index / QUIZ.fragen.length) * 100);
+      fill.style.width = pct + '%';
+    }
+  }
 
   const c = QUIZ.container;
   c.innerHTML = '';
@@ -402,6 +698,88 @@ function antwortPruefen(antwort, frage) {
   const input = qs('input', QUIZ.container);
   if (input) input.disabled = true;
 
+  // ── Per-Frage-Statistik aktualisieren ──────────────────
+  if (typeof _frageStatAktualisieren === 'function') _frageStatAktualisieren(frage, istRichtig);
+
+  // ── Boss-Kampf-Modus: Spezielle Logik ──────────────────
+  if (QUIZ.boss.aktiv) {
+    // Falsche-Fragen-Tracking auch im Boss-Modus
+    if (istRichtig) {
+      if (typeof _falscheFrageEntfernen === 'function') _falscheFrageEntfernen(frage);
+    } else {
+      if (typeof _falscheFrageSpeichern === 'function') _falscheFrageSpeichern(frage);
+    }
+
+    if (istRichtig) {
+      QUIZ.richtig++;
+      QUIZ.boss.hp--;
+
+      // XP für Treffer
+      const xpMenge = 10;
+      if (typeof xpHinzufuegen === 'function') xpHinzufuegen(xpMenge);
+      QUIZ.xpRunde += xpMenge;
+
+      _bossTrefferAnimation();
+      _bossHpAktualisieren();
+      if (typeof soundBossTreffer === 'function') soundBossTreffer();
+      if (typeof avatarEmotion === 'function') avatarEmotion('happy');
+
+      // Boss besiegt?
+      if (QUIZ.boss.hp <= 0) {
+        feedbackZeigen(true, frage.erklaerung ?? '', xpMenge, false);
+        // Weiter-Button entfernen/deaktivieren – Sieg-Screen kommt automatisch
+        const weiterBtn = document.getElementById('weiterBtn');
+        if (weiterBtn) weiterBtn.remove();
+        setTimeout(() => _bossSiegScreen(), 1500);
+        return;
+      }
+
+      feedbackZeigen(true, frage.erklaerung ?? '', xpMenge, false);
+      herzAnzeigenAktualisieren();
+
+    } else {
+      QUIZ.falsch++;
+      _spielerSchadenAnimation();
+
+      let herzNachher  = 6;
+      let rundeVerloren = false;
+      if (typeof herzVerlieren === 'function') {
+        const res = herzVerlieren();
+        herzNachher   = res.herzNachher;
+        rundeVerloren = res.verloren;
+      }
+
+      if (typeof soundSpielerSchaden === 'function') soundSpielerSchaden();
+      if (typeof avatarEmotion === 'function') {
+        avatarEmotion(rundeVerloren ? 'cry' : 'sad');
+      }
+
+      _richtigeAntwortMarkieren(frage);
+
+      // Spieler besiegt?
+      if (rundeVerloren) {
+        feedbackZeigen(false, frage.erklaerung ?? '', 0, false, herzNachher, false);
+        // Weiter-Button entfernen – Niederlage-Screen kommt automatisch
+        const weiterBtn = document.getElementById('weiterBtn');
+        if (weiterBtn) weiterBtn.remove();
+        setTimeout(() => _bossNiederlageScreen(), 1500);
+        return;
+      }
+
+      feedbackZeigen(false, frage.erklaerung ?? '', 0, false, herzNachher, false);
+      herzAnzeigenAktualisieren();
+    }
+    return;
+  }
+
+  // ── Falsche-Fragen-Tracking (für Welt 5.5) ──────────────
+  if (istRichtig) {
+    if (typeof _falscheFrageEntfernen === 'function') _falscheFrageEntfernen(frage);
+  } else {
+    if (typeof _falscheFrageSpeichern === 'function') _falscheFrageSpeichern(frage);
+  }
+
+  // ── Normaler Quiz-Modus ──────────────────────────────────
   if (istRichtig) {
     QUIZ.richtig++;
     QUIZ._richtigInFolge++;
@@ -553,7 +931,7 @@ function feedbackZeigen(richtig, erklaerung, xp, levelUp, herzNachher = 5, runde
            Zur Karte →
          </button>`
       : `<button class="fb-weiter-btn" id="weiterBtn">
-           ${QUIZ.index + 1 >= QUIZ.fragen.length ? 'Ergebnis →' : 'Weiter →'}
+           ${!QUIZ.boss.aktiv && QUIZ.index + 1 >= QUIZ.fragen.length ? 'Ergebnis →' : 'Weiter →'}
          </button>`
     }`;
 
@@ -568,6 +946,24 @@ function feedbackZeigen(richtig, erklaerung, xp, levelUp, herzNachher = 5, runde
 
 function naechsteFrage() {
   QUIZ.index++;
+
+  // Boss-Modus: Fragen zyklisch wiederholen bis Boss/Spieler besiegt
+  if (QUIZ.boss.aktiv) {
+    if (QUIZ.index >= QUIZ.fragen.length) {
+      const letzteFrage = QUIZ.fragen[QUIZ.fragen.length - 1];
+      QUIZ.index = 0;
+      // Fragen neu mischen für Abwechslung
+      QUIZ.fragen = mischen(QUIZ.fragen);
+      // Vermeiden, dass die gleiche Frage direkt wiederholt wird
+      if (QUIZ.fragen.length > 1 && QUIZ.fragen[0].frage === letzteFrage.frage) {
+        const tausch = 1 + Math.floor(Math.random() * (QUIZ.fragen.length - 1));
+        [QUIZ.fragen[0], QUIZ.fragen[tausch]] = [QUIZ.fragen[tausch], QUIZ.fragen[0]];
+      }
+    }
+    frageAnzeigen(QUIZ.fragen[QUIZ.index]);
+    return;
+  }
+
   if (QUIZ.index >= QUIZ.fragen.length) {
     rundeBeenden();
   } else {
@@ -576,6 +972,9 @@ function naechsteFrage() {
 }
 
 function rundeBeenden() {
+  // Boss-Kampf hat eigene Sieg/Niederlage-Screens
+  if (QUIZ.boss.aktiv) return;
+
   const gesamt  = QUIZ.fragen.length;
   const pct     = gesamt > 0 ? Math.round((QUIZ.richtig / gesamt) * 100) : 0;
   const sterne  = pct >= 90 ? 3 : pct >= 60 ? 2 : pct >= 30 ? 1 : 0;
@@ -588,18 +987,26 @@ function rundeBeenden() {
   // Streak aktualisieren
   if (typeof streakAktualisieren === 'function') streakAktualisieren();
 
-  // Fortschritt speichern (Sterne + Welt-Freischaltung) – nicht im Themen-Quiz
+  // Fortschritt speichern (Subwelten / Boss) – nicht im Themen-Quiz
   if (!QUIZ.xpProAntwort && typeof fortschrittLaden === 'function') {
     const fortschritt = fortschrittLaden();
     const weltIdx     = QUIZ.weltNr - 1;
     if (weltIdx >= 0 && weltIdx < 5) {
-      const fs = fortschritt[weltIdx];
-      fs.stars = Math.max(fs.stars ?? 0, sterne);
-      if (sterne > 0) fs.completed = true;
-      if (sterne >= 2) {
-        fs.testPassed = true;
-        if (weltIdx + 1 < 5) fortschritt[weltIdx + 1].unlocked = true;
-        if (typeof soundTestBestanden === 'function') soundTestBestanden();
+      if (QUIZ.isBoss) {
+        // Boss besiegt bei 2+ Sternen → nächste Welt freischalten
+        if (sterne >= 2) {
+          fortschritt[weltIdx].bossDefeated = true;
+          if (weltIdx + 1 < 5) fortschritt[weltIdx + 1].unlocked = true;
+          if (typeof soundTestBestanden === 'function') soundTestBestanden();
+        }
+      } else if (QUIZ.subNr > 0) {
+        // Unterwelt-Fortschritt speichern
+        const subIdx = QUIZ.subNr - 1;
+        if (subIdx >= 0 && subIdx < 5) {
+          const sub = fortschritt[weltIdx].subwelten[subIdx];
+          sub.stars = Math.max(sub.stars ?? 0, sterne);
+          if (sterne > 0) sub.completed = true;
+        }
       }
       fortschrittSpeichern(fortschritt);
     }
@@ -608,6 +1015,14 @@ function rundeBeenden() {
   // Achievements prüfen
   if (typeof achievementsPruefen === 'function') {
     achievementsPruefen({ quizAbgeschlossen: true, pct });
+  }
+
+  // Accessoire-Freischaltungen prüfen
+  if (typeof neuFreigeschalteteAccessoires === 'function') {
+    const neueAcc = neuFreigeschalteteAccessoires();
+    if (typeof accessoireFreischaltungAnzeigen === 'function') {
+      neueAcc.forEach(a => setTimeout(() => accessoireFreischaltungAnzeigen(a), 800));
+    }
   }
 
   if (typeof avatarEmotion === 'function') {
@@ -1002,6 +1417,8 @@ function _verbindenKlick(seite, wort, btn, frage) {
     btn.classList.add('verbunden-err');
     qsa('.links-btn.aktiv', QUIZ.container).forEach(b => b.classList.add('verbunden-err'));
     if (typeof herzVerlieren === 'function') herzVerlieren();
+    if (typeof herzAnzeigenAktualisieren === 'function') herzAnzeigenAktualisieren();
+    if (typeof soundFalsch === 'function') soundFalsch();
     if (typeof avatarEmotion === 'function') avatarEmotion('sad');
 
     setTimeout(() => {
@@ -1043,7 +1460,9 @@ if (typeof module !== 'undefined' && module.exports) {
     naechsteFrage,
     rundeBeenden,
     herzAnzeigenAktualisieren,
+    bossKampfStarten,
     TYPEN_RENDERER,
     TYPEN_PRUEFER,
+    BOSS_DATEN,
   };
 }

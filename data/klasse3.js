@@ -194,8 +194,8 @@ const KLASSE3 = {
         {
           typ:       'reihenfolge',
           frage:     'Bringe die Wörter in die richtige Reihenfolge (Nebensatz mit „weil"):',
-          woerter:   ['nicht', 'weil', 'bin', 'ich', 'da', 'ich'],
-          richtig:   ['ich', 'bin', 'nicht', 'da', 'weil', 'ich'],
+          woerter:   ['nicht', 'weil', 'bin', 'ich', 'da'],
+          richtig:   ['weil', 'ich', 'nicht', 'da', 'bin'],
           erklaerung: '„… weil ich nicht da bin." – Im Nebensatz mit „weil" steht das Verb (bin) am Ende.',
         },
       ],
@@ -393,7 +393,7 @@ const KLASSE3 = {
             'Er war gespielt.',
           ],
           richtig:   2,
-          erklaerung: '„Er wird morgen spielen." → werden + Infinitiv = Futur I. „morgen" ist ein weiteres Hinweis auf die Zukunft.',
+          erklaerung: '„Er wird morgen spielen." → werden + Infinitiv = Futur I. „morgen" ist ein weiterer Hinweis auf die Zukunft.',
         },
         {
           typ:       'richtig_falsch',
@@ -868,7 +868,7 @@ const KLASSE3 = {
           frage:     'Was bedeutet das Fremdwort „Reaktion"?',
           optionen:  ['Aufbau, Gliederung', 'Antwort auf einen Reiz, Wirkung', 'Volksherrschaft', 'Nachricht, Auskunft'],
           richtig:   1,
-          erklaerung: '"Reaktion" (aus dem Lateinischen) bedeutet eine Antwort oder Wirkung auf einen Reiz oder eine Handlung. Beispiel: „Die Reaktion auf den Alarm war sofortig."',
+          erklaerung: '"Reaktion" (aus dem Lateinischen) bedeutet eine Antwort oder Wirkung auf einen Reiz oder eine Handlung. Beispiel: „Die Reaktion auf den Alarm war sofort da."',
         },
         {
           typ:       'multiple_choice',

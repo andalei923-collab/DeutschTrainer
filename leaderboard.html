@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deutsch Trainer – Rangliste</title>
+  <link rel="stylesheet" href="css/avatar.css?v=0.3" />
   <style>
     /* ── Reset & Design-Tokens ──────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -354,8 +355,9 @@
     </a>
   </nav>
 
-  <script src="js/storage.js?v=0.2"></script>
-  <script src="js/supabase.js?v=0.2"></script>
+  <script src="js/storage.js?v=0.3"></script>
+  <script src="js/avatar.js?v=0.3"></script>
+  <script src="js/supabase.js?v=0.3"></script>
   <script>
     // ── Hilfsfunktionen ───────────────────────────────────────
 
@@ -374,6 +376,13 @@
     }
 
     // ── Leaderboard rendern ───────────────────────────────────
+
+    function _eigenerAvatarHTML() {
+      const s = spielerLaden();
+      const tier  = (typeof AVATAR_TIERE !== 'undefined' && AVATAR_TIERE[s.avatar]) ? AVATAR_TIERE[s.avatar] : (s.avatar || '\u{1F60A}');
+      const badge = (typeof AVATAR_BADGES !== 'undefined' && s.badge && AVATAR_BADGES[s.badge]) ? AVATAR_BADGES[s.badge] : '';
+      return tier + (badge ? '<span style="font-size:.6em;position:relative;top:.15em">' + badge + '</span>' : '');
+    }
 
     function leaderboardRendern(eintraege) {
       const spieler  = spielerLaden();
@@ -404,8 +413,8 @@
         podestHTML += `
           <div class="podest-platz platz-${platz}${istEigen ? ' eigener-podest' : ''}">
             <div class="podest-medal">${MEDAILLEN[i]}</div>
-            <div class="podest-avatar" style="${istEigen ? 'border-color: var(--c-gold);' : ''}">🎓</div>
-            <div class="podest-name" title="${e.name}">${e.name}</div>
+            <div class="podest-avatar" style="${istEigen ? 'border-color: var(--c-gold);' : ''}">${istEigen ? _eigenerAvatarHTML() : '\u{1F393}'}</div>
+            <div class="podest-name" title="${escapeHTML(e.name)}">${escapeHTML(e.name)}</div>
             <div class="podest-xp">${xpFormatieren(e.xp)} XP</div>
             <div class="podest-sockel"></div>
           </div>`;

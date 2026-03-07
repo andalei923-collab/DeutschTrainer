@@ -2128,9 +2128,9 @@ const THEMEN = {
       {
         "typ": "richtig_falsch",
         "frage": "Ist die Aussage richtig oder falsch?",
-        "aussage": "„Den\" ist immer Akkusativ maskulin.",
+        "aussage": "„Den\" ist der bestimmte Artikel im Akkusativ maskulin Singular.",
         "richtig": true,
-        "erklaerung": "Richtig! „den\" = Akkusativ maskulin. „der\" = Nominativ maskulin.",
+        "erklaerung": "Richtig! „den\" = Akkusativ maskulin Singular. „der\" = Nominativ maskulin.",
         "thema": [
           "akkusativ",
           "faelle-mix"

@@ -39,6 +39,16 @@ const AVATAR_BRILLEN = {
   sonnenbrille: '🕶️',
   lesebrille:   '👓',
   schutzbrille: '🥽',
+  monokel:      '🧐',
+};
+
+const AVATAR_BADGES = {
+  anfaenger: '🌱',
+  fleissig:  '🔥',
+  stern:     '⭐',
+  diamant:   '💎',
+  champion:  '🏆',
+  meister:   '🎖️',
 };
 
 // ── Gültige Emotionen ──────────────────────────────────────
@@ -100,6 +110,7 @@ function avatarAnzeigen(tier, hut = null, brille = null, optionen = {}) {
     containerId   = 'avatar-container',
     groesse       = '',
     startEmotion  = 'happy',
+    badge         = null,
   } = optionen;
 
   const container = document.getElementById(containerId);
@@ -111,6 +122,7 @@ function avatarAnzeigen(tier, hut = null, brille = null, optionen = {}) {
   const tierEmoji    = _aufloesen(tier,   AVATAR_TIERE)   ?? AVATAR_TIERE.default;
   const hutEmoji     = _aufloesen(hut,    AVATAR_HUETE);
   const brilleEmoji  = _aufloesen(brille, AVATAR_BRILLEN);
+  const badgeEmoji   = _aufloesen(badge,  AVATAR_BADGES);
 
   // Wrap-Element aufbauen
   const wrap = document.createElement('div');
@@ -141,6 +153,15 @@ function avatarAnzeigen(tier, hut = null, brille = null, optionen = {}) {
     brilleEl.textContent = brilleEmoji;
     brilleEl.setAttribute('aria-hidden', 'true');
     wrap.appendChild(brilleEl);
+  }
+
+  // Badge (optional)
+  if (badgeEmoji) {
+    const badgeEl = document.createElement('span');
+    badgeEl.className   = 'avatar-badge';
+    badgeEl.textContent = badgeEmoji;
+    badgeEl.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(badgeEl);
   }
 
   // Alten Inhalt ersetzen
@@ -226,8 +247,10 @@ function avatarAccessoire(typ, wert, wrap = null) {
   const el = wrap ?? _aktuellerContainer;
   if (!el) return;
 
-  const klasse  = typ === 'hut' ? 'avatar-hut' : 'avatar-brille';
-  const tabelle = typ === 'hut' ? AVATAR_HUETE : AVATAR_BRILLEN;
+  const klassenMap  = { hut: 'avatar-hut', brille: 'avatar-brille', badge: 'avatar-badge' };
+  const tabellenMap = { hut: AVATAR_HUETE, brille: AVATAR_BRILLEN, badge: AVATAR_BADGES };
+  const klasse  = klassenMap[typ]  ?? 'avatar-brille';
+  const tabelle = tabellenMap[typ] ?? AVATAR_BRILLEN;
   const emoji   = _aufloesen(wert, tabelle);
 
   let slot = el.querySelector(`.${klasse}`);
@@ -279,6 +302,7 @@ if (typeof module !== 'undefined' && module.exports) {
     AVATAR_TIERE,
     AVATAR_HUETE,
     AVATAR_BRILLEN,
+    AVATAR_BADGES,
     EMOTIONEN,
     avatarAnzeigen,
     avatarEmotion,

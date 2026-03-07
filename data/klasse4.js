@@ -470,7 +470,7 @@ const KLASSE4 = {
           '  Rhythmus, Phrase, Chaos, Niveau, Jalousie\n' +
           '  Eingedeutschte Schreibung: Telefon (Telephon), Foto (Photo)',
         beispiel:
-          'ss: „Er isst Wasser." – kurzes i und kurzes a → ss\n' +
+          'ss: „Er isst eine Wurst." – kurzes i → ss | „Wasser" – kurzes a → ss\n' +
           'ß:  „Die Straße ist heiß." – langes a und ei → ß\n\n' +
           'Nominalisierung:\n' +
           '  „das Schreiben" (Verb → Nomen)\n' +
@@ -489,7 +489,7 @@ const KLASSE4 = {
         {
           typ:       'multiple_choice',
           frage:     'Welche Schreibweise ist richtig: ss oder ß?',
-          optionen:  ['die Straße', 'die Straße', 'die Strasse', 'die Straße'],
+          optionen:  ['die Straße', 'die Strase', 'die Strasse', 'die Strasze'],
           richtig:   0,
           erklaerung: '"die Straße" mit ß – der Vokal vor dem s-Laut ist lang (a → Stra-ße). Langer Vokal → ß.',
         },
@@ -555,10 +555,10 @@ const KLASSE4 = {
           '• Stilebenen:\n' +
           '  gehoben:          erörtern, darlegen, konstatieren\n' +
           '  neutral/standard: erklären, sagen, feststellen\n' +
-          '  umgangssprachlich:erklären, sagen, meinen\n' +
+          '  umgangssprachlich:reden, quatschen, meinen\n' +
           '  derb/salopp:      labern, quatschen, stänkern\n\n' +
           '• Konnotation (Beiklang):\n' +
-          '  positiv:  Menschenmenge, Gemeinschaft, Gruppe\n' +
+          '  positiv:  Gemeinschaft, Gruppe, Versammlung\n' +
           '  neutral:  Ansammlung von Menschen\n' +
           '  negativ:  Masse, Mob, Horde\n\n' +
           '• Geltungsbereich:\n' +
