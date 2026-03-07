@@ -129,6 +129,9 @@ function xpHinzufuegen(menge) {
     if (typeof soundLevelUp === 'function') soundLevelUp();
   }
 
+  // Leaderboard automatisch aktualisieren
+  if (typeof leaderboardSync === 'function') leaderboardSync();
+
   return {
     xpVorher,
     xpNachher,

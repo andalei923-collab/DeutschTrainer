@@ -496,11 +496,13 @@
       }
     }
 
-    // ── Initialisierung ───────────────────────────────────────
+    // ── Leaderboard laden (ohne Ladekreis bei Auto-Refresh) ──
 
-    async function leaderboardLaden() {
-      document.getElementById('main').innerHTML =
-        '<div class="ladekreis" id="ladekreis"></div>';
+    async function leaderboardLaden(mitLadekreis) {
+      if (mitLadekreis) {
+        document.getElementById('main').innerHTML =
+          '<div class="ladekreis" id="ladekreis"></div>';
+      }
 
       const eintraege = await top10Laden();
 
@@ -515,8 +517,23 @@
       leaderboardRendern(eintraege);
     }
 
-    // Seite starten
-    leaderboardLaden();
+    // ── Initialisierung + Auto-Refresh ───────────────────────
+
+    // Eigenen Score beim Öffnen automatisch eintragen
+    if (typeof leaderboardSync === 'function') leaderboardSync();
+
+    // Erstes Laden mit Ladekreis
+    leaderboardLaden(true);
+
+    // Alle 10 Sekunden automatisch aktualisieren
+    var _autoRefresh = setInterval(function () {
+      leaderboardLaden(false);
+    }, 10000);
+
+    // Beim Verlassen der Seite aufräumen
+    window.addEventListener('beforeunload', function () {
+      clearInterval(_autoRefresh);
+    });
   </script>
 
 </body>

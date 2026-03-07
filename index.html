@@ -261,6 +261,24 @@
   </style>
 </head>
 <body>
+  <script>
+    // ── Einmaliger Reset für bestehende User (v2) ──────────────
+    (function() {
+      if (localStorage.getItem('dt_reset_v2')) return;
+      var hatDaten = false;
+      for (var i = 0; i < localStorage.length; i++) {
+        if (localStorage.key(i).startsWith('dt_')) { hatDaten = true; break; }
+      }
+      if (hatDaten) {
+        var keys = [];
+        for (var j = 0; j < localStorage.length; j++) {
+          if (localStorage.key(j).startsWith('dt_')) keys.push(localStorage.key(j));
+        }
+        for (var k = 0; k < keys.length; k++) localStorage.removeItem(keys[k]);
+      }
+      localStorage.setItem('dt_reset_v2', 'true');
+    })();
+  </script>
 
   <div class="logo">
     <span>Deutsch</span><span>&nbsp;</span><span>Trainer</span>

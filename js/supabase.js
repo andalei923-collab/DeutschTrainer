@@ -178,10 +178,30 @@ async function analyticsZaehlen(ereignis) {
 }
 
 // ============================================================
+//  leaderboardSync
+//  Liest den aktuellen Spieler aus localStorage und sendet
+//  den Score automatisch an Supabase (fire & forget).
+//  Wird nach jeder XP-/Streak-Änderung aufgerufen.
+// ============================================================
+
+function leaderboardSync() {
+  if (!_supabaseKonfiguriert()) return;
+  if (typeof spielerLaden !== 'function') return;
+
+  try {
+    const s = spielerLaden();
+    if (!s.name || s.name === 'Spieler') return;
+    spielerEintragen(s.name, s.xp || 0, s.level || 1, s.streak || 0);
+  } catch (_) {
+    // fire & forget – Fehler nicht propagieren
+  }
+}
+
+// ============================================================
 //  Exports (für Module-Umgebungen)
 //  Im Browser auch global verfügbar (window.*)
 // ============================================================
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { top10Laden, spielerEintragen, analyticsZaehlen };
+  module.exports = { top10Laden, spielerEintragen, analyticsZaehlen, leaderboardSync };
 }

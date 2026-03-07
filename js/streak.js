@@ -109,6 +109,9 @@ function streakAktualisieren() {
     lastLogin:    heute,
   });
 
+  // Leaderboard automatisch aktualisieren
+  if (typeof leaderboardSync === 'function') leaderboardSync();
+
   console.info(
     `[streak] ${streakVorher} → ${streakNachher}` +
     (neuerRekord ? ' 🏆 Neuer Rekord!' : '')
